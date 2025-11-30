@@ -22,12 +22,12 @@ class AppColors {
   static const Color deepPurple = Color(0xFF371B34);
 //------warna text-----
   static const Color darkBrown = Color(0xFF4B3425);
-  static const Color darkSlateGray = Color(0xFF707070);
+  static const Color darkSlateGray = Color(0xFF707070); 
 //-----warna basic------
   static const Color whiteColor = Color(0xFFFFFFFF);
   static const Color blackColor = Color(0xFF000000);
 }
-
+  
 
  
 
