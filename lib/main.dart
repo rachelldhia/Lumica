@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:lumica_app/routes/app_pages.dart';
 import 'package:lumica_app/routes/app_routes.dart';
@@ -15,9 +16,17 @@ class App extends StatefulWidget {
 class _AppState extends State<App> {
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      initialRoute: AppRoutes.home,
-      getPages: AppPages.pages,
+    return ScreenUtilInit(
+      designSize: const Size(375, 812),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (context, child) {
+        return GetMaterialApp(
+          debugShowCheckedModeBanner: false,
+          initialRoute: AppRoutes.onboarding,
+          getPages: AppPages.pages,
+        );
+      },
     );
   }
 }
