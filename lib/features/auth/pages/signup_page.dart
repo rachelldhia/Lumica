@@ -61,7 +61,7 @@ class SignUpPage extends GetView<AuthController> {
                       _buildStyledTextFormField(
                         controller: controller.emailController,
                         hintText: 'Enter your email...',
-                        prefixIconPath: AppImages.emailIcon,
+                        prefixIconPath: AppImages.emailDuotone,
                         keyboardType: TextInputType.emailAddress,
                         onChanged: (value) {
                           if (GetUtils.isEmail(value)) {
@@ -134,7 +134,7 @@ class SignUpPage extends GetView<AuthController> {
                         () => _buildStyledTextFormField(
                           controller: controller.passwordController,
                           hintText: 'Enter your password...',
-                          prefixIconPath: AppImages.lockIcon,
+                          prefixIconPath: AppImages.lock,
                           obscureText: !controller.isPasswordVisible.value,
                           suffixIcon: IconButton(
                             icon: Icon(

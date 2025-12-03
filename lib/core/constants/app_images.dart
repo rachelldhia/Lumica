@@ -1,6 +1,24 @@
 class AppImages {
-  static const String lumiBot = 'assets/images/lumi-bot.png';
-  static const String logo = 'assets/images/lumi-robot-image.png';
-  static const String emailIcon = 'assets/icons/duotone-email.png';
-  static const String lockIcon = 'assets/icons/lock.png';
+  //image
+  static const String logo = 'assets/images/lumica-logo.png';
+  static const String lumiBot = 'assets/images/lumi-robot-image.png';
+  static const String lumicaLogo = 'assets/images/lumica-logo.png';
+  static const String lumiRobot = 'assets/images/lumi-robot-image.png';
+  static const String emoAngry = 'assets/images/angry.png';
+  static const String emoCalm = 'assets/images/calm.png';
+  static const String emoExited = 'assets/images/exited.png';
+  static const String emoHappy = 'assets/images/happy.png';
+  static const String emoSad = 'assets/images/sad.png';
+  static const String emoStress = 'assets/images/stress.png';
+  static const String bgTokenPage = 'assets/images/background(token page).png';
+  static const String bgBoyFly = 'assets/images/bg-boy-fly.png';
+  static const String illusBoyFly = 'assets/images/boy-fly.png';
+  static const String illusWomanCry = 'assets/images/woman-cry.png';
+  static const String imageMeditation = 'assets/images/meditation-icon.png';
+  static const String imageMeetup = 'assets/images/meetup-icon.png';
+  static const String imageQuoteLeft = 'assets/images/quote-left.png';
+  static const String imageTrash = 'assets/images/trash-image.png';
+
+  
+  
 }
