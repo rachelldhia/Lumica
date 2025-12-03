@@ -22,19 +22,13 @@ class PrimaryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: width ?? double.infinity,
-      height: height ?? 60.h,
+      height: height ?? 50.h,
       child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.vividOrange,
-        ),
+        style: ElevatedButton.styleFrom(backgroundColor: AppColors.vividOrange),
         onPressed: onPressed,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (icon != null) ...[
-              icon!,
-              const SizedBox(width: 8),
-            ],
             Text(
               text,
               style: TextStyle(
@@ -43,6 +37,8 @@ class PrimaryButton extends StatelessWidget {
                 color: AppColors.whiteColor,
               ),
             ),
+            SizedBox(width: 10.w),
+            if (icon != null) ...[icon!, const SizedBox(width: 8)],
           ],
         ),
       ),
