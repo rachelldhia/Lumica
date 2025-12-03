@@ -14,11 +14,8 @@ class AppImages {
   static const String bgBoyFly = 'assets/images/bg-boy-fly.png';
   static const String illusBoyFly = 'assets/images/boy-fly.png';
   static const String illusWomanCry = 'assets/images/woman-cry.png';
-  static const String imageMeditation = 'assets/images/meditation-icon.png';
-  static const String imageMeetup = 'assets/images/meetup-icon.png';
+  static const String imageMeditation = 'assets/images/meditation-Icon.png';
+  static const String imageMeetup = 'assets/images/meetup-Icon.png';
   static const String imageQuoteLeft = 'assets/images/quote-left.png';
   static const String imageTrash = 'assets/images/trash-image.png';
-
-  
-  
 }
