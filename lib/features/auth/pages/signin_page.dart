@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:lumica_app/core/config/theme.dart';
+import 'package:lumica_app/core/constants/app_icon.dart';
 import 'package:lumica_app/core/constants/app_images.dart';
 import 'package:lumica_app/core/widgets/background_circle.dart';
 import 'package:lumica_app/core/widgets/primary_button.dart';
@@ -75,7 +76,7 @@ class SignInPage extends GetView<AuthController> {
                             AuthTextField(
                               controller: controller.signInEmailController,
                               hintText: 'kentudbadoag@gmail.com',
-                              prefixIconPath: AppImages.emailIcon,
+                              prefixIconPath: AppIcon.emailDuotone,
                               keyboardType: TextInputType.emailAddress,
                               onChanged: (value) {
                                 if (GetUtils.isEmail(value)) {
@@ -119,7 +120,7 @@ class SignInPage extends GetView<AuthController> {
                               () => AuthTextField(
                                 controller: controller.signInPasswordController,
                                 hintText: 'Enter your password...',
-                                prefixIconPath: AppImages.lockIcon,
+                                prefixIconPath: AppIcon.lock,
                                 obscureText:
                                     !controller.signInPasswordVisible.value,
                                 suffixIcon: IconButton(
@@ -162,7 +163,7 @@ class SignInPage extends GetView<AuthController> {
                               text: 'Sign In',
                               onPressed: controller.signIn,
                               icon: Image.asset(
-                                AppImages.arrowRight,
+                                AppIcon.arrowRight,
                                 width: 20.w,
                                 height: 20.h,
                                 color: Colors.white,
@@ -174,17 +175,17 @@ class SignInPage extends GetView<AuthController> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 SocialLoginButton(
-                                  iconPath: AppImages.facebookIcon,
+                                  iconPath: AppIcon.facebook,
                                   onPressed: controller.signInWithFacebook,
                                 ),
                                 SizedBox(width: 15.w),
                                 SocialLoginButton(
-                                  iconPath: AppImages.googleIcon,
+                                  iconPath: AppIcon.google,
                                   onPressed: controller.signInWithGoogle,
                                 ),
                                 SizedBox(width: 15.w),
                                 SocialLoginButton(
-                                  iconPath: AppImages.instagramIcon,
+                                  iconPath: AppIcon.instagram,
                                   onPressed: controller.signInWithInstagram,
                                 ),
                               ],

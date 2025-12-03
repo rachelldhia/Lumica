@@ -18,252 +18,221 @@ class SignUpPage extends GetView<AuthController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          BackgroundCircle(
-            position: CirclePosition.topCenter,
-            circleColor: AppColors.amethyst,
-          ),
-          SafeArea(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.all(15),
-                child: Form(
-                  key: controller.formKey,
-                  autovalidateMode: AutovalidateMode.onUserInteraction,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(height: 30.h),
-                      Center(child: Image.asset(AppImages.logo, width: 150.w)),
-                      SizedBox(height: 15.h),
-                      Center(
-                        child: Text(
-                          'Sign Up For Free',
-                          style: TextStyle(
-                            fontSize: 24.sp,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.darkBrown,
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 20.h),
-                      Text(
-                        'Email Address',
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      SizedBox(height: 10.h),
-                      // Email TextFormField
-                      _buildStyledTextFormField(
-                        controller: controller.emailController,
-                        hintText: 'Enter your email...',
-                        prefixIconPath: AppImages.emailDuotone,
-                        keyboardType: TextInputType.emailAddress,
-                        onChanged: (value) {
-                          if (GetUtils.isEmail(value)) {
-                            controller.emailError.value = '';
-                          } else {
-                            controller.emailError.value =
-                                'Invalid Email Address!!';
-                          }
-                        },
-                        validator: (value) {
-                          if (value == null || !GetUtils.isEmail(value)) {
-                            controller.emailError.value =
-                                'Invalid Email Address!!';
-                            return '';
-                          }
-                          controller.emailError.value = '';
-                          return null;
-                        },
-                      ),
-                      Obx(() {
-                        if (controller.emailError.value.isEmpty) {
-                          return const SizedBox.shrink();
-                        }
-                        return Padding(
-                          padding: EdgeInsets.only(top: 8.h),
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 15.w,
-                              vertical: 10.h,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.vividOrange.withAlpha(50),
-                              borderRadius: BorderRadius.circular(15),
-                              border: Border.all(
-                                color: AppColors.vividOrange,
-                                width: 1,
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.error_outline,
-                                  color: AppColors.vividOrange,
-                                  size: 20.sp,
-                                ),
-                                SizedBox(width: 10.w),
-                                Text(
-                                  controller.emailError.value,
-                                  style: TextStyle(
-                                    color: AppColors.vividOrange,
-                                    fontSize: 12.sp,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }),
-                      SizedBox(height: 15.h),
-                      Text(
-                        'Password',
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      SizedBox(height: 10.h),
-                      // Password TextFormField
-                      Obx(
-                        () => _buildStyledTextFormField(
-                          controller: controller.passwordController,
-                          hintText: 'Enter your password...',
-                          prefixIconPath: AppImages.lock,
-                          obscureText: !controller.isPasswordVisible.value,
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              controller.isPasswordVisible.value
-                                  ? Icons.visibility
-                                  : Icons.visibility_off,
-                              color: AppColors.greyText,
-                            ),
-                            onPressed: controller.isPasswordVisible.toggle,
-                          ),
-                          onChanged: (value) {
-                            if (value.length >= 6) {
-                              controller.passwordError.value = '';
-                            } else {
-                              controller.passwordError.value =
-                                  'Password must be at least 6 characters';
-                            }
-                          },
-                          validator: (value) {
-                            if (value == null || value.length < 6) {
-                              controller.passwordError.value =
-                                  'Password must be at least 6 characters';
-                              return '';
-                            }
-                            controller.passwordError.value = '';
-                            return null;
-                          },
-                        ),
-                      ),
-                      Obx(() {
-                        if (controller.passwordError.value.isEmpty) {
-                          return const SizedBox.shrink();
-                        }
-                        return Padding(
-                          padding: EdgeInsets.only(top: 8.h),
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 15.w,
-                              vertical: 10.h,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.vividOrange.withAlpha(50),
-                              borderRadius: BorderRadius.circular(15),
-                              border: Border.all(
-                                color: AppColors.vividOrange,
-                                width: 1,
-                              ),
-                            ),
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.error_outline,
-                                  color: AppColors.vividOrange,
-                                  size: 20.sp,
-                                ),
-                                SizedBox(width: 10.w),
-                                Text(
-                                  controller.passwordError.value,
-                                  style: TextStyle(
-                                    color: AppColors.vividOrange,
-                                    fontSize: 12.sp,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        );
-                      }),
-                      SizedBox(height: 15.h),
-                      // Terms and Conditions
-                      Obx(
-                        () => Row(
+      backgroundColor: Colors.white,
+      body: SizedBox(
+        width: double.infinity,
+        height: double.infinity,
+        child: Stack(
+          children: [
+            BackgroundCircle(
+              position: CirclePosition.topCenter,
+              circleColor: AppColors.amethyst,
+            ),
+            SafeArea(
+              child: CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 24.w),
+                      child: Form(
+                        key: controller.signUpFormKey,
+                        autovalidateMode: AutovalidateMode.onUserInteraction,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            SizedBox(
-                              width: 24.w,
-                              height: 24.h,
-                              child: Checkbox(
-                                value: controller.agreeToTerms.value,
-                                onChanged: (bool? newValue) {
-                                  controller.agreeToTerms.value = newValue!;
-                                },
-                                activeColor: AppColors.vividOrange,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(5),
+                            SizedBox(height: 40.h),
+                            // Logo
+                            Image.asset(AppImages.logo, width: 150.w),
+                            SizedBox(height: 20.h),
+                            // Title
+                            Text(
+                              'Sign Up For Free',
+                              style: TextStyle(
+                                fontSize: 24.sp,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.darkBrown,
+                              ),
+                            ),
+                            SizedBox(height: 30.h),
+                            // Email Address Label
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'Email Address',
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.darkBrown,
                                 ),
                               ),
                             ),
-                            SizedBox(width: 10.w),
-                            Expanded(
-                              child: Text.rich(
-                                TextSpan(
-                                  text: 'I Agree with the ',
-                                  style: TextStyle(
-                                    fontSize: 14.sp,
-                                    color: AppColors.darkBrown,
+                            SizedBox(height: 10.h),
+                            // Email TextFormField
+                            AuthTextField(
+                              controller: controller.emailController,
+                              hintText: 'Enter your email...',
+                              prefixIconPath: AppIcon.emailDuotone,
+                              keyboardType: TextInputType.emailAddress,
+                              onChanged: (value) {
+                                if (GetUtils.isEmail(value)) {
+                                  controller.emailError.value = '';
+                                } else {
+                                  controller.emailError.value =
+                                      'Invalid Email Address!!';
+                                }
+                              },
+                              validator: (value) {
+                                if (value == null || !GetUtils.isEmail(value)) {
+                                  controller.emailError.value =
+                                      'Invalid Email Address!!';
+                                  return '';
+                                }
+                                controller.emailError.value = '';
+                                return null;
+                              },
+                            ),
+                            Obx(
+                              () => ErrorMessageBox(
+                                message: controller.emailError.value,
+                              ),
+                            ),
+                            SizedBox(height: 15.h),
+                            // Password Label
+                            Align(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                'Password',
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.darkBrown,
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 10.h),
+                            // Password TextFormField
+                            Obx(
+                              () => AuthTextField(
+                                controller: controller.passwordController,
+                                hintText: 'Enter your password...',
+                                prefixIconPath: AppIcon.lock,
+                                obscureText:
+                                    !controller.signUpPasswordVisible.value,
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    controller.signUpPasswordVisible.value
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
+                                    color: AppColors.greyText,
                                   ),
-                                  children: [
-                                    TextSpan(
-                                      text: 'Terms & Conditions',
-                                      style: TextStyle(
-                                        fontSize: 14.sp,
-                                        color: AppColors.mossGreen,
-                                        fontWeight: FontWeight.w600,
-                                        decorationColor: AppColors.mossGreen,
-                                        decoration: TextDecoration.underline,
-                                      ),
-
-                                      // Add recognizer for navigation if needed
-                                    ),
-                                  ],
+                                  onPressed:
+                                      controller.signUpPasswordVisible.toggle,
                                 ),
+                                onChanged: (value) {
+                                  if (value.length >= 6) {
+                                    controller.passwordError.value = '';
+                                  } else {
+                                    controller.passwordError.value =
+                                        'Password must be at least 6 characters';
+                                  }
+                                },
+                                validator: (value) {
+                                  if (value == null || value.length < 6) {
+                                    controller.passwordError.value =
+                                        'Password must be at least 6 characters';
+                                    return '';
+                                  }
+                                  controller.passwordError.value = '';
+                                  return null;
+                                },
                               ),
                             ),
+                            Obx(
+                              () => ErrorMessageBox(
+                                message: controller.passwordError.value,
+                              ),
+                            ),
+                            SizedBox(height: 20.h),
+                            // Terms and Conditions
+                            Obx(
+                              () => Row(
+                                children: [
+                                  SizedBox(
+                                    width: 24.w,
+                                    height: 24.h,
+                                    child: Checkbox(
+                                      value: controller.agreeToTerms.value,
+                                      onChanged: (bool? newValue) {
+                                        controller.agreeToTerms.value =
+                                            newValue!;
+                                      },
+                                      activeColor: AppColors.vividOrange,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(5),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(width: 10.w),
+                                  Expanded(
+                                    child: Text.rich(
+                                      TextSpan(
+                                        text: 'I Agree with the ',
+                                        style: TextStyle(
+                                          fontSize: 14.sp,
+                                          color: AppColors.darkBrown,
+                                        ),
+                                        children: [
+                                          TextSpan(
+                                            text: 'Terms & Conditions',
+                                            style: TextStyle(
+                                              fontSize: 14.sp,
+                                              color: AppColors.mossGreen,
+                                              fontWeight: FontWeight.w600,
+                                              decorationColor:
+                                                  AppColors.mossGreen,
+                                              decoration:
+                                                  TextDecoration.underline,
+                                            ),
+                                            recognizer: TapGestureRecognizer()
+                                              ..onTap = () {
+                                                Get.snackbar(
+                                                  'Terms & Conditions',
+                                                  'This page will be implemented soon',
+                                                  snackPosition:
+                                                      SnackPosition.BOTTOM,
+                                                );
+                                              },
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: 20.h),
+                            // Sign Up Button
+                            Obx(
+                              () => PrimaryButton(
+                                text: 'Sign Up',
+                                onPressed: controller.agreeToTerms.value
+                                    ? controller.signUp
+                                    : null,
+                              ),
+                            ),
+                            SizedBox(height: 20.h),
                           ],
                         ),
                       ),
-                      SizedBox(height: 20.h),
-                      // Sign Up Button
-                      Obx(
-                        () => PrimaryButton(
-                          text: 'Sign Up',
-                          onPressed: controller.agreeToTerms.value
-                              ? controller.signUp
-                              : null, // Disable button if terms not agreed
-                        ),
-                      ),
-                      SizedBox(height: 15.h),
-                      // Sign In Link
-                      Center(
-                        child: Text.rich(
+                    ),
+                  ),
+                  SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: Column(
+                      children: [
+                        const Spacer(),
+                        // Sign In Link
+                        Text.rich(
                           TextSpan(
                             text: 'Already have an account? ',
                             style: TextStyle(
@@ -286,14 +255,15 @@ class SignUpPage extends GetView<AuthController> {
                             ],
                           ),
                         ),
-                      ),
-                    ],
+                        SizedBox(height: 30.h),
+                      ],
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
