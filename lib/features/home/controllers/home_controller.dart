@@ -5,9 +5,6 @@ class HomeController extends GetxController {
   // Selected mood index (0: Happy, 1: Calm, 2: Exited, 3: Angry, 4: Sad)
   var selectedMoodIndex = RxnInt();
 
-  // Bottom navigation index
-  var currentNavIndex = 0.obs;
-
   // User name (can be fetched from auth/storage later)
   var userName = 'Mbud!'.obs;
 
@@ -73,9 +70,5 @@ class HomeController extends GetxController {
     } else {
       selectedMoodIndex.value = index;
     }
-  }
-
-  void changeNavIndex(int index) {
-    currentNavIndex.value = index;
   }
 }

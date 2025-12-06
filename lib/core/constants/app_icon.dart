@@ -1,13 +1,9 @@
 class AppIcon {
   // Navigation icons
-  static const String homeOrange = 'assets/icons/home(orange).png';
-  static const String homeGray = 'assets/icons/home(gray).png';
-  static const String profileOrange = 'assets/icons/profile(orange).png';
-  static const String profileGrey = 'assets/icons/profil(gray).png';
-  static const String jurnalOrange = 'assets/icons/jurnal(orrange).png';
+  static const String home = 'assets/icons/home.png';
+  static const String profile = 'assets/icons/profile.png';
   static const String jurnalGrey = 'assets/icons/jurnal(grey).png';
-  static const String cameraOrange = 'assets/icons/camera(orange).png';
-  static const String cameraGrey = 'assets/icons/camera(grey).png';
+  static const String vidcall = 'assets/icons/vidcall.png';
   static const String chatAI = 'assets/icons/ai-chat.png';
   static const String iconChatAI = 'assets/icons/ai-chat-icon.png';
   static const String timeGrey = 'assets/icons/time(grey).png';

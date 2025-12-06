@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:lumica_app/core/config/text_theme.dart';
 import 'package:lumica_app/core/config/theme.dart';
 import 'package:lumica_app/core/constants/app_images.dart';
 
@@ -19,34 +21,19 @@ class SessionCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                Text(
                   '1 on 1 Sessions',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.darkBrown,
-                  ),
+                  style: AppTextTheme.textTheme.headlineLarge,
                 ),
                 const SizedBox(height: 8),
-                const Text(
+                Text(
                   "Let's open up to the things that\nmatter the most",
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: AppColors.darkBrown,
-                    height: 1.4,
-                  ),
+                  style: AppTextTheme.textTheme.headlineMedium,
                 ),
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    Text(
-                      'Book Now',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.vividOrange,
-                      ),
-                    ),
+                    Text('Book Now', style: AppTextTheme.textTheme.bodyMedium),
                     const SizedBox(width: 4),
                     Icon(
                       Icons.calendar_today,
@@ -62,8 +49,8 @@ class SessionCard extends StatelessWidget {
           // Meditation illustration
           Image.asset(
             AppImages.imageMeetup,
-            width: 60,
-            height: 60,
+            width: 100.w,
+            height: 100.h,
             fit: BoxFit.contain,
           ),
         ],
