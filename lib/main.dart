@@ -16,18 +16,32 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ScreenUtilInit(
-      designSize: const Size(375, 812),
-      minTextAdapt: true,
-      splitScreenMode: true,
+    // GetMaterialApp is the true root to ensure GetX stability
+    return GetMaterialApp(
+      debugShowCheckedModeBanner: false,
+      defaultTransition: Transition.cupertino,
+      initialRoute: AppPages.initial,
+      getPages: AppPages.pages,
+      // Provide a basic theme initially (will be overridden in builder)
+      theme: ThemeData.light(),
       builder: (context, child) {
-        return GetMaterialApp(
-          debugShowCheckedModeBanner: false,
-          initialRoute: AppPages.initial,
-          getPages: AppPages.pages,
-          theme: ThemeData(
-            textTheme: AppTextTheme.textTheme,
-          ),
+        // Initialize ScreenUtil and Apply Theme inside the App context
+        return ScreenUtilInit(
+          designSize: const Size(375, 812),
+          minTextAdapt: true,
+          builder: (context, _) {
+            return Theme(
+              // Apply the custom text theme which uses .sp
+              // This is safe because ScreenUtil is initialized above this Theme
+              data: ThemeData(
+                textTheme: AppTextTheme.textTheme,
+                scaffoldBackgroundColor: Colors.white,
+                primaryColor: Colors
+                    .deepPurple, // Example, matching previous implicit defaults
+              ),
+              child: child!,
+            );
+          },
         );
       },
     );

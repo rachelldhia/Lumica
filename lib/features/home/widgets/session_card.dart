@@ -23,17 +23,17 @@ class SessionCard extends StatelessWidget {
               children: [
                 Text(
                   '1 on 1 Sessions',
-                  style: AppTextTheme.textTheme.headlineLarge,
+                  style: AppTextTheme.textTheme.displayLarge,
                 ),
                 const SizedBox(height: 8),
                 Text(
                   "Let's open up to the things that\nmatter the most",
-                  style: AppTextTheme.textTheme.headlineMedium,
+                  style: AppTextTheme.textTheme.bodyLarge,
                 ),
                 const SizedBox(height: 12),
                 Row(
                   children: [
-                    Text('Book Now', style: AppTextTheme.textTheme.bodyMedium),
+                    Text('Book Now', style: AppTextTheme.textTheme.bodySmall),
                     const SizedBox(width: 4),
                     Icon(
                       Icons.calendar_today,

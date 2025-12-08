@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:lumica_app/core/config/text_theme.dart';
 import 'package:lumica_app/core/config/theme.dart';
 
 class ActionButton extends StatelessWidget {
@@ -22,7 +23,7 @@ class ActionButton extends StatelessWidget {
         child: Container(
           padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 12.w),
           decoration: BoxDecoration(
-            color: AppColors.stoneGray,
+            color: AppColors.stoneGray.withValues(alpha: 0.4),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
@@ -31,9 +32,7 @@ class ActionButton extends StatelessWidget {
               SizedBox(width: 12.w),
               Text(
                 label,
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w600,
+                style: AppTextTheme.textTheme.labelMedium?.copyWith(
                   color: AppColors.darkBrown,
                 ),
               ),

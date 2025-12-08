@@ -18,4 +18,5 @@ class AppImages {
   static const String imageMeetup = 'assets/images/meetup-Icon.png';
   static const String imageQuoteLeft = 'assets/images/quote-left.png';
   static const String imageTrash = 'assets/images/trash-image.png';
+  static const String kentud = 'assets/images/kentud.jpg';
 }

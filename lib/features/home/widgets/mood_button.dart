@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:lumica_app/core/config/text_theme.dart';
 import 'package:lumica_app/core/config/theme.dart';
 
 class MoodButton extends StatelessWidget {
@@ -33,8 +34,7 @@ class MoodButton extends StatelessWidget {
             SizedBox(height: 8.h),
             Text(
               label,
-              style: TextStyle(
-                fontSize: 12.sp,
+              style: AppTextTheme.textTheme.labelSmall?.copyWith(
                 color: AppColors.darkBrown,
                 fontWeight: isSelected ? FontWeight.w700 : FontWeight.w400,
               ),

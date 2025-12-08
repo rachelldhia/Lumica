@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:lumica_app/core/config/text_theme.dart';
+
 import 'package:lumica_app/core/constants/app_images.dart';
 import 'package:lumica_app/core/constants/app_icon.dart';
 
@@ -27,20 +29,16 @@ class PlanExpiredCard extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'Plan Expired',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w700,
+                style: AppTextTheme.textTheme.displayMedium?.copyWith(
                   color: Colors.white,
                 ),
               ),
               const SizedBox(height: 8),
-              const Text(
+              Text(
                 'make a plan of your activities',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w400,
+                style: AppTextTheme.textTheme.bodyMedium?.copyWith(
                   color: Colors.white,
                 ),
               ),
@@ -48,11 +46,9 @@ class PlanExpiredCard extends StatelessWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Text(
+                  Text(
                     'Make Your Plan',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
+                    style: AppTextTheme.textTheme.labelLarge?.copyWith(
                       color: Colors.white,
                     ),
                   ),

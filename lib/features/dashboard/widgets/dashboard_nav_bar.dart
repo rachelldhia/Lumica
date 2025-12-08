@@ -16,7 +16,7 @@ class DashboardNavBar extends GetView<DashboardController> {
         color: AppColors.whiteColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, -2),
           ),
@@ -71,15 +71,12 @@ class DashboardNavBar extends GetView<DashboardController> {
         height: 60.h,
         decoration: BoxDecoration(
           gradient: const LinearGradient(
-            colors: [
-              AppColors.vividOrange,
-              Color(0xFFFF9D5C),
-            ],
+            colors: [AppColors.vividOrange, Color(0xFFFF9D5C)],
           ),
           shape: BoxShape.circle,
           boxShadow: [
             BoxShadow(
-              color: AppColors.vividOrange.withOpacity(0.4),
+              color: AppColors.vividOrange.withValues(alpha: 0.4),
               blurRadius: 12,
               spreadRadius: 2,
             ),

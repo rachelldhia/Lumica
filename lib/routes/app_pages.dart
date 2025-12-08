@@ -23,7 +23,8 @@ import 'package:lumica_app/features/vidcall/pages/vidcall_page.dart';
 import 'package:lumica_app/routes/app_routes.dart';
 
 class AppPages {
-  static const initial = AppRoutes.splash;
+  // TODO: Change back to AppRoutes.splash when ready for production
+  static const initial = AppRoutes.onboarding; // Development: skip splash
 
   static final pages = [
     GetPage(
@@ -32,36 +33,37 @@ class AppPages {
       binding: SplashBinding(),
     ),
     GetPage(
-        name: AppRoutes.dashboard,
-        page: () => const DashboardPage(),
-        binding: DashboardBinding(),
-        children: [
-          GetPage(
-            name: AppRoutes.home,
-            page: () => const HomePage(),
-            binding: HomeBinding(),
-          ),
-          GetPage(
-            name: AppRoutes.vidcall,
-            page: () => const VidcallPage(),
-            binding: VidcallBinding(),
-          ),
-          GetPage(
-            name: AppRoutes.aiChat,
-            page: () => const AiChatPage(),
-            binding: AiChatBinding(),
-          ),
-          GetPage(
-            name: AppRoutes.journal,
-            page: () => const JournalPage(),
-            binding: JournalBinding(),
-          ),
-          GetPage(
-            name: AppRoutes.profile,
-            page: () => const ProfilePage(),
-            binding: ProfileBinding(),
-          ),
-        ]),
+      name: AppRoutes.dashboard,
+      page: () => const DashboardPage(),
+      binding: DashboardBinding(),
+      children: [
+        GetPage(
+          name: AppRoutes.home,
+          page: () => const HomePage(),
+          binding: HomeBinding(),
+        ),
+        GetPage(
+          name: AppRoutes.vidcall,
+          page: () => const VidcallPage(),
+          binding: VidcallBinding(),
+        ),
+        GetPage(
+          name: AppRoutes.aiChat,
+          page: () => const AiChatPage(),
+          binding: AiChatBinding(),
+        ),
+        GetPage(
+          name: AppRoutes.journal,
+          page: () => const JournalPage(),
+          binding: JournalBinding(),
+        ),
+        GetPage(
+          name: AppRoutes.profile,
+          page: () => const ProfilePage(),
+          binding: ProfileBinding(),
+        ),
+      ],
+    ),
     GetPage(
       name: AppRoutes.signup,
       page: () => const SignUpPage(),

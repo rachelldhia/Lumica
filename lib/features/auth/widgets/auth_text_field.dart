@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:lumica_app/core/config/text_theme.dart';
 import 'package:lumica_app/core/config/theme.dart';
 
 class AuthTextField extends StatelessWidget {
@@ -34,7 +35,9 @@ class AuthTextField extends StatelessWidget {
       keyboardType: keyboardType,
       decoration: InputDecoration(
         hintText: hintText,
-        hintStyle: TextStyle(color: AppColors.greyText, fontSize: 14.sp),
+        hintStyle: AppTextTheme.textTheme.bodyMedium?.copyWith(
+          color: AppColors.greyText,
+        ),
         prefixIcon: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Image.asset(prefixIconPath, width: 24.w, height: 24.h),

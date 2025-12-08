@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:lumica_app/core/config/text_theme.dart';
 import 'package:lumica_app/core/config/theme.dart';
 
 class PrimaryButton extends StatelessWidget {
@@ -31,10 +32,9 @@ class PrimaryButton extends StatelessWidget {
           children: [
             Text(
               text,
-              style: TextStyle(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.w500,
+              style: AppTextTheme.textTheme.labelLarge?.copyWith(
                 color: AppColors.whiteColor,
+                fontWeight: FontWeight.w500,
               ),
             ),
             SizedBox(width: 10.w),

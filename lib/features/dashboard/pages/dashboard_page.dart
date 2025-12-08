@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lumica_app/features/ai_chat/pages/ai_chat_page.dart';
 import 'package:lumica_app/features/dashboard/controllers/dashboard_controller.dart';
 import 'package:lumica_app/features/dashboard/widgets/dashboard_nav_bar.dart';
-import 'package:lumica_app/routes/app_pages.dart';
-import 'package:lumica_app/routes/app_routes.dart';
+import 'package:lumica_app/features/home/pages/home_page.dart';
+import 'package:lumica_app/features/journal/pages/journal_page.dart';
+import 'package:lumica_app/features/profile/pages/profile_page.dart';
+import 'package:lumica_app/features/vidcall/pages/vidcall_page.dart';
 
 class DashboardPage extends GetView<DashboardController> {
   const DashboardPage({super.key});
@@ -11,29 +14,19 @@ class DashboardPage extends GetView<DashboardController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: GetNavigator(
-        key: Get.nestedKey(1), // Match the ID in the controller
-        initialRoute: AppRoutes.home,
-        onGenerateRoute: (settings) {
-          final dashboardChildren = AppPages.pages
-              .firstWhere((p) => p.name == AppRoutes.dashboard)
-              .children;
-          
-          final targetRoute = dashboardChildren.firstWhere(
-            (p) => p.name == settings.name,
-            orElse: () => dashboardChildren.first, // Fallback to home
-          );
-
-          return GetPageRoute(
-            settings: settings,
-            page: targetRoute.page,
-            binding: targetRoute.binding,
-            transition: targetRoute.transition,
-          );
-        },
+      body: Obx(
+        () => IndexedStack(
+          index: controller.tabIndex.value,
+          children: const [
+            HomePage(),
+            VidcallPage(),
+            AiChatPage(),
+            JournalPage(),
+            ProfilePage(),
+          ],
+        ),
       ),
       bottomNavigationBar: const DashboardNavBar(),
     );
   }
 }
-

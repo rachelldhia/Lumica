@@ -17,7 +17,7 @@ class BottomNavBar extends StatelessWidget {
         color: AppColors.whiteColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, -2),
           ),
@@ -52,15 +52,12 @@ class BottomNavBar extends StatelessWidget {
                     height: 60.h,
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: [
-                          AppColors.vividOrange,
-                          Color(0xFFFF9D5C),
-                        ],
+                        colors: [AppColors.vividOrange, Color(0xFFFF9D5C)],
                       ),
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.vividOrange.withOpacity(0.4),
+                          color: AppColors.vividOrange.withValues(alpha: 0.4),
                           blurRadius: 12,
                           spreadRadius: 2,
                         ),
@@ -108,32 +105,14 @@ class BottomNavBar extends StatelessWidget {
         height: 60.h, // Match FAB height
         width: 40.w, // Sufficient width for hit target
         color: Colors.transparent,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            // Dot indicator - sticks to top
-            Positioned(
-              top: 0,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                width: 8.w,
-                height: 8.h,
-                decoration: BoxDecoration(
-                  color: isActive ? AppColors.vividOrange : Colors.transparent,
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
-            // Icon - Centered
-            Image.asset(
-              imagePath,
-              width: 30.w,
-              height: 30.h,
-              fit: BoxFit.contain,
-              color: isActive ? AppColors.vividOrange : AppColors.stoneGray,
-            ),
-          ],
+        child: Center(
+          child: Image.asset(
+            imagePath,
+            width: 24.w,
+            height: 24.h,
+            fit: BoxFit.contain,
+            color: isActive ? AppColors.vividOrange : AppColors.stoneGray,
+          ),
         ),
       ),
     );

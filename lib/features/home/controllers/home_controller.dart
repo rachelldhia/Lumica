@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:get/get.dart';
+import 'package:lumica_app/features/dashboard/controllers/dashboard_controller.dart';
 
 class HomeController extends GetxController {
   // Selected mood index (0: Happy, 1: Calm, 2: Exited, 3: Angry, 4: Sad)
@@ -13,6 +14,9 @@ class HomeController extends GetxController {
 
   // Current quote
   var currentQuote = ''.obs;
+
+  // Navigation index for bottom nav bar
+  var currentNavIndex = 0.obs;
 
   // Timer for auto-rotating quotes
   Timer? _quoteTimer;
@@ -59,7 +63,7 @@ class HomeController extends GetxController {
 
   void _startQuoteRotation() {
     // Auto-rotate quotes every 10 seconds
-    _quoteTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+    _quoteTimer = Timer.periodic(const Duration(minutes: 5), (timer) {
       _setRandomQuote();
     });
   }
@@ -70,5 +74,12 @@ class HomeController extends GetxController {
     } else {
       selectedMoodIndex.value = index;
     }
+  }
+
+  void changeNavIndex(int index) {
+    currentNavIndex.value = index;
+    // Delegate to DashboardController for actual navigation
+    final dashboardController = Get.find<DashboardController>();
+    dashboardController.changeTabIndex(index);
   }
 }

@@ -3,10 +3,6 @@ import 'package:get/get.dart';
 import 'package:lumica_app/routes/app_routes.dart';
 
 class AuthController extends GetxController {
-  // Form keys - separated for each page
-  final signInFormKey = GlobalKey<FormState>();
-  final signUpFormKey = GlobalKey<FormState>();
-
   // Sign In controllers
   final signInEmailController = TextEditingController();
   final signInPasswordController = TextEditingController();
@@ -26,34 +22,25 @@ class AuthController extends GetxController {
   // UI state for Sign Up
   final agreeToTerms = false.obs;
 
+  // Method to manually clean up when completely exiting auth flow
   @override
   void onClose() {
-    // Dispose Sign In controllers
-    signInEmailController.dispose();
-    signInPasswordController.dispose();
-
-    // Dispose Sign Up controllers
-    nameController.dispose();
-    emailController.dispose();
-    passwordController.dispose();
-
+    // Don't dispose controllers here - they may still be used during navigation animations
+    // GetX will handle cleanup when controller is truly no longer needed
     super.onClose();
   }
 
   void signUp() {
-    if (signUpFormKey.currentState!.validate()) {
-      // Form is valid, proceed with sign up logic
-      // For example, calling an auth repository or API
-
-      // You would typically navigate to the home screen or a verification page here
-      // Get.offAllNamed('/home');
-    }
+    // Perform sign up logic
+    // Called after form validation passes in the SignUpPage
+    // For example, calling an auth repository or API
+    // Get.offAllNamed('/home');
   }
 
   void signIn() {
-    if (signInFormKey.currentState!.validate()) {
-      Get.offAllNamed(AppRoutes.home);
-    }
+    // Perform sign in logic
+    // Called after form validation passes in the SignInPage
+    Get.offAllNamed(AppRoutes.dashboard);
   }
 
   void forgotPassword() {

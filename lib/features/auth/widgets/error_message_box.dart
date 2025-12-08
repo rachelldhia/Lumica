@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:lumica_app/core/config/text_theme.dart';
 import 'package:lumica_app/core/config/theme.dart';
 
 class ErrorMessageBox extends StatelessWidget {
@@ -33,7 +34,9 @@ class ErrorMessageBox extends StatelessWidget {
             Expanded(
               child: Text(
                 message,
-                style: TextStyle(color: AppColors.vividOrange, fontSize: 12.sp),
+                style: AppTextTheme.textTheme.bodySmall?.copyWith(
+                  color: AppColors.vividOrange,
+                ),
               ),
             ),
           ],
