@@ -18,7 +18,7 @@ class HomePage extends GetView<HomeController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.whiteColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
@@ -58,7 +58,7 @@ class HomePage extends GetView<HomeController> {
 
                 // How are you feeling today
                 Text(
-                  'How are you feeling today ?',
+                  'home.howAreYou'.tr,
                   style: AppTextTheme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w500,
                     fontFamily: 'Poppins',
@@ -73,35 +73,35 @@ class HomePage extends GetView<HomeController> {
                     children: [
                       MoodButton(
                         imagePath: AppImages.emoHappy,
-                        label: 'Happy',
+                        label: 'mood.happy'.tr,
                         color: AppColors.brightYellow,
                         isSelected: controller.selectedMoodIndex.value == 0,
                         onTap: () => controller.selectMood(0),
                       ),
                       MoodButton(
                         imagePath: AppImages.emoCalm,
-                        label: 'Calm',
+                        label: 'mood.calm'.tr,
                         color: AppColors.lightSkyBlue,
                         isSelected: controller.selectedMoodIndex.value == 1,
                         onTap: () => controller.selectMood(1),
                       ),
                       MoodButton(
                         imagePath: AppImages.emoExited,
-                        label: 'Exited',
+                        label: 'mood.excited'.tr,
                         color: AppColors.brightPink,
                         isSelected: controller.selectedMoodIndex.value == 2,
                         onTap: () => controller.selectMood(2),
                       ),
                       MoodButton(
                         imagePath: AppImages.emoAngry,
-                        label: 'Angry',
+                        label: 'mood.angry'.tr,
                         color: AppColors.brightRed,
                         isSelected: controller.selectedMoodIndex.value == 3,
                         onTap: () => controller.selectMood(3),
                       ),
                       MoodButton(
                         imagePath: AppImages.emoSad,
-                        label: 'Sad',
+                        label: 'mood.sad'.tr,
                         color: AppColors.darkBlue,
                         isSelected: controller.selectedMoodIndex.value == 4,
                         onTap: () => controller.selectMood(4),
@@ -120,7 +120,7 @@ class HomePage extends GetView<HomeController> {
                   children: [
                     ActionButton(
                       icon: Icons.book_outlined,
-                      label: 'Journal',
+                      label: 'journal.journal'.tr,
                       onTap: () {
                         // Navigate to journal
                       },
@@ -128,7 +128,7 @@ class HomePage extends GetView<HomeController> {
                     const SizedBox(width: 12),
                     ActionButton(
                       icon: Icons.insert_chart_outlined,
-                      label: 'Mood Track',
+                      label: 'home.moodTrack'.tr,
                       onTap: () {
                         // Navigate to mood track
                       },

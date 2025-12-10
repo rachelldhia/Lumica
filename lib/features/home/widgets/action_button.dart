@@ -28,12 +28,18 @@ class ActionButton extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Icon(icon, size: 20.sp, color: AppColors.darkSlateGray),
+              Icon(
+                icon,
+                size: 20.sp,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.vividOrange
+                    : AppColors.darkSlateGray,
+              ),
               SizedBox(width: 12.w),
               Text(
                 label,
                 style: AppTextTheme.textTheme.labelMedium?.copyWith(
-                  color: AppColors.darkBrown,
+                  color: Theme.of(context).textTheme.bodyLarge?.color,
                 ),
               ),
             ],

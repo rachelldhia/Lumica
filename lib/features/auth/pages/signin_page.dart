@@ -49,7 +49,7 @@ class _SignInPageState extends State<SignInPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SizedBox(
         width: double.infinity,
         height: double.infinity,
@@ -83,7 +83,7 @@ class _SignInPageState extends State<SignInPage> {
                                 SizedBox(height: 20.h),
                                 // Title
                                 Text(
-                                  'Sign In To Lumica',
+                                  'auth.signInToLumica'.tr,
                                   style: AppTextTheme.textTheme.displayMedium,
                                 ),
                                 SizedBox(height: 30.h),
@@ -91,7 +91,7 @@ class _SignInPageState extends State<SignInPage> {
                                 Align(
                                   alignment: Alignment.centerLeft,
                                   child: Text(
-                                    'Email Address',
+                                    'auth.emailAddress'.tr,
                                     style: AppTextTheme.textTheme.titleMedium,
                                   ),
                                 ),
@@ -99,7 +99,7 @@ class _SignInPageState extends State<SignInPage> {
                                 // Email TextFormField
                                 AuthTextField(
                                   controller: controller.signInEmailController,
-                                  hintText: 'kentudbadoag@gmail.com',
+                                  hintText: 'auth.emailHint'.tr,
                                   prefixIconPath: AppIcon.emailDuotone,
                                   keyboardType: TextInputType.emailAddress,
                                   onChanged: (value) {
@@ -107,18 +107,21 @@ class _SignInPageState extends State<SignInPage> {
                                       controller.signInEmailError.value = '';
                                     } else {
                                       controller.signInEmailError.value =
-                                          'Invalid Email Address!!';
+                                          'auth.invalidEmail'.tr;
                                     }
                                   },
                                   validator: (value) {
-                                    if (value == null ||
-                                        !GetUtils.isEmail(value)) {
-                                      controller.signInEmailError.value =
-                                          'Invalid Email Address!!';
-                                      return '';
-                                    }
-                                    controller.signInEmailError.value = '';
-                                    return null;
+                                    final hasError =
+                                        value == null ||
+                                        !GetUtils.isEmail(value);
+                                    WidgetsBinding.instance
+                                        .addPostFrameCallback((_) {
+                                          controller.signInEmailError.value =
+                                              hasError
+                                              ? 'auth.invalidEmail'.tr
+                                              : '';
+                                        });
+                                    return hasError ? '' : null;
                                   },
                                 ),
                                 Obx(
@@ -131,7 +134,7 @@ class _SignInPageState extends State<SignInPage> {
                                 Align(
                                   alignment: Alignment.centerLeft,
                                   child: Text(
-                                    'Password',
+                                    'auth.password'.tr,
                                     style: AppTextTheme.textTheme.titleMedium,
                                   ),
                                 ),
@@ -141,7 +144,7 @@ class _SignInPageState extends State<SignInPage> {
                                   () => AuthTextField(
                                     controller:
                                         controller.signInPasswordController,
-                                    hintText: 'Enter your password...',
+                                    hintText: 'auth.passwordHint'.tr,
                                     prefixIconPath: AppIcon.lock,
                                     obscureText:
                                         !controller.signInPasswordVisible.value,
@@ -162,17 +165,21 @@ class _SignInPageState extends State<SignInPage> {
                                             '';
                                       } else {
                                         controller.signInPasswordError.value =
-                                            'Password must be at least 6 characters';
+                                            'auth.passwordTooShort'.tr;
                                       }
                                     },
                                     validator: (value) {
-                                      if (value == null || value.length < 6) {
-                                        controller.signInPasswordError.value =
-                                            'Password must be at least 6 characters';
-                                        return '';
-                                      }
-                                      controller.signInPasswordError.value = '';
-                                      return null;
+                                      final hasError =
+                                          value == null || value.length < 6;
+                                      WidgetsBinding.instance
+                                          .addPostFrameCallback((_) {
+                                            controller
+                                                .signInPasswordError
+                                                .value = hasError
+                                                ? 'auth.passwordTooShort'.tr
+                                                : '';
+                                          });
+                                      return hasError ? '' : null;
                                     },
                                   ),
                                 ),
@@ -184,18 +191,27 @@ class _SignInPageState extends State<SignInPage> {
                                 ),
                                 SizedBox(height: 25.h),
                                 // Sign In Button
-                                PrimaryButton(
-                                  text: 'Sign In',
-                                  onPressed: () {
-                                    if (Form.of(context).validate()) {
-                                      controller.signIn();
-                                    }
-                                  },
-                                  icon: Image.asset(
-                                    AppIcon.arrowRight,
-                                    width: 20.w,
-                                    height: 20.h,
-                                    color: Colors.white,
+                                Obx(
+                                  () => PrimaryButton(
+                                    text: 'auth.signIn'.tr,
+                                    isLoading: controller.isLoading.value,
+                                    onPressed:
+                                        controller.isSignInFormValid.value &&
+                                            !controller.isLoading.value
+                                        ? () {
+                                            if (Form.of(context).validate()) {
+                                              controller.signIn();
+                                            }
+                                          }
+                                        : null, // Disable if invalid or loading
+                                    icon: controller.isLoading.value
+                                        ? null
+                                        : Image.asset(
+                                            AppIcon.arrowRight,
+                                            width: 20.w,
+                                            height: 20.h,
+                                            color: Colors.white,
+                                          ),
                                   ),
                                 ),
                                 SizedBox(height: 35.h),
@@ -211,11 +227,6 @@ class _SignInPageState extends State<SignInPage> {
                                     SocialLoginButton(
                                       iconPath: AppIcon.google,
                                       onPressed: controller.signInWithGoogle,
-                                    ),
-                                    SizedBox(width: 15.w),
-                                    SocialLoginButton(
-                                      iconPath: AppIcon.instagram,
-                                      onPressed: controller.signInWithInstagram,
                                     ),
                                   ],
                                 ),
@@ -236,11 +247,11 @@ class _SignInPageState extends State<SignInPage> {
                         // Don't have an account? Sign Up
                         Text.rich(
                           TextSpan(
-                            text: "Don't have an account? ",
+                            text: 'auth.dontHaveAccount'.tr,
                             style: AppTextTheme.textTheme.bodyMedium,
                             children: [
                               TextSpan(
-                                text: 'Sign Up.',
+                                text: 'auth.signUp'.tr,
                                 style: AppTextTheme.textTheme.labelMedium,
                                 recognizer: _signUpTapRecognizer,
                               ),
@@ -252,7 +263,7 @@ class _SignInPageState extends State<SignInPage> {
                         TextButton(
                           onPressed: controller.forgotPassword,
                           child: Text(
-                            'Forgot Password',
+                            'auth.forgotPassword'.tr,
                             style: AppTextTheme.textTheme.labelMedium,
                           ),
                         ),

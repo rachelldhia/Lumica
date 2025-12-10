@@ -1,7 +1,8 @@
-import 'package:lumica_app/features/journal/models/note_category.dart';
+import 'package:lumica_app/domain/entities/note_category.dart';
 
 class Note {
   final String id;
+  final String userId; // Added for Supabase database
   final String title;
   final String content;
   final NoteCategory category;
@@ -10,6 +11,7 @@ class Note {
 
   Note({
     required this.id,
+    required this.userId,
     required this.title,
     required this.content,
     required this.category,
@@ -19,6 +21,7 @@ class Note {
 
   Note copyWith({
     String? id,
+    String? userId,
     String? title,
     String? content,
     NoteCategory? category,
@@ -27,6 +30,7 @@ class Note {
   }) {
     return Note(
       id: id ?? this.id,
+      userId: userId ?? this.userId,
       title: title ?? this.title,
       content: content ?? this.content,
       category: category ?? this.category,
@@ -38,22 +42,24 @@ class Note {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'user_id': userId,
       'title': title,
       'content': content,
-      'category': category.index,
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt.toIso8601String(),
+      'category': category.name, // Use name for Supabase
+      'created_at': createdAt.toIso8601String(),
+      'updated_at': updatedAt.toIso8601String(),
     };
   }
 
   factory Note.fromJson(Map<String, dynamic> json) {
     return Note(
-      id: json['id'],
-      title: json['title'],
-      content: json['content'],
-      category: NoteCategory.values[json['category']],
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      id: json['id'] as String,
+      userId: json['user_id'] as String,
+      title: json['title'] as String,
+      content: json['content'] as String,
+      category: NoteCategoryExtension.fromName(json['category'] as String),
+      createdAt: DateTime.parse(json['created_at'] as String),
+      updatedAt: DateTime.parse(json['updated_at'] as String),
     );
   }
 }

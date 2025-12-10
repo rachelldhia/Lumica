@@ -5,6 +5,13 @@ class SessionPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      appBar: AppBar(
+        title: const Text('Sessions'),
+        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
+      ),
+      body: const Center(child: Text('Session Page Content')),
+    );
   }
 }

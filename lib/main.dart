@@ -1,12 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:lumica_app/core/config/text_theme.dart';
+import 'package:flutter_quill/flutter_quill.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:lumica_app/core/config/supabase_config.dart';
+import 'package:lumica_app/core/config/theme.dart';
+import 'package:lumica_app/core/translations/app_translations.dart';
 import 'package:lumica_app/routes/app_pages.dart';
 import 'package:lumica_app/storage/storage_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize Supabase
+  await Supabase.initialize(
+    url: SupabaseConfig.supabaseUrl,
+    anonKey: SupabaseConfig.supabaseAnonKey,
+  );
+
   await StorageService.init();
   runApp(const App());
 }
@@ -16,29 +27,35 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // GetMaterialApp is the true root to ensure GetX stability
-    return GetMaterialApp(
-      debugShowCheckedModeBanner: false,
-      defaultTransition: Transition.cupertino,
-      initialRoute: AppPages.initial,
-      getPages: AppPages.pages,
-      // Provide a basic theme initially (will be overridden in builder)
-      theme: ThemeData.light(),
+    // Initialize ScreenUtil first so it's ready for AppTheme which uses .sp
+    return ScreenUtilInit(
+      designSize: const Size(375, 812),
+      minTextAdapt: true,
       builder: (context, child) {
-        // Initialize ScreenUtil and Apply Theme inside the App context
-        return ScreenUtilInit(
-          designSize: const Size(375, 812),
-          minTextAdapt: true,
-          builder: (context, _) {
-            return Theme(
-              // Apply the custom text theme which uses .sp
-              // This is safe because ScreenUtil is initialized above this Theme
-              data: ThemeData(
-                textTheme: AppTextTheme.textTheme,
-                scaffoldBackgroundColor: Colors.white,
-                primaryColor: Colors
-                    .deepPurple, // Example, matching previous implicit defaults
-              ),
+        return GetMaterialApp(
+          debugShowCheckedModeBanner: false,
+          defaultTransition: Transition.cupertino,
+          initialRoute: AppPages.initial,
+          getPages: AppPages.pages,
+
+          // Translations
+          translations: AppTranslations(),
+          locale: const Locale('en', 'EN'), // Default language
+          fallbackLocale: const Locale('en', 'EN'),
+
+          // Theme
+          // Now safe to use AppTheme because ScreenUtil is initialized
+          theme: AppTheme.lightTheme(),
+          // darkTheme: AppTheme.darkTheme(), // Removed to force light mode
+          themeMode: ThemeMode.light, // Force light mode
+
+          localizationsDelegates: const [FlutterQuillLocalizations.delegate],
+          builder: (context, child) {
+            // Apply text scale factor clamping if needed, or other global builders
+            return MediaQuery(
+              data: MediaQuery.of(
+                context,
+              ).copyWith(textScaler: TextScaler.noScaling),
               child: child!,
             );
           },

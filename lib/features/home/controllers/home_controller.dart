@@ -1,13 +1,14 @@
 import 'dart:async';
 import 'package:get/get.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lumica_app/features/dashboard/controllers/dashboard_controller.dart';
 
 class HomeController extends GetxController {
   // Selected mood index (0: Happy, 1: Calm, 2: Exited, 3: Angry, 4: Sad)
   var selectedMoodIndex = RxnInt();
 
-  // User name (can be fetched from auth/storage later)
-  var userName = 'Mbud!'.obs;
+  // User name
+  var userName = ''.obs;
 
   // Time-based greeting
   var greeting = 'Good Morning,'.obs;
@@ -34,6 +35,7 @@ class HomeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _loadUserData();
     _updateGreeting();
     _setRandomQuote();
     _startQuoteRotation();
@@ -43,6 +45,45 @@ class HomeController extends GetxController {
   void onClose() {
     _quoteTimer?.cancel();
     super.onClose();
+  }
+
+  // Load user data from Supabase
+  void _loadUserData() {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user != null) {
+      // Extract username from email (part before @) or use metadata name
+      String username = user.userMetadata?['name'] as String? ?? '';
+
+      if (username.isEmpty && user.email != null) {
+        // Get part before @ from email
+        username = user.email!.split('@').first;
+        // Format username: replace dots/underscores with spaces and capitalize
+        username = _formatUsername(username);
+      }
+
+      userName.value = username.isNotEmpty ? username : 'Friend';
+    } else {
+      userName.value = 'Friend';
+    }
+  }
+
+  // Format username: replace separators with spaces and capitalize
+  String _formatUsername(String username) {
+    // Replace common separators with spaces
+    String formatted = username
+        .replaceAll('.', ' ')
+        .replaceAll('_', ' ')
+        .replaceAll('-', ' ');
+
+    // Capitalize first letter of each word
+    return formatted
+        .split(' ')
+        .map(
+          (word) => word.isEmpty
+              ? ''
+              : word[0].toUpperCase() + word.substring(1).toLowerCase(),
+        )
+        .join(' ');
   }
 
   void _updateGreeting() {
@@ -62,7 +103,7 @@ class HomeController extends GetxController {
   }
 
   void _startQuoteRotation() {
-    // Auto-rotate quotes every 10 seconds
+    // Auto-rotate quotes every 5 minutes
     _quoteTimer = Timer.periodic(const Duration(minutes: 5), (timer) {
       _setRandomQuote();
     });

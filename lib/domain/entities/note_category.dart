@@ -48,4 +48,21 @@ extension NoteCategoryExtension on NoteCategory {
         return 'All';
     }
   }
+
+  /// Convert string name to NoteCategory enum
+  static NoteCategory fromName(String name) {
+    switch (name.toLowerCase()) {
+      case 'productmeeting':
+        return NoteCategory.productMeeting;
+      case 'todolist':
+        return NoteCategory.toDoList;
+      case 'shopping':
+        return NoteCategory.shopping;
+      case 'important':
+        return NoteCategory.important;
+      case 'general':
+      default:
+        return NoteCategory.general;
+    }
+  }
 }

@@ -1,4 +1,3 @@
-
 abstract class AppRoutes {
   static const splash = '/splash';
   static const dashboard = '/dashboard';
@@ -11,4 +10,5 @@ abstract class AppRoutes {
   static const onboarding = '/onboarding';
   static const signin = '/signin';
   static const session = '/session';
+  static const completeProfile = '/complete-profile';
 }

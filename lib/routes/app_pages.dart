@@ -23,8 +23,8 @@ import 'package:lumica_app/features/vidcall/pages/vidcall_page.dart';
 import 'package:lumica_app/routes/app_routes.dart';
 
 class AppPages {
-  // TODO: Change back to AppRoutes.splash when ready for production
-  static const initial = AppRoutes.onboarding; // Development: skip splash
+  // Splash page checks Supabase session and redirects accordingly
+  static const initial = AppRoutes.splash;
 
   static final pages = [
     GetPage(

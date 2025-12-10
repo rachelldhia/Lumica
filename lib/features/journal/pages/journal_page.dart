@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:lumica_app/core/config/text_theme.dart';
 import 'package:lumica_app/core/config/theme.dart';
 import 'package:lumica_app/features/journal/controllers/journal_controller.dart';
-import 'package:lumica_app/features/journal/models/note_category.dart';
 import 'package:lumica_app/features/journal/widgets/note_card.dart';
 import 'package:lumica_app/features/journal/pages/note_editor_page.dart';
 import 'package:intl/intl.dart';
@@ -20,152 +19,135 @@ class JournalPage extends GetView<JournalController> {
         child: Column(
           children: [
             // Header
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-              child: Row(
-                children: [
-                  // Back button
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back_ios),
-                    onPressed: () => Get.back(),
-                    iconSize: 20.sp,
-                    color: AppColors.darkBrown,
-                  ),
-                  SizedBox(width: 8.w),
+            // Padding(
+            //   padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+            //   child: Text(
+            //     'Journal',
+            //     style: AppTextTheme.textTheme.headlineSmall?.copyWith(
+            //       color: AppColors.darkSlateGray,
+            //       fontWeight: FontWeight.bold,
+            //     ),
+            //   ),
+            // ),
 
-                  // Title
-                  Text(
-                    'journal',
-                    style: AppTextTheme.textTheme.headlineSmall?.copyWith(
-                      color: AppColors.darkSlateGray,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
+            // Calendar horizontal scroll - only show dates with notes
+            Obx(() {
+              if (controller.isLoading.value) {
+                return const SizedBox(height: 100);
+              }
 
-                  const Spacer(),
+              final datesWithNotes = controller.getDatesWithNotes;
 
-                  // Search icon
-                  IconButton(
-                    icon: const Icon(Icons.search),
-                    onPressed: () {
-                      // TODO: Implement search
-                    },
-                    iconSize: 24.sp,
-                    color: AppColors.darkBrown,
-                  ),
-                ],
-              ),
-            ),
+              if (datesWithNotes.isEmpty) {
+                return SizedBox(height: 12.h);
+              }
 
-            // Calendar horizontal scroll
-            SizedBox(
-              height: 80.h,
-              child: Obx(
-                () => ListView.builder(
+              return SizedBox(
+                height: 100.h, // Increased height for better touch target
+                child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   padding: EdgeInsets.symmetric(horizontal: 12.w),
-                  itemCount: 7,
+                  itemCount: datesWithNotes.length,
                   itemBuilder: (context, index) {
-                    final date = DateTime.now().subtract(
-                      Duration(days: 3 - index),
-                    );
-                    final isSelected =
-                        controller.selectedDate.value.day == date.day &&
-                        controller.selectedDate.value.month == date.month;
+                    final date = datesWithNotes[index];
 
-                    return GestureDetector(
-                      onTap: () => controller.setSelectedDate(date),
-                      child: Container(
-                        width: 60.w,
-                        margin: EdgeInsets.symmetric(
-                          horizontal: 4.w,
-                          vertical: 8.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? AppColors.vividOrange
-                              : AppColors.whiteColor,
-                          borderRadius: BorderRadius.circular(12.r),
-                          border: Border.all(
+                    // Wrap each item in Obx for reactive selection
+                    return Obx(() {
+                      final isSelected =
+                          controller.selectedDate.value.day == date.day &&
+                          controller.selectedDate.value.month == date.month &&
+                          controller.selectedDate.value.year == date.year;
+
+                      return GestureDetector(
+                        onTap: () => controller.setSelectedDate(date),
+                        child: Container(
+                          width: 70.w, // Increased width
+                          margin: EdgeInsets.symmetric(
+                            horizontal: 6.w, // Increased margin
+                            vertical: 10.h,
+                          ),
+                          decoration: BoxDecoration(
                             color: isSelected
                                 ? AppColors.vividOrange
-                                : AppColors.stoneGray,
-                            width: 1.5,
+                                : AppColors.whiteColor,
+                            borderRadius: BorderRadius.circular(
+                              16.r,
+                            ), // Increased radius
+                            border: Border.all(
+                              color: isSelected
+                                  ? AppColors.vividOrange
+                                  : AppColors.stoneGray,
+                              width: 2, // Increased border width
+                            ),
+                            boxShadow: isSelected
+                                ? [
+                                    BoxShadow(
+                                      color: AppColors.vividOrange.withValues(
+                                        alpha: 0.3,
+                                      ),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ]
+                                : null,
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                DateFormat('EEE').format(date).substring(0, 3),
+                                style: AppTextTheme.textTheme.bodyMedium
+                                    ?.copyWith(
+                                      // Changed from bodySmall
+                                      color: isSelected
+                                          ? AppColors.whiteColor
+                                          : AppColors.darkSlateGray,
+                                      fontWeight:
+                                          FontWeight.w600, // Increased weight
+                                    ),
+                              ),
+                              SizedBox(height: 6.h), // Increased spacing
+                              Text(
+                                date.day.toString(),
+                                style: AppTextTheme.textTheme.headlineSmall
+                                    ?.copyWith(
+                                      // Changed from titleLarge
+                                      color: isSelected
+                                          ? AppColors.whiteColor
+                                          : AppColors.darkBrown,
+                                      fontWeight:
+                                          FontWeight.w700, // Increased weight
+                                    ),
+                              ),
+                              Text(
+                                DateFormat('MMM').format(date),
+                                style: AppTextTheme.textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: isSelected
+                                          ? AppColors.whiteColor
+                                          : AppColors.darkSlateGray,
+                                      fontSize: 11.sp, // Increased from 10.sp
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                              ),
+                            ],
                           ),
                         ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              DateFormat('EEE').format(date).substring(0, 3),
-                              style: AppTextTheme.textTheme.bodySmall?.copyWith(
-                                color: isSelected
-                                    ? AppColors.whiteColor
-                                    : AppColors.darkSlateGray,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                            SizedBox(height: 4.h),
-                            Text(
-                              date.day.toString(),
-                              style: AppTextTheme.textTheme.titleLarge
-                                  ?.copyWith(
-                                    color: isSelected
-                                        ? AppColors.whiteColor
-                                        : AppColors.darkBrown,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                            ),
-                            Text(
-                              DateFormat('MMM').format(date),
-                              style: AppTextTheme.textTheme.bodySmall?.copyWith(
-                                color: isSelected
-                                    ? AppColors.whiteColor
-                                    : AppColors.darkSlateGray,
-                                fontSize: 10.sp,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
+                      );
+                    });
                   },
                 ),
-              ),
-            ),
+              );
+            }),
 
-            SizedBox(height: 12.h),
-
-            // Category filter chips
-            SizedBox(
-              height: 36.h,
-              child: Obx(
-                () => ListView(
-                  scrollDirection: Axis.horizontal,
-                  padding: EdgeInsets.symmetric(horizontal: 16.w),
-                  children: [
-                    _buildCategoryChip('All', null),
-                    SizedBox(width: 8.w),
-                    _buildCategoryChip('Important', NoteCategory.important),
-                    SizedBox(width: 8.w),
-                    _buildCategoryChip(
-                      'Lecture notes',
-                      NoteCategory.productMeeting,
-                    ),
-                    SizedBox(width: 8.w),
-                    _buildCategoryChip('To-do lists', NoteCategory.toDoList),
-                    SizedBox(width: 8.w),
-                    _buildCategoryChip('Shopping', NoteCategory.shopping),
-                  ],
-                ),
-              ),
-            ),
-
-            SizedBox(height: 16.h),
-
+            SizedBox(height: 20.h), // Increased spacing
             // Notes grid
             Expanded(
               child: Obx(() {
+                if (controller.isLoading.value) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
                 final notes = controller.filteredNotes;
 
                 if (notes.isEmpty) {
@@ -198,6 +180,17 @@ class JournalPage extends GetView<JournalController> {
                           transition: Transition.rightToLeft,
                         );
                       },
+                      onDelete: () {
+                        controller.deleteNote(note.id);
+                        Get.snackbar(
+                          'Deleted',
+                          'Note deleted successfully',
+                          snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: AppColors.vividOrange,
+                          colorText: Colors.white,
+                          duration: const Duration(seconds: 2),
+                        );
+                      },
                     );
                   },
                 );
@@ -217,34 +210,6 @@ class JournalPage extends GetView<JournalController> {
         },
         backgroundColor: AppColors.vividOrange,
         child: Icon(Icons.add, color: AppColors.whiteColor, size: 28.sp),
-      ),
-    );
-  }
-
-  Widget _buildCategoryChip(String label, NoteCategory? category) {
-    final isSelected = controller.selectedCategory.value == category;
-
-    return GestureDetector(
-      onTap: () => controller.setCategoryFilter(category),
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.darkBrown : Colors.transparent,
-          borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(
-            color: isSelected
-                ? AppColors.darkBrown
-                : AppColors.darkSlateGray.withValues(alpha: 0.3),
-            width: 1,
-          ),
-        ),
-        child: Text(
-          label,
-          style: AppTextTheme.textTheme.bodySmall?.copyWith(
-            color: isSelected ? AppColors.whiteColor : AppColors.darkSlateGray,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-          ),
-        ),
       ),
     );
   }

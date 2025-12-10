@@ -59,7 +59,7 @@ class _SignUpPageState extends State<SignUpPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SizedBox(
         width: double.infinity,
         height: double.infinity,
@@ -85,11 +85,15 @@ class _SignUpPageState extends State<SignUpPage> {
                               children: [
                                 SizedBox(height: 40.h),
                                 // Logo
-                                Image.asset(AppImages.logo, width: 150.w),
+                                Image.asset(
+                                  AppImages.logo,
+                                  width: 120.w,
+                                  height: 120.h,
+                                ),
                                 SizedBox(height: 20.h),
                                 // Title
                                 Text(
-                                  'Sign Up For Free',
+                                  'auth.signUpForFree'.tr,
                                   style: AppTextTheme.textTheme.displayMedium,
                                 ),
                                 SizedBox(height: 30.h),
@@ -97,7 +101,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                 Align(
                                   alignment: Alignment.centerLeft,
                                   child: Text(
-                                    'Email Address',
+                                    'auth.emailAddress'.tr,
                                     style: AppTextTheme.textTheme.titleMedium,
                                   ),
                                 ),
@@ -105,7 +109,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                 // Email TextFormField
                                 AuthTextField(
                                   controller: controller.emailController,
-                                  hintText: 'Enter your email...',
+                                  hintText: 'auth.enterEmail'.tr,
                                   prefixIconPath: AppIcon.emailDuotone,
                                   keyboardType: TextInputType.emailAddress,
                                   onChanged: (value) {
@@ -113,18 +117,20 @@ class _SignUpPageState extends State<SignUpPage> {
                                       controller.emailError.value = '';
                                     } else {
                                       controller.emailError.value =
-                                          'Invalid Email Address!!';
+                                          'auth.invalidEmail'.tr;
                                     }
                                   },
                                   validator: (value) {
-                                    if (value == null ||
-                                        !GetUtils.isEmail(value)) {
-                                      controller.emailError.value =
-                                          'Invalid Email Address!!';
-                                      return '';
-                                    }
-                                    controller.emailError.value = '';
-                                    return null;
+                                    final hasError =
+                                        value == null ||
+                                        !GetUtils.isEmail(value);
+                                    WidgetsBinding.instance
+                                        .addPostFrameCallback((_) {
+                                          controller.emailError.value = hasError
+                                              ? 'auth.invalidEmail'.tr
+                                              : '';
+                                        });
+                                    return hasError ? '' : null;
                                   },
                                 ),
                                 Obx(
@@ -137,7 +143,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                 Align(
                                   alignment: Alignment.centerLeft,
                                   child: Text(
-                                    'Password',
+                                    'auth.password'.tr,
                                     style: AppTextTheme.textTheme.titleMedium,
                                   ),
                                 ),
@@ -146,7 +152,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                 Obx(
                                   () => AuthTextField(
                                     controller: controller.passwordController,
-                                    hintText: 'Enter your password...',
+                                    hintText: 'auth.passwordHint'.tr,
                                     prefixIconPath: AppIcon.lock,
                                     obscureText:
                                         !controller.signUpPasswordVisible.value,
@@ -166,17 +172,20 @@ class _SignUpPageState extends State<SignUpPage> {
                                         controller.passwordError.value = '';
                                       } else {
                                         controller.passwordError.value =
-                                            'Password must be at least 6 characters';
+                                            'auth.passwordTooShort'.tr;
                                       }
                                     },
                                     validator: (value) {
-                                      if (value == null || value.length < 6) {
-                                        controller.passwordError.value =
-                                            'Password must be at least 6 characters';
-                                        return '';
-                                      }
-                                      controller.passwordError.value = '';
-                                      return null;
+                                      final hasError =
+                                          value == null || value.length < 6;
+                                      WidgetsBinding.instance
+                                          .addPostFrameCallback((_) {
+                                            controller.passwordError.value =
+                                                hasError
+                                                ? 'auth.passwordTooShort'.tr
+                                                : '';
+                                          });
+                                      return hasError ? '' : null;
                                     },
                                   ),
                                 ),
@@ -211,13 +220,13 @@ class _SignUpPageState extends State<SignUpPage> {
                                       Expanded(
                                         child: Text.rich(
                                           TextSpan(
-                                            text: 'I Agree with the ',
+                                            text: 'auth.agreeTerms'.tr,
                                             style: AppTextTheme
                                                 .textTheme
                                                 .bodyMedium,
                                             children: [
                                               TextSpan(
-                                                text: 'Terms & Conditions',
+                                                text: 'auth.terms'.tr,
                                                 style: AppTextTheme
                                                     .textTheme
                                                     .labelMedium
@@ -242,8 +251,11 @@ class _SignUpPageState extends State<SignUpPage> {
                                 // Sign Up Button
                                 Obx(
                                   () => PrimaryButton(
-                                    text: 'Sign Up',
-                                    onPressed: controller.agreeToTerms.value
+                                    text: 'auth.signUp'.tr,
+                                    isLoading: controller.isLoading.value,
+                                    onPressed:
+                                        controller.agreeToTerms.value &&
+                                            !controller.isLoading.value
                                         ? () {
                                             if (Form.of(context).validate()) {
                                               controller.signUp();
@@ -269,11 +281,11 @@ class _SignUpPageState extends State<SignUpPage> {
                         // Sign In Link
                         Text.rich(
                           TextSpan(
-                            text: 'Already have an account? ',
+                            text: 'auth.alreadyHaveAccount'.tr,
                             style: AppTextTheme.textTheme.bodyMedium,
                             children: [
                               TextSpan(
-                                text: 'Sign In.',
+                                text: 'auth.signIn'.tr,
                                 style: AppTextTheme.textTheme.labelMedium,
                                 recognizer: _signInTapRecognizer,
                               ),
