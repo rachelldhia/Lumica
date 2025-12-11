@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
+
 import 'package:lumica_app/core/config/text_theme.dart';
 import 'package:lumica_app/core/config/theme.dart';
 import 'package:lumica_app/domain/entities/note.dart';
@@ -45,52 +45,23 @@ class NoteCard extends StatelessWidget {
 
   void _showDeleteConfirmation(BuildContext context) {
     if (onDelete == null) return;
+    // We assume onDelete is bound to logic, but now we prefer Controller.
+    // However, NoteCard is stateless and 'onDelete' call implies parent handles it?
+    // Looking at JournalPage usage:
+    // `onDelete: () => controller.deleteNote(note.id)` was likely the old usage.
+    // We should change JournalPage to pass `() => controller.promptDeleteNote(note.id, noteTitle: note.title)`
+    // Or we can just invoke it here if we have access.
+    // NoteCard doesn't inject Controller. It takes a callback.
+    // So we just call the callback!
+    // And let the PARENT (JournalPage) decide to call promptDeleteNote.
 
-    Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16.r),
-        ),
-        title: Text(
-          'Delete Note?',
-          style: AppTextTheme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: AppColors.darkBrown,
-          ),
-        ),
-        content: Text(
-          'Are you sure you want to delete "${note.title}"? This action cannot be undone.',
-          style: AppTextTheme.textTheme.bodyMedium?.copyWith(
-            color: AppColors.darkBrown.withValues(alpha: 0.8),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: Text(
-              'Cancel',
-              style: AppTextTheme.textTheme.titleSmall?.copyWith(
-                color: AppColors.darkBrown,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              Get.back();
-              onDelete!();
-            },
-            child: Text(
-              'Delete',
-              style: AppTextTheme.textTheme.titleSmall?.copyWith(
-                color: Colors.red,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+    // WAIT! The previous implementation was showing the dialog INSIDE NoteCard.
+    // The user wants efficient refactor.
+    // If I just call `onDelete!()`, then the dialog is gone?
+    // Yes, that is the goal. NoteCard should just say "I was long pressed for delete".
+    // The PARENT handles the UI flow.
+
+    onDelete!();
   }
 
   @override

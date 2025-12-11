@@ -135,6 +135,8 @@ class NoteRepositoryImpl implements NoteRepository {
   @override
   Future<Either<Failure, void>> deleteNote(String noteId) async {
     try {
+      // Simulate network delay (matching getNotes)
+      await Future.delayed(const Duration(milliseconds: 500));
       _notes.removeWhere((note) => note.id == noteId);
       return const Right(null);
     } catch (e) {

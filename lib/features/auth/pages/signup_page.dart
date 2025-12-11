@@ -252,10 +252,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                 Obx(
                                   () => PrimaryButton(
                                     text: 'auth.signUp'.tr,
-                                    isLoading: controller.isLoading.value,
-                                    onPressed:
-                                        controller.agreeToTerms.value &&
-                                            !controller.isLoading.value
+                                    onPressed: controller.agreeToTerms.value
                                         ? () {
                                             if (Form.of(context).validate()) {
                                               controller.signUp();

@@ -194,24 +194,20 @@ class _SignInPageState extends State<SignInPage> {
                                 Obx(
                                   () => PrimaryButton(
                                     text: 'auth.signIn'.tr,
-                                    isLoading: controller.isLoading.value,
                                     onPressed:
-                                        controller.isSignInFormValid.value &&
-                                            !controller.isLoading.value
+                                        controller.isSignInFormValid.value
                                         ? () {
                                             if (Form.of(context).validate()) {
                                               controller.signIn();
                                             }
                                           }
-                                        : null, // Disable if invalid or loading
-                                    icon: controller.isLoading.value
-                                        ? null
-                                        : Image.asset(
-                                            AppIcon.arrowRight,
-                                            width: 20.w,
-                                            height: 20.h,
-                                            color: Colors.white,
-                                          ),
+                                        : null,
+                                    icon: Image.asset(
+                                      AppIcon.arrowRight,
+                                      width: 20.w,
+                                      height: 20.h,
+                                      color: Colors.white,
+                                    ),
                                   ),
                                 ),
                                 SizedBox(height: 35.h),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:lumica_app/core/utils/loading_util.dart';
 import 'package:lumica_app/core/widgets/app_snackbar.dart';
 import 'package:lumica_app/data/models/user_model.dart';
 import 'package:lumica_app/domain/repositories/auth_repository.dart';
@@ -61,6 +62,7 @@ class AuthController extends GetxController {
     if (isLoading.value) return;
 
     isLoading.value = true;
+    LoadingUtil.show(message: 'Creating account...');
     errorMessage.value = '';
 
     try {
@@ -74,6 +76,7 @@ class AuthController extends GetxController {
 
       await result.fold(
         (failure) async {
+          LoadingUtil.hide(); // Hide first on error
           errorMessage.value = failure.message;
           debugPrint('Sign up failed: ${failure.message}');
           AppSnackbar.error(failure.message, title: 'Sign Up Failed');
@@ -85,6 +88,9 @@ class AuthController extends GetxController {
           await _fetchAndMergeProfile(authUser.id, isNewUser: true);
 
           _clearSignUpFields();
+
+          LoadingUtil.hide(); // Hide BEFORE Nav
+
           AppSnackbar.success(
             'Your account has been created successfully!',
             title: 'Welcome!',
@@ -95,6 +101,7 @@ class AuthController extends GetxController {
         },
       );
     } catch (e) {
+      LoadingUtil.hide();
       debugPrint('Sign up error: $e');
       AppSnackbar.error(
         'An unexpected error occurred. Please try again.',
@@ -102,6 +109,7 @@ class AuthController extends GetxController {
       );
     } finally {
       isLoading.value = false;
+      // Do NOT call LoadingUtil.hide() here blindly, as we might have already navigated
     }
   }
 
@@ -110,6 +118,7 @@ class AuthController extends GetxController {
     if (isLoading.value) return;
 
     isLoading.value = true;
+    LoadingUtil.show(message: 'Signing in...');
     errorMessage.value = '';
 
     try {
@@ -120,6 +129,7 @@ class AuthController extends GetxController {
 
       await result.fold(
         (failure) async {
+          LoadingUtil.hide(); // Hide on error
           errorMessage.value = failure.message;
           debugPrint('Sign in failed: ${failure.message}');
           AppSnackbar.error(failure.message, title: 'Sign In Failed');
@@ -131,6 +141,9 @@ class AuthController extends GetxController {
           await _fetchAndMergeProfile(authUser.id);
 
           _clearSignInFields();
+
+          LoadingUtil.hide(); // Hide BEFORE Nav
+
           AppSnackbar.success('Welcome back!', title: 'Success');
 
           // Navigate to dashboard
@@ -138,6 +151,7 @@ class AuthController extends GetxController {
         },
       );
     } catch (e) {
+      LoadingUtil.hide();
       debugPrint('Sign in error: $e');
       AppSnackbar.error(
         'An unexpected error occurred. Please try again.',
@@ -145,6 +159,7 @@ class AuthController extends GetxController {
       );
     } finally {
       isLoading.value = false;
+      // No blind hide
     }
   }
 
@@ -198,21 +213,26 @@ class AuthController extends GetxController {
     if (isLoading.value) return;
 
     isLoading.value = true;
+    LoadingUtil.show(message: 'Signing out...');
 
     try {
       final result = await _authRepository.signOut();
 
       result.fold(
         (failure) {
+          LoadingUtil.hide();
           AppSnackbar.error(failure.message, title: 'Sign Out Failed');
         },
         (_) {
+          LoadingUtil.hide(); // Hide before nav
+
           currentUser.value = null;
           AppSnackbar.success('You have been logged out');
           Get.offAllNamed(AppRoutes.signin);
         },
       );
     } catch (e) {
+      LoadingUtil.hide();
       debugPrint('Sign out error: $e');
       AppSnackbar.error('Failed to sign out');
     } finally {
@@ -233,6 +253,7 @@ class AuthController extends GetxController {
     }
 
     isLoading.value = true;
+    LoadingUtil.show(message: 'Sending email...');
 
     try {
       final result = await _authRepository.resetPassword(email);
@@ -253,6 +274,7 @@ class AuthController extends GetxController {
       AppSnackbar.error('Failed to send reset email');
     } finally {
       isLoading.value = false;
+      LoadingUtil.hide(); // Safe to use here as no navigation happens
     }
   }
 

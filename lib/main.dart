@@ -46,8 +46,7 @@ class App extends StatelessWidget {
           // Theme
           // Now safe to use AppTheme because ScreenUtil is initialized
           theme: AppTheme.lightTheme(),
-          // darkTheme: AppTheme.darkTheme(), // Removed to force light mode
-          themeMode: ThemeMode.light, // Force light mode
+          themeMode: ThemeMode.light,
 
           localizationsDelegates: const [FlutterQuillLocalizations.delegate],
           builder: (context, child) {

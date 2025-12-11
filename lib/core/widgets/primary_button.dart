@@ -11,7 +11,6 @@ class PrimaryButton extends StatelessWidget {
     this.width,
     this.height,
     this.icon,
-    this.isLoading = false,
   });
 
   final String text;
@@ -19,7 +18,6 @@ class PrimaryButton extends StatelessWidget {
   final double? width;
   final double? height;
   final Widget? icon;
-  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -28,35 +26,24 @@ class PrimaryButton extends StatelessWidget {
       height: height ?? 50.h,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: (onPressed == null || isLoading)
+          backgroundColor: onPressed == null
               ? AppColors.stoneGray
               : AppColors.vividOrange,
         ),
-        onPressed: isLoading ? null : onPressed,
-        child: isLoading
-            ? SizedBox(
-                width: 24.w,
-                height: 24.h,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2.5,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    AppColors.whiteColor,
-                  ),
-                ),
-              )
-            : Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    text,
-                    style: AppTextTheme.textTheme.labelLarge?.copyWith(
-                      color: AppColors.whiteColor,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  if (icon != null) ...[SizedBox(width: 10.w), icon!],
-                ],
+        onPressed: onPressed,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              text,
+              style: AppTextTheme.textTheme.labelLarge?.copyWith(
+                color: AppColors.whiteColor,
+                fontWeight: FontWeight.w500,
               ),
+            ),
+            if (icon != null) ...[SizedBox(width: 10.w), icon!],
+          ],
+        ),
       ),
     );
   }

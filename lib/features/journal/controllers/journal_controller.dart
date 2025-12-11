@@ -1,4 +1,11 @@
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:lumica_app/core/config/text_theme.dart';
+import 'package:lumica_app/core/config/theme.dart';
+import 'package:lumica_app/core/utils/loading_util.dart';
+import 'package:lumica_app/core/widgets/app_snackbar.dart';
 import 'package:lumica_app/domain/entities/note.dart';
 import 'package:lumica_app/domain/entities/note_category.dart';
 import 'package:lumica_app/domain/repositories/note_repository.dart';
@@ -18,7 +25,7 @@ class JournalController extends GetxController {
   // Search query
   final RxString searchQuery = ''.obs;
 
-  // Loading state
+  // Loading state - used for skeleton UI while LoadingUtil shows dialog
   final RxBool isLoading = false.obs;
 
   @override
@@ -29,18 +36,31 @@ class JournalController extends GetxController {
 
   Future<void> loadNotes() async {
     isLoading.value = true;
-    final result = await _noteRepository.getNotes();
 
-    result.fold(
-      (failure) {
-        isLoading.value = false;
-        Get.snackbar('Error', failure.message);
-      },
-      (data) {
-        notes.assignAll(data);
-        isLoading.value = false;
-      },
-    );
+    // Defer showing dialog until after current frame to avoid build context errors
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (isLoading.value) {
+        LoadingUtil.show(message: 'Loading notes...');
+      }
+    });
+
+    try {
+      final result = await _noteRepository.getNotes();
+
+      result.fold(
+        (failure) {
+          AppSnackbar.error(failure.message, title: 'Error');
+        },
+        (data) {
+          notes.assignAll(data);
+        },
+      );
+    } catch (e) {
+      AppSnackbar.error('Failed to load notes', title: 'Error');
+    } finally {
+      isLoading.value = false;
+      LoadingUtil.hide();
+    }
   }
 
   // Get filtered notes based on selected date and search
@@ -95,46 +115,163 @@ class JournalController extends GetxController {
   }
 
   // Create a new note
-  Future<void> createNote(Note note) async {
-    final result = await _noteRepository.createNote(note);
-    result.fold((failure) => Get.snackbar('Error', failure.message), (newNote) {
-      notes.add(newNote);
-      Get.back(); // Navigate back after success
-    });
+  Future<bool> createNote(Note note, {bool showSnackbar = true}) async {
+    LoadingUtil.show(message: 'Creating note...');
+    try {
+      final result = await _noteRepository.createNote(note);
+      return result.fold(
+        (failure) {
+          AppSnackbar.error(failure.message, title: 'Error');
+          return false;
+        },
+        (newNote) {
+          notes.add(newNote);
+          if (showSnackbar) {
+            AppSnackbar.success('Note created successfully');
+          }
+          return true;
+        },
+      );
+    } catch (e) {
+      AppSnackbar.error('Failed to create note', title: 'Error');
+      return false;
+    } finally {
+      LoadingUtil.hide();
+    }
   }
 
   // Update an existing note
-  Future<void> updateNote(Note updatedNote) async {
-    final result = await _noteRepository.updateNote(updatedNote);
-    result.fold((failure) => Get.snackbar('Error', failure.message), (note) {
-      final index = notes.indexWhere((n) => n.id == note.id);
-      if (index != -1) {
-        notes[index] = note;
-      }
-      Get.back(); // Navigate back after success
-    });
+  Future<bool> updateNote(Note updatedNote, {bool showSnackbar = true}) async {
+    LoadingUtil.show(message: 'Updating note...');
+    try {
+      final result = await _noteRepository.updateNote(updatedNote);
+      return result.fold(
+        (failure) {
+          AppSnackbar.error(failure.message, title: 'Error');
+          return false;
+        },
+        (note) {
+          final index = notes.indexWhere((n) => n.id == note.id);
+          if (index != -1) {
+            notes[index] = note;
+          }
+          if (showSnackbar) {
+            AppSnackbar.success('Note updated successfully');
+          }
+          return true;
+        },
+      );
+    } catch (e) {
+      AppSnackbar.error('Failed to update note', title: 'Error');
+      return false;
+    } finally {
+      LoadingUtil.hide();
+    }
   }
 
-  // Delete a note
-  Future<void> deleteNote(String noteId) async {
-    final result = await _noteRepository.deleteNote(noteId);
-    result.fold((failure) => Get.snackbar('Error', failure.message), (_) {
-      notes.removeWhere((note) => note.id == noteId);
-    });
+  /// Prompt delete confirmation and handle flow
+  Future<void> promptDeleteNote(
+    String noteId, {
+    String? noteTitle,
+    bool closePage = false,
+  }) async {
+    // 1. Show Confirmation Dialog
+    // We expect the dialog to return TRUE if confirmed, FALSE/NULL otherwise.
+    final bool? confirm = await Get.dialog<bool>(
+      AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        title: Text(
+          'Delete Note?',
+          style: AppTextTheme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: AppColors.darkBrown,
+          ),
+        ),
+        content: Text(
+          'Are you sure you want to delete "${noteTitle ?? 'this note'}"? This action cannot be undone.',
+          style: AppTextTheme.textTheme.bodyMedium?.copyWith(
+            color: AppColors.darkBrown.withValues(alpha: 0.8),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: Text(
+              'Cancel',
+              style: AppTextTheme.textTheme.titleSmall?.copyWith(
+                color: AppColors.darkBrown,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Get.back(result: true),
+            child: Text(
+              'Delete',
+              style: AppTextTheme.textTheme.titleSmall?.copyWith(
+                color: Colors.red,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    // 2. Guard: If not confirmed, stopping here.
+    if (confirm != true) return;
+
+    // 3. Proceed to Delete
+    LoadingUtil.show(message: 'Deleting note...');
+
+    try {
+      final result = await _noteRepository.deleteNote(noteId);
+
+      await result.fold(
+        (failure) async {
+          LoadingUtil.hide();
+          AppSnackbar.error(failure.message, title: 'Error');
+        },
+        (_) async {
+          // Success!
+          // Remove from local list if exists
+          notes.removeWhere((note) => note.id == noteId);
+
+          LoadingUtil.hide(); // Hide loading BEFORE navigation
+
+          if (closePage) {
+            // Safety delay just to ensure Dialog is 100% gone physically
+            await Future.delayed(const Duration(milliseconds: 100));
+            Get.back(); // Close Notice Editor
+            AppSnackbar.success('Note deleted successfully');
+          } else {
+            AppSnackbar.success('Note deleted successfully');
+          }
+        },
+      );
+    } catch (e) {
+      LoadingUtil.hide();
+      AppSnackbar.error('Failed to delete note: $e', title: 'Error');
+    }
   }
 
   // Save note (Create or Update based on ID)
   // This handles the business logic of constructing the Note object
-  void saveNote({
+  Future<bool> saveNote({
     String? id,
     required String title,
     required String contentJson, // Expecting JSON string from Quill
     required NoteCategory category,
     Note? existingNote, // Optional: if we have the original note object
-  }) {
-    if (title.isEmpty) {
-      // Logic to check empty content could be here, but usually passed in
-      // For now assuming validation happens before or we construct with defaults
+    bool showSnackbar = true,
+  }) async {
+    // Basic validation
+    if (title.isEmpty &&
+        (contentJson.isEmpty || contentJson == '[{"insert":"\\n"}]')) {
+      // Maybe allow empty notes? Or return false?
+      // For now let's proceed but maybe defaulting title is enough
     }
 
     final now = DateTime.now();
@@ -147,7 +284,7 @@ class JournalController extends GetxController {
         category: category,
         updatedAt: now,
       );
-      updateNote(updatedNote);
+      return await updateNote(updatedNote, showSnackbar: showSnackbar);
     } else {
       // Create
       final newNote = Note(
@@ -159,7 +296,47 @@ class JournalController extends GetxController {
         createdAt: now,
         updatedAt: now,
       );
-      createNote(newNote);
+      return await createNote(newNote, showSnackbar: showSnackbar);
+    }
+  }
+
+  // Save and navigate back
+  Future<void> saveAndClose({
+    String? id,
+    required String title,
+    required String contentJson,
+    required NoteCategory category,
+    Note? existingNote,
+  }) async {
+    // Check if completely empty -> Just close without saving
+    // Simple check: title empty AND content is just newline or empty
+    final isContentEmpty =
+        contentJson.isEmpty || contentJson == '[{"insert":"\\n"}]';
+    if (title.isEmpty && isContentEmpty) {
+      Get.back();
+      return;
+    }
+
+    final success = await saveNote(
+      id: id,
+      title: title,
+      contentJson: contentJson,
+      category: category,
+      existingNote: existingNote,
+      showSnackbar: false, // Don't show snackbar while on this page
+    );
+
+    if (success) {
+      // Wait for any existing overlay/loading to settle
+      LoadingUtil.hide(); // Ensure loading is definitely gone
+
+      Get.back(); // Pop the page
+
+      // Show snackbar AFTER navigation to avoid overlay conflict
+      // Short delay to let the route transition happen
+      Future.delayed(const Duration(milliseconds: 350), () {
+        AppSnackbar.success('Note saved successfully');
+      });
     }
   }
 

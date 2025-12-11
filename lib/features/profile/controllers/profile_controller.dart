@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lumica_app/core/config/text_theme.dart';
 import 'package:lumica_app/core/config/theme.dart';
+import 'package:lumica_app/core/utils/loading_util.dart';
 import 'package:lumica_app/core/widgets/app_snackbar.dart';
 import 'package:lumica_app/features/profile/bindings/personal_info_binding.dart';
 import 'package:lumica_app/features/profile/pages/personal_info_page.dart';
@@ -95,11 +96,9 @@ class ProfileController extends GetxController {
 
   // Navigate to notifications settings
   void navigateToNotifications() {
-    // TODO: Implement navigation to notifications page
-    Get.snackbar(
-      'Notifications',
+    AppSnackbar.info(
       'Navigate to notifications settings',
-      snackPosition: SnackPosition.BOTTOM,
+      title: 'Notifications',
     );
   }
 
@@ -265,10 +264,14 @@ class ProfileController extends GetxController {
           TextButton(
             onPressed: () async {
               Get.back();
+              LoadingUtil.show(message: 'Logging out...');
               try {
                 await Supabase.instance.client.auth.signOut();
+                LoadingUtil.hide();
+                AppSnackbar.success('You have been logged out');
                 Get.offAllNamed(AppRoutes.signin);
               } catch (e) {
+                LoadingUtil.hide();
                 AppSnackbar.error(
                   'Failed to log out. Please try again.',
                   title: 'Error',

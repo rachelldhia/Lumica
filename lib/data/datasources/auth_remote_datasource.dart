@@ -50,6 +50,13 @@ class AuthRemoteDataSource {
         throw AppAuthException('Sign up failed');
       }
 
+      // Check if session is missing (indicates email confirmation is required)
+      if (response.session == null) {
+        throw AppAuthException(
+          'Please check your email to verify your account before logging in.',
+        );
+      }
+
       return UserModel.fromSupabaseAuth(response.user!);
     } on AppAuthException {
       rethrow;

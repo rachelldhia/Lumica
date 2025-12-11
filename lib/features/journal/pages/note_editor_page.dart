@@ -27,6 +27,7 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
 
   late Rx<NoteCategory> selectedCategory;
   Note? editingNote;
+  // _canPop removed - delegated to controller
 
   // Track active format states
   final RxBool _isBoldActive = false.obs;
@@ -105,24 +106,6 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
     super.dispose();
   }
 
-  void _saveNote() {
-    final plainText = quillController.document.toPlainText().trim();
-    if (titleController.text.isEmpty && plainText.isEmpty) {
-      Get.back();
-      return;
-    }
-
-    final contentJson = jsonEncode(quillController.document.toDelta().toJson());
-
-    controller.saveNote(
-      id: widget.noteId,
-      title: titleController.text,
-      contentJson: contentJson,
-      category: selectedCategory.value,
-      existingNote: editingNote,
-    );
-  }
-
   void _toggleFormat(Attribute attribute, RxBool isActive) {
     if (isActive.value) {
       // Turn off: use the "clone" attribute with null value to remove
@@ -152,11 +135,23 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: true,
-      onPopInvokedWithResult: (didPop, result) {
-        if (!didPop) {
-          _saveNote();
-        }
+      canPop: false, // Always intercept back to handle saving
+      // ignore: use_build_context_synchronously
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+
+        // Delegate to controller
+        final contentJson = jsonEncode(
+          quillController.document.toDelta().toJson(),
+        );
+
+        await controller.saveAndClose(
+          id: widget.noteId,
+          title: titleController.text,
+          contentJson: contentJson,
+          category: selectedCategory.value,
+          existingNote: editingNote,
+        );
       },
       child: Scaffold(
         backgroundColor: AppColors.whiteColor,
@@ -178,60 +173,15 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
   }
 
   void _showDeleteConfirmation() {
-    Get.dialog(
-      AlertDialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16.r),
-        ),
-        title: Text(
-          'Delete Note?',
-          style: AppTextTheme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: AppColors.darkBrown,
-          ),
-        ),
-        content: Text(
-          'Are you sure you want to delete this note? This action cannot be undone.',
-          style: AppTextTheme.textTheme.bodyMedium?.copyWith(
-            color: AppColors.darkBrown.withValues(alpha: 0.8),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: Text(
-              'Cancel',
-              style: AppTextTheme.textTheme.titleSmall?.copyWith(
-                color: AppColors.darkBrown,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          TextButton(
-            onPressed: () {
-              Get.back(); // Close dialog
-              Get.back(); // Close editor page
-              controller.deleteNote(widget.noteId!);
-              Get.snackbar(
-                'Deleted',
-                'Note deleted successfully',
-                snackPosition: SnackPosition.BOTTOM,
-                backgroundColor: AppColors.vividOrange,
-                colorText: Colors.white,
-                duration: const Duration(seconds: 2),
-              );
-            },
-            child: Text(
-              'Delete',
-              style: AppTextTheme.textTheme.titleSmall?.copyWith(
-                color: Colors.red,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+    // Delegate entirely to controller
+    // This handles Dialog -> Loading -> Delete -> Navigation safely
+    if (widget.noteId != null) {
+      controller.promptDeleteNote(
+        widget.noteId!,
+        noteTitle: titleController.text,
+        closePage: true,
+      );
+    }
   }
 
   PreferredSizeWidget _buildAppBar() {
@@ -244,7 +194,7 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
           color: AppColors.darkBrown,
           size: 20.sp,
         ),
-        onPressed: _saveNote,
+        onPressed: () => Navigator.maybePop(context),
       ),
       actions: [
         // Delete button (only show when editing existing note)

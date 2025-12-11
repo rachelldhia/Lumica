@@ -32,8 +32,9 @@ class JournalPage extends GetView<JournalController> {
 
             // Calendar horizontal scroll - only show dates with notes
             Obx(() {
-              if (controller.isLoading.value) {
-                return const SizedBox(height: 100);
+              // Show skeleton during initial load
+              if (controller.notes.isEmpty && controller.isLoading.value) {
+                return SizedBox(height: 12.h);
               }
 
               final datesWithNotes = controller.getDatesWithNotes;
@@ -144,8 +145,9 @@ class JournalPage extends GetView<JournalController> {
             // Notes grid
             Expanded(
               child: Obx(() {
-                if (controller.isLoading.value) {
-                  return const Center(child: CircularProgressIndicator());
+                // Show skeleton during initial load
+                if (controller.notes.isEmpty && controller.isLoading.value) {
+                  return const SizedBox.shrink();
                 }
 
                 final notes = controller.filteredNotes;
@@ -180,15 +182,11 @@ class JournalPage extends GetView<JournalController> {
                           transition: Transition.rightToLeft,
                         );
                       },
-                      onDelete: () {
-                        controller.deleteNote(note.id);
-                        Get.snackbar(
-                          'Deleted',
-                          'Note deleted successfully',
-                          snackPosition: SnackPosition.BOTTOM,
-                          backgroundColor: AppColors.vividOrange,
-                          colorText: Colors.white,
-                          duration: const Duration(seconds: 2),
+                      onDelete: () async {
+                        // All delete logic (confirmation + loading + delete) is now in controller
+                        await controller.promptDeleteNote(
+                          note.id,
+                          noteTitle: note.title,
                         );
                       },
                     );
