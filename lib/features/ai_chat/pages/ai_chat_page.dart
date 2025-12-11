@@ -22,60 +22,64 @@ class AiChatPage extends GetView<AiChatController> {
     return Scaffold(
       backgroundColor: AppColors.whiteColor,
       appBar: const ChatAppBar(),
-      body: Column(
-        children: [
-          Expanded(
-            child: Obx(() {
-              if (controller.messages.isEmpty && !controller.isLoading.value) {
-                return const ChatEmptyState();
-              }
+      resizeToAvoidBottomInset: true,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: Obx(() {
+                if (controller.messages.isEmpty &&
+                    !controller.isLoading.value) {
+                  return const ChatEmptyState();
+                }
 
-              return ListView.builder(
-                controller: controller.scrollController,
-                padding: EdgeInsets.symmetric(vertical: 8.h),
-                physics: const BouncingScrollPhysics(),
-                itemCount:
-                    controller.messages.length +
-                    (controller.isLoading.value ? 1 : 0),
-                itemBuilder: (context, index) {
-                  // Show typing indicator at the end if loading
-                  if (index == controller.messages.length &&
-                      controller.isLoading.value) {
-                    return const TypingIndicator();
-                  }
+                return ListView.builder(
+                  controller: controller.scrollController,
+                  padding: EdgeInsets.symmetric(vertical: 8.h),
+                  physics: const BouncingScrollPhysics(),
+                  itemCount:
+                      controller.messages.length +
+                      (controller.isLoading.value ? 1 : 0),
+                  itemBuilder: (context, index) {
+                    // Show typing indicator at the end if loading
+                    if (index == controller.messages.length &&
+                        controller.isLoading.value) {
+                      return const TypingIndicator();
+                    }
 
-                  final message = controller.messages[index];
+                    final message = controller.messages[index];
 
-                  // Show date divider if needed
-                  final widgets = <Widget>[];
-                  if (controller.shouldShowDateDivider(index)) {
-                    widgets.add(
-                      ChatDateDivider(
-                        dateText: controller.formatDateDivider(
-                          message.timestamp,
+                    // Show date divider if needed
+                    final widgets = <Widget>[];
+                    if (controller.shouldShowDateDivider(index)) {
+                      widgets.add(
+                        ChatDateDivider(
+                          dateText: controller.formatDateDivider(
+                            message.timestamp,
+                          ),
                         ),
-                      ),
+                      );
+                    }
+
+                    widgets.add(_buildMessageWidget(message));
+
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: widgets,
                     );
-                  }
-
-                  widgets.add(_buildMessageWidget(message));
-
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: widgets,
-                  );
-                },
-              );
-            }),
-          ),
-          Obx(
-            () => ChatInputField(
-              controller: controller.messageController,
-              onSend: controller.sendMessage,
-              isDisabled: controller.isLoading.value,
+                  },
+                );
+              }),
             ),
-          ),
-        ],
+            Obx(
+              () => ChatInputField(
+                controller: controller.messageController,
+                onSend: controller.sendMessage,
+                isDisabled: controller.isLoading.value,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -83,7 +87,10 @@ class AiChatPage extends GetView<AiChatController> {
   Widget _buildMessageWidget(ChatMessage message) {
     switch (message.type) {
       case MessageType.user:
-        return UserMessageBubble(message: message.content);
+      return UserMessageBubble(
+          message: message.content,
+          avatarUrl: controller.userAvatarUrl.value,
+        );
       case MessageType.ai:
         return AiMessageBubble(
           message: message.content,

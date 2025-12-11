@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lumica_app/core/utils/loading_util.dart';
 import 'package:lumica_app/core/widgets/app_snackbar.dart';
-import 'package:lumica_app/data/models/user_model.dart';
+import 'package:lumica_app/features/auth/data/models/user_model.dart';
 import 'package:lumica_app/domain/repositories/auth_repository.dart';
 import 'package:lumica_app/domain/repositories/profile_repository.dart';
 import 'package:lumica_app/routes/app_routes.dart';

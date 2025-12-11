@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:flutter_quill/flutter_quill.dart';
+import 'package:lumica_app/features/dashboard/controllers/network_controller.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lumica_app/core/config/supabase_config.dart';
 import 'package:lumica_app/core/config/theme.dart';
@@ -12,6 +14,9 @@ import 'package:lumica_app/storage/storage_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Load connection strings from .env
+  await dotenv.load(fileName: ".env");
+
   // Initialize Supabase
   await Supabase.initialize(
     url: SupabaseConfig.supabaseUrl,
@@ -19,6 +24,10 @@ void main() async {
   );
 
   await StorageService.init();
+
+  // Initialize Global Network Controller
+  Get.put(NetworkController(), permanent: true);
+
   runApp(const App());
 }
 

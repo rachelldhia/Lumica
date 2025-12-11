@@ -19,8 +19,18 @@ class StorageService {
   static Future<void> clearToken() async {
     await _box.remove(_Keys.token);
   }
+
+  // --- Settings ---
+  static Future<void> saveLanguage(String language) async {
+    await _box.write(_Keys.selectedLanguage, language);
+  }
+
+  static String? getLanguage() {
+    return _box.read<String>(_Keys.selectedLanguage);
+  }
 }
 
 abstract class _Keys {
   static const String token = 'auth_token';
+  static const String selectedLanguage = 'selected_language';
 }

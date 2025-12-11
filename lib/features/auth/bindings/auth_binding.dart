@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lumica_app/data/datasources/auth_remote_datasource.dart';
+import 'package:lumica_app/data/datasources/profile_local_datasource.dart';
 import 'package:lumica_app/data/datasources/profile_remote_datasource.dart';
 import 'package:lumica_app/data/repositories/auth_repository_impl.dart';
 import 'package:lumica_app/data/repositories/profile_repository_impl.dart';
@@ -17,11 +18,13 @@ class AuthBinding extends Bindings {
     // Create data sources
     final authDataSource = AuthRemoteDataSource(supabaseClient);
     final profileDataSource = ProfileRemoteDataSource(supabaseClient);
+    final profileLocalDataSource = ProfileLocalDataSource();
 
     // Create repositories
     final authRepository = AuthRepositoryImpl(authDataSource);
     final profileRepository = ProfileRepositoryImpl(
       profileDataSource,
+      profileLocalDataSource,
       supabaseClient,
     );
 

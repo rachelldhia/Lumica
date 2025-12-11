@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lumica_app/features/profile/controllers/profile_controller.dart';
 import 'package:lumica_app/features/ai_chat/models/chat_message.dart';
 import 'package:intl/intl.dart';
 
 class AiChatController extends GetxController {
+  final _profileController = Get.find<ProfileController>();
+
+  RxString get userAvatarUrl => _profileController.userAvatarUrl;
+
   final RxList<ChatMessage> messages = <ChatMessage>[].obs;
   final TextEditingController messageController = TextEditingController();
   final ScrollController scrollController = ScrollController();

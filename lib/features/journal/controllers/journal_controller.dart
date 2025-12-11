@@ -1,4 +1,3 @@
-import 'package:flutter/scheduler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -35,31 +34,34 @@ class JournalController extends GetxController {
   }
 
   Future<void> loadNotes() async {
-    isLoading.value = true;
-
-    // Defer showing dialog until after current frame to avoid build context errors
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      if (isLoading.value) {
-        LoadingUtil.show(message: 'Loading notes...');
-      }
-    });
-
+    debugPrint('🚀 Starting loadNotes...');
     try {
+      isLoading.value = true;
+      // Removed LoadingUtil.show() to prevent stuck dialogs during navigation
+
+      debugPrint('📡 Calling _noteRepository.getNotes()...');
       final result = await _noteRepository.getNotes();
 
       result.fold(
         (failure) {
+          debugPrint('❌ Failed to load notes: ${failure.message}');
           AppSnackbar.error(failure.message, title: 'Error');
+          notes.clear();
         },
         (data) {
+          debugPrint('✅ Notes loaded successfully: ${data.length} items');
           notes.assignAll(data);
         },
       );
     } catch (e) {
+      debugPrint('❌ Unexpected crash in loadNotes: $e');
+      debugPrint('Stack trace: ${StackTrace.current}');
       AppSnackbar.error('Failed to load notes', title: 'Error');
+      notes.clear();
     } finally {
+      debugPrint('🏁 loadNotes finished.');
       isLoading.value = false;
-      LoadingUtil.hide();
+      // Removed LoadingUtil.hide()
     }
   }
 
@@ -126,6 +128,9 @@ class JournalController extends GetxController {
         },
         (newNote) {
           notes.add(newNote);
+          // BUG FIX 1: Automatically select the date of the new note
+          setSelectedDate(newNote.createdAt);
+
           if (showSnackbar) {
             AppSnackbar.success('Note created successfully');
           }

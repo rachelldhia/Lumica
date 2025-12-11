@@ -125,7 +125,7 @@ class ProfilePage extends GetView<ProfileController> {
       () => Column(
         children: [
           // Avatar
-          ProfileAvatar(size: 120),
+          ProfileAvatar(size: 120, imagePath: controller.userAvatarUrl.value),
 
           SizedBox(height: 12.h),
 

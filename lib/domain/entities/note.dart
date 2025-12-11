@@ -38,28 +38,4 @@ class Note {
       updatedAt: updatedAt ?? this.updatedAt,
     );
   }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'user_id': userId,
-      'title': title,
-      'content': content,
-      'category': category.name, // Use name for Supabase
-      'created_at': createdAt.toIso8601String(),
-      'updated_at': updatedAt.toIso8601String(),
-    };
-  }
-
-  factory Note.fromJson(Map<String, dynamic> json) {
-    return Note(
-      id: json['id'] as String,
-      userId: json['user_id'] as String,
-      title: json['title'] as String,
-      content: json['content'] as String,
-      category: NoteCategoryExtension.fromName(json['category'] as String),
-      createdAt: DateTime.parse(json['created_at'] as String),
-      updatedAt: DateTime.parse(json['updated_at'] as String),
-    );
-  }
 }

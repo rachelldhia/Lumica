@@ -1,21 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lumica_app/core/config/text_theme.dart';
 import 'package:lumica_app/core/config/theme.dart';
 import 'package:lumica_app/core/utils/loading_util.dart';
 import 'package:lumica_app/core/widgets/app_snackbar.dart';
+import 'package:lumica_app/domain/repositories/profile_repository.dart';
 import 'package:lumica_app/features/profile/bindings/personal_info_binding.dart';
 import 'package:lumica_app/features/profile/pages/personal_info_page.dart';
 import 'package:lumica_app/routes/app_routes.dart';
+import 'package:lumica_app/storage/storage_service.dart';
 
 class ProfileController extends GetxController {
+  // Dependencies
+  final ProfileRepository _profileRepository = Get.find();
+
   // User data
   final RxString userName = ''.obs;
   final RxString userEmail = ''.obs;
   final RxString userLocation = ''.obs;
+  final RxString userAvatarUrl = ''.obs;
 
   // Settings state
   final RxBool notificationsEnabled = true.obs;
@@ -28,24 +33,47 @@ class ProfileController extends GetxController {
     _loadPreferences();
   }
 
-  // Load user data from Supabase
-  void _loadUserData() {
+  // Refresh profile data (public method to be called from other controllers)
+  Future<void> refreshProfile() async {
+    await _loadUserData();
+  }
+
+  // Load user data from Supabase Profile table
+  Future<void> _loadUserData() async {
     final user = Supabase.instance.client.auth.currentUser;
     if (user != null) {
       userEmail.value = user.email ?? '';
 
-      // Extract username from email (part before @) or use metadata name
-      String username = user.userMetadata?['name'] as String? ?? '';
+      // Fetch profile data from repository
+      final result = await _profileRepository.getProfile(user.id);
 
-      if (username.isEmpty && user.email != null) {
-        // Get part before @ from email
-        username = user.email!.split('@').first;
-        // Format username: replace dots/underscores with spaces and capitalize
-        username = _formatUsername(username);
-      }
+      result.fold(
+        (failure) {
+          debugPrint('❌ Failed to load profile for UI: ${failure.message}');
+          // Fallback to auth metadata if profile fetch fails
+          _loadFromAuthMetadata(user);
+        },
+        (profile) {
+          debugPrint('✅ Profile loaded from Repo: ${profile.username}');
+          debugPrint('🖼️ Avatar URL: ${profile.avatarUrl}');
 
-      userName.value = username.isNotEmpty ? username : 'User';
+          userName.value =
+              profile.username ??
+              _formatUsername(user.email?.split('@').first ?? 'User');
+          userAvatarUrl.value = profile.avatarUrl ?? '';
+          userLocation.value = 'Tokyo, Japan'; // Placeholder until added to DB
+        },
+      );
     }
+  }
+
+  void _loadFromAuthMetadata(User user) {
+    String username = user.userMetadata?['name'] as String? ?? '';
+    if (username.isEmpty && user.email != null) {
+      username = user.email!.split('@').first;
+      username = _formatUsername(username);
+    }
+    userName.value = username.isNotEmpty ? username : 'User';
   }
 
   // Format username: replace separators with spaces and capitalize
@@ -67,29 +95,33 @@ class ProfileController extends GetxController {
         .join(' ');
   }
 
-  // Load preferences from SharedPreferences
-  Future<void> _loadPreferences() async {
-    final prefs = await SharedPreferences.getInstance();
-
+  // Load preferences from StorageService
+  void _loadPreferences() {
     // Language Handling
-    // If key exists, use it. If not, try to match system locale.
-    if (prefs.containsKey('selectedLanguage')) {
-      selectedLanguage.value =
-          prefs.getString('selectedLanguage') ?? 'English (EN)';
-      if (selectedLanguage.value == 'English (EN)') {
-        Get.updateLocale(const Locale('en', 'EN'));
-      } else {
-        Get.updateLocale(const Locale('id', 'ID'));
-      }
+    final savedLanguage = StorageService.getLanguage();
+
+    if (savedLanguage != null) {
+      selectedLanguage.value = savedLanguage;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (selectedLanguage.value == 'English (EN)') {
+          Get.updateLocale(const Locale('en', 'EN'));
+        } else {
+          Get.updateLocale(const Locale('id', 'ID'));
+        }
+      });
     } else {
       // Auto-detect system language
       final deviceLocale = Get.deviceLocale;
       if (deviceLocale?.languageCode == 'id') {
         selectedLanguage.value = 'Indonesian (ID)';
-        Get.updateLocale(const Locale('id', 'ID'));
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Get.updateLocale(const Locale('id', 'ID'));
+        });
       } else {
         selectedLanguage.value = 'English (EN)';
-        Get.updateLocale(const Locale('en', 'EN'));
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Get.updateLocale(const Locale('en', 'EN'));
+        });
       }
     }
   }
@@ -248,9 +280,8 @@ class ProfileController extends GetxController {
       Get.updateLocale(const Locale('id', 'ID'));
     }
 
-    // Save preference
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('selectedLanguage', language);
+    // Save preference using StorageService
+    await StorageService.saveLanguage(language);
   }
 
   // Logout with confirmation

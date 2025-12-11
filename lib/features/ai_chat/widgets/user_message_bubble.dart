@@ -6,8 +6,13 @@ import 'package:lumica_app/core/widgets/profile_avatar.dart';
 
 class UserMessageBubble extends StatelessWidget {
   final String message;
+  final String? avatarUrl;
 
-  const UserMessageBubble({super.key, required this.message});
+  const UserMessageBubble({
+    super.key,
+    required this.message,
+    this.avatarUrl, // Optional avatar URL
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +38,7 @@ class UserMessageBubble extends StatelessWidget {
             ),
           ),
           SizedBox(width: 8.w),
-          ProfileAvatar(size: 32, borderWidth: 2),
+          ProfileAvatar(size: 32, borderWidth: 2, imagePath: avatarUrl),
         ],
       ),
     );

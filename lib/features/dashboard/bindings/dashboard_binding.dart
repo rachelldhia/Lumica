@@ -8,6 +8,12 @@ import 'package:lumica_app/features/profile/controllers/profile_controller.dart'
 import 'package:lumica_app/features/vidcall/controllers/vidcall_controller.dart';
 import 'package:lumica_app/data/repositories/note_repository_impl.dart';
 import 'package:lumica_app/domain/repositories/note_repository.dart';
+import 'package:lumica_app/data/datasources/note_remote_datasource.dart';
+import 'package:lumica_app/data/datasources/profile_local_datasource.dart';
+import 'package:lumica_app/data/datasources/profile_remote_datasource.dart';
+import 'package:lumica_app/data/repositories/profile_repository_impl.dart';
+import 'package:lumica_app/domain/repositories/profile_repository.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class DashboardBinding extends Bindings {
   @override
@@ -19,8 +25,20 @@ class DashboardBinding extends Bindings {
     Get.lazyPut<VidcallController>(() => VidcallController());
     Get.lazyPut<AiChatController>(() => AiChatController());
     // Register NoteRepository for JournalController
-    Get.lazyPut<NoteRepository>(() => NoteRepositoryImpl());
+    Get.lazyPut(() => NoteRemoteDataSource(Supabase.instance.client));
+    Get.lazyPut<NoteRepository>(() => NoteRepositoryImpl(Get.find()));
     Get.lazyPut<JournalController>(() => JournalController());
+
+    // Register ProfileRepository for ProfileController
+    Get.lazyPut(() => ProfileRemoteDataSource(Supabase.instance.client));
+    Get.lazyPut(() => ProfileLocalDataSource());
+    Get.lazyPut<ProfileRepository>(
+      () => ProfileRepositoryImpl(
+        Get.find<ProfileRemoteDataSource>(),
+        Get.find<ProfileLocalDataSource>(),
+        Supabase.instance.client,
+      ),
+    );
     Get.lazyPut<ProfileController>(() => ProfileController());
   }
 }

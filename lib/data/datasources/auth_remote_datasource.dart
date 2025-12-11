@@ -1,5 +1,5 @@
 import 'package:lumica_app/core/errors/exceptions.dart';
-import 'package:lumica_app/data/models/user_model.dart';
+import 'package:lumica_app/features/auth/data/models/user_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 /// Auth remote data source (Supabase)

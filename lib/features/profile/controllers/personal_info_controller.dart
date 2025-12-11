@@ -1,14 +1,13 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:lumica_app/core/config/text_theme.dart';
-import 'package:lumica_app/core/config/theme.dart';
 import 'package:lumica_app/core/utils/loading_util.dart';
 import 'package:lumica_app/core/widgets/app_snackbar.dart';
 import 'package:lumica_app/domain/repositories/profile_repository.dart';
+import 'package:lumica_app/features/profile/controllers/profile_controller.dart';
+import 'package:lumica_app/features/profile/widgets/location_selection_dialog.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class PersonalInfoController extends GetxController {
@@ -53,11 +52,16 @@ class PersonalInfoController extends GetxController {
   void onInit() {
     super.onInit();
     // Initialize dependencies
-    try {
+    if (Get.isRegistered<ProfileRepository>()) {
       _profileRepository = Get.find<ProfileRepository>();
-    } catch (e) {
-      // Fallback if not found (should be bound in AuthBinding)
-      // This is a safety measure
+    } else {
+      // Fallback: This should ideally not happen if Binding is correct,
+      // but if it does, we should probably throw or lazy put it here.
+      // For now, let's assume binding logic in DashboardBinding covers it.
+      // But if we are here via a separate route, we might need it.
+      debugPrint(
+        '⚠️ ProfileRepository not found in GetX. Checking bindings...',
+      );
     }
 
     _loadUserData();
@@ -79,10 +83,16 @@ class PersonalInfoController extends GetxController {
     try {
       final user = Supabase.instance.client.auth.currentUser;
       if (user != null) {
+        if (!Get.isRegistered<ProfileRepository>()) {
+          throw Exception('ProfileRepository not initialized');
+        }
+
         final result = await _profileRepository.getProfile(user.id);
         result.fold(
           (failure) {
-            // Silently fail or show minimal error, sticking to default/auth data
+            debugPrint('❌ Failed to load Personal Info: ${failure.message}');
+            // Don't show error to user immediately on load to avoid nagging,
+            // but log it. Maybe set a local error state UI if needed.
           },
           (userModel) {
             usernameController.text = userModel.username ?? '';
@@ -95,7 +105,8 @@ class PersonalInfoController extends GetxController {
         );
       }
     } catch (e) {
-      // Handle error
+      debugPrint('❌ Unexpected error in _loadUserData: $e');
+      AppSnackbar.error('Failed to load profile data', title: 'Error');
     } finally {
       isLoading.value = false;
     }
@@ -157,121 +168,6 @@ class PersonalInfoController extends GetxController {
     }
   }
 
-  // Show location selection dialog
-  void showLocationDialog() {
-    Get.dialog(
-      Dialog(
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16.r),
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(24.w),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Title
-              Text(
-                'Select Location',
-                style: AppTextTheme.textTheme.titleLarge?.copyWith(
-                  color: AppColors.darkBrown,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-
-              SizedBox(height: 20.h),
-
-              // Location options
-              ...locations.map(
-                (location) => Padding(
-                  padding: EdgeInsets.only(bottom: 12.h),
-                  child: Obx(
-                    () => _buildLocationOption(
-                      location,
-                      selectedLocation.value == location,
-                      () => updateLocation(location),
-                    ),
-                  ),
-                ),
-              ),
-
-              SizedBox(height: 12.h),
-
-              // Done button
-              SizedBox(
-                width: double.infinity,
-                height: 48.h,
-                child: ElevatedButton(
-                  onPressed: () => Get.back(),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.vividOrange,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    'Done',
-                    style: AppTextTheme.textTheme.titleMedium?.copyWith(
-                      color: AppColors.whiteColor,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLocationOption(
-    String location,
-    bool isSelected,
-    VoidCallback onTap,
-  ) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? AppColors.vividOrange
-              : AppColors.stoneGray.withValues(alpha: 0.1),
-          borderRadius: BorderRadius.circular(12.r),
-          border: Border.all(
-            color: isSelected
-                ? AppColors.vividOrange
-                : AppColors.stoneGray.withValues(alpha: 0.3),
-            width: 1.5,
-          ),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                location,
-                style: AppTextTheme.textTheme.bodyLarge?.copyWith(
-                  color: isSelected
-                      ? AppColors.whiteColor
-                      : AppColors.darkBrown,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-            if (isSelected)
-              Icon(
-                Icons.check_circle,
-                color: AppColors.whiteColor,
-                size: 20.sp,
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
   // Update location
   void updateLocation(String? location) {
     if (location != null) {
@@ -286,6 +182,9 @@ class PersonalInfoController extends GetxController {
 
   // Save settings
   Future<void> saveSettings() async {
+    // Prevent double submission / spam click
+    if (isLoading.value) return;
+
     // Validate all fields
     _validateUsername();
     _validatePassword();
@@ -298,14 +197,14 @@ class PersonalInfoController extends GetxController {
       return;
     }
 
-    LoadingUtil.show(message: 'Saving changes...');
-
     try {
+      isLoading.value = true;
+      LoadingUtil.show(message: 'Saving changes...');
+
       final user = Supabase.instance.client.auth.currentUser;
       if (user == null) throw Exception('No user found');
 
       // 1. Update Username if changed
-      // Note: We should ideally check if it changed, but repo handles update.
       final username = usernameController.text.trim();
       if (username.isNotEmpty) {
         final result = await _profileRepository.updateUsername(
@@ -326,28 +225,60 @@ class PersonalInfoController extends GetxController {
       }
 
       // 3. Update Avatar if provided
-      // If file uploaded:
       if (uploadedAvatar.value != null) {
-        // Upload logic would go here. For now we skip or implement if helper exists.
-        // Since we don't have a Storage Service helper readily available in context,
-        // We will skip actual file upload to avoid introducing errors with buckets setup.
-        // But we should notify user it's a demo if so.
-        // However, assuming user wants functionality, I'll log it.
-        print(
-          'Avatar upload not fully implemented without Storage bucket config',
+        final uploadResult = await _profileRepository.uploadAvatar(
+          user.id,
+          uploadedAvatar.value,
+        );
+
+        // Handle upload result
+        await uploadResult.fold(
+          (failure) async {
+            // Just log error but don't stop the whole process
+            debugPrint('Avatar upload failed: ${failure.message}');
+            AppSnackbar.error('Avatar upload failed: ${failure.message}');
+          },
+          (url) async {
+            // If upload success, update the profile record with new URL
+            await _profileRepository.updateAvatarUrl(user.id, url);
+          },
         );
       }
 
       LoadingUtil.hide();
 
+      // Refresh profile data in ProfileController to update UI
+      if (Get.isRegistered<ProfileController>()) {
+        final profileController = Get.find<ProfileController>();
+        await profileController.refreshProfile(); // Reload user data from DB
+      }
+
       Get.back();
       AppSnackbar.success('Personal information updated successfully');
     } catch (e) {
+      debugPrint('❌ Profile Update Error: $e');
+      debugPrint('Stack trace: ${StackTrace.current}');
+
       LoadingUtil.hide();
       AppSnackbar.error(
         'Failed to save settings. ${e.toString().replaceAll('Exception:', '').trim()}',
         title: 'Error',
       );
+    } finally {
+      isLoading.value = false;
     }
+  }
+
+  // Show location selection dialog
+  void showLocationDialog() {
+    Get.dialog(
+      LocationSelectionDialog(
+        locations: locations,
+        selectedLocation: selectedLocation.value,
+        onLocationSelected: (location) {
+          updateLocation(location);
+        },
+      ),
+    );
   }
 }

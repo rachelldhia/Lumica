@@ -145,9 +145,13 @@ class JournalPage extends GetView<JournalController> {
             // Notes grid
             Expanded(
               child: Obx(() {
-                // Show skeleton during initial load
+                // Show loading indicator
                 if (controller.notes.isEmpty && controller.isLoading.value) {
-                  return const SizedBox.shrink();
+                  return Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.vividOrange,
+                    ),
+                  );
                 }
 
                 final notes = controller.filteredNotes;

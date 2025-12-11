@@ -1,21 +1,25 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lumica_app/core/errors/exceptions.dart';
+import 'package:lumica_app/features/auth/data/models/user_model.dart';
 
-/// Remote data source for profile operations on public.users table
+/// Remote data source for profile operations on public.profiles table
 class ProfileRemoteDataSource {
   final SupabaseClient _supabase;
 
   ProfileRemoteDataSource(this._supabase);
 
-  /// Fetch user profile from public.users
-  Future<Map<String, dynamic>?> getProfile(String userId) async {
+  /// Fetch user profile from public.profiles
+  Future<UserModel?> getProfile(String userId) async {
     try {
       final response = await _supabase
-          .from('users')
+          .from('profiles')
           .select()
           .eq('id', userId)
           .maybeSingle();
-      return response;
+
+      if (response == null) return null;
+      return UserModel.fromJson(response);
     } on PostgrestException catch (e) {
       throw ServerException('Failed to fetch profile: ${e.message}');
     } catch (e) {
@@ -23,44 +27,86 @@ class ProfileRemoteDataSource {
     }
   }
 
-  /// Update username in public.users
-  /// NO email updates allowed from client
-  Future<Map<String, dynamic>> updateUsername({
+  /// Update username in public.profiles
+  Future<UserModel> updateUsername({
     required String userId,
     required String username,
   }) async {
     try {
+      debugPrint('📝 Updating username for user: $userId to: $username');
       final response = await _supabase
-          .from('users')
-          .update({'username': username})
+          .from('profiles')
+          .update({
+            'username': username,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
           .eq('id', userId)
           .select()
           .single();
-      return response;
+      debugPrint('✅ Username updated successfully');
+      return UserModel.fromJson(response);
     } on PostgrestException catch (e) {
+      debugPrint('❌ PostgrestException in updateUsername: ${e.message}');
+      debugPrint('Error code: ${e.code}');
+
+      // Handle missing profile row (PGRST116: The result contains 0 rows)
+      if (e.code == 'PGRST116') {
+        debugPrint(
+          '⚠️ Profile missing. Attempting to create profile for $userId...',
+        );
+        try {
+          // Auto-create profile
+          await _supabase.from('profiles').insert({
+            'id': userId,
+            'updated_at': DateTime.now().toIso8601String(),
+          });
+
+          debugPrint('✅ Profile created. Retrying username update...');
+
+          // Retry update
+          final retryResponse = await _supabase
+              .from('profiles')
+              .update({
+                'username': username,
+                'updated_at': DateTime.now().toIso8601String(),
+              })
+              .eq('id', userId)
+              .select()
+              .single();
+
+          return UserModel.fromJson(retryResponse);
+        } catch (createError) {
+          debugPrint('❌ Failed to auto-create profile: $createError');
+          throw ServerException('Failed to create profile: $createError');
+        }
+      }
+
       if (e.code == '23505') {
-        // Unique constraint violation
         throw AppException('Username already taken');
       }
       throw ServerException('Failed to update username: ${e.message}');
     } catch (e) {
+      debugPrint('❌ Unexpected error in updateUsername: $e');
       throw ServerException('Failed to update username: ${e.toString()}');
     }
   }
 
-  /// Update display name in public.users
-  Future<Map<String, dynamic>> updateDisplayName({
+  /// Update display name in public.profiles
+  Future<UserModel> updateDisplayName({
     required String userId,
     required String displayName,
   }) async {
     try {
       final response = await _supabase
-          .from('users')
-          .update({'display_name': displayName})
+          .from('profiles')
+          .update({
+            'display_name': displayName,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
           .eq('id', userId)
           .select()
           .single();
-      return response;
+      return UserModel.fromJson(response);
     } on PostgrestException catch (e) {
       throw ServerException('Failed to update display name: ${e.message}');
     } catch (e) {
@@ -68,23 +114,51 @@ class ProfileRemoteDataSource {
     }
   }
 
-  /// Update avatar URL in public.users
-  Future<Map<String, dynamic>> updateAvatarUrl({
+  /// Update avatar URL in public.profiles
+  Future<UserModel> updateAvatarUrl({
     required String userId,
     required String avatarUrl,
   }) async {
     try {
       final response = await _supabase
-          .from('users')
-          .update({'avatar_url': avatarUrl})
+          .from('profiles')
+          .update({
+            'avatar_url': avatarUrl,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
           .eq('id', userId)
           .select()
           .single();
-      return response;
+      return UserModel.fromJson(response);
     } on PostgrestException catch (e) {
       throw ServerException('Failed to update avatar: ${e.message}');
     } catch (e) {
       throw ServerException('Failed to update avatar: ${e.toString()}');
+    }
+  }
+
+  /// Upload avatar file to storage bucket and return Public URL
+  Future<String> uploadAvatar(String userId, dynamic file) async {
+    try {
+      final fileExt = file.path.split('.').last;
+      final fileName =
+          '$userId-${DateTime.now().millisecondsSinceEpoch}.$fileExt';
+      final filePath = fileName; // Root of bucket
+
+      await _supabase.storage
+          .from('avatars')
+          .upload(
+            filePath,
+            file,
+            fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
+          );
+
+      final imageUrl = _supabase.storage.from('avatars').getPublicUrl(filePath);
+      return imageUrl;
+    } on StorageException catch (e) {
+      throw ServerException('Failed to upload avatar: ${e.message}');
+    } catch (e) {
+      throw ServerException('Failed to upload avatar: $e');
     }
   }
 
@@ -94,7 +168,10 @@ class ProfileRemoteDataSource {
     String? excludeUserId,
   }) async {
     try {
-      var query = _supabase.from('users').select('id').eq('username', username);
+      var query = _supabase
+          .from('profiles')
+          .select('id')
+          .eq('username', username);
 
       // Exclude current user when checking (for profile edits)
       if (excludeUserId != null) {
@@ -115,7 +192,7 @@ class ProfileRemoteDataSource {
   }
 
   /// Ensure profile exists - create if missing (for edge cases where trigger failed)
-  Future<Map<String, dynamic>> ensureProfileExists(String userId) async {
+  Future<UserModel> ensureProfileExists(String userId) async {
     try {
       // First check if exists
       final existing = await getProfile(userId);
@@ -125,11 +202,14 @@ class ProfileRemoteDataSource {
 
       // Create profile if missing
       final response = await _supabase
-          .from('users')
-          .insert({'id': userId})
+          .from('profiles')
+          .insert({
+            'id': userId,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
           .select()
           .single();
-      return response;
+      return UserModel.fromJson(response);
     } on PostgrestException catch (e) {
       throw ServerException('Failed to ensure profile exists: ${e.message}');
     } catch (e) {

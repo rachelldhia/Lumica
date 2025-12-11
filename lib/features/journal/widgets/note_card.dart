@@ -20,20 +20,59 @@ class NoteCard extends StatelessWidget {
     this.onDelete,
   });
 
-  /// Extracts plain text from Quill JSON content
+  /// Extracts plain text from Quill JSON content with basic formatting
   String _getPlainTextContent(String content) {
     try {
-      // Try to parse as JSON (Quill format)
+      if (content.isEmpty) return '';
       final jsonContent = jsonDecode(content) as List;
       final buffer = StringBuffer();
+      final currentLine = StringBuffer();
+      int orderedListIndex = 0;
 
       for (final op in jsonContent) {
         if (op is Map && op.containsKey('insert')) {
           final insert = op['insert'];
+          final attributes = op['attributes'] as Map<String, dynamic>?;
+
           if (insert is String) {
-            buffer.write(insert);
+            for (int i = 0; i < insert.length; i++) {
+              final char = insert[i];
+              if (char == '\n') {
+                // End of line, process attributes
+                String prefix = '';
+                bool isOrdered = false;
+
+                if (attributes != null) {
+                  if (attributes['list'] == 'bullet') {
+                    prefix = '• ';
+                  } else if (attributes['list'] == 'ordered') {
+                    orderedListIndex++;
+                    prefix = '$orderedListIndex. ';
+                    isOrdered = true;
+                  } else if (attributes['list'] == 'checked') {
+                    prefix = '[x] ';
+                  } else if (attributes['list'] == 'unchecked') {
+                    prefix = '[ ] ';
+                  }
+                }
+
+                if (!isOrdered) {
+                  orderedListIndex = 0;
+                }
+
+                buffer.write('$prefix$currentLine\n');
+                currentLine.clear();
+              } else {
+                currentLine.write(char);
+              }
+            }
           }
         }
+      }
+
+      // Append any remaining text
+      if (currentLine.isNotEmpty) {
+        buffer.write(currentLine.toString());
       }
 
       return buffer.toString().trim();
@@ -45,22 +84,6 @@ class NoteCard extends StatelessWidget {
 
   void _showDeleteConfirmation(BuildContext context) {
     if (onDelete == null) return;
-    // We assume onDelete is bound to logic, but now we prefer Controller.
-    // However, NoteCard is stateless and 'onDelete' call implies parent handles it?
-    // Looking at JournalPage usage:
-    // `onDelete: () => controller.deleteNote(note.id)` was likely the old usage.
-    // We should change JournalPage to pass `() => controller.promptDeleteNote(note.id, noteTitle: note.title)`
-    // Or we can just invoke it here if we have access.
-    // NoteCard doesn't inject Controller. It takes a callback.
-    // So we just call the callback!
-    // And let the PARENT (JournalPage) decide to call promptDeleteNote.
-
-    // WAIT! The previous implementation was showing the dialog INSIDE NoteCard.
-    // The user wants efficient refactor.
-    // If I just call `onDelete!()`, then the dialog is gone?
-    // Yes, that is the goal. NoteCard should just say "I was long pressed for delete".
-    // The PARENT handles the UI flow.
-
     onDelete!();
   }
 

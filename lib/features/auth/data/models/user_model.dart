@@ -41,18 +41,16 @@ class UserModel extends UserEntity {
     );
   }
 
-  /// Merge auth user with profile data from public.users
-  UserModel mergeWithProfile(Map<String, dynamic> profileData) {
+  /// Merge auth user with profile data
+  UserModel mergeWithProfile(UserModel profileData) {
     return UserModel(
       id: id,
       email: email,
-      username: profileData['username'] as String?,
-      displayName: profileData['display_name'] as String?,
-      avatarUrl: profileData['avatar_url'] as String?,
+      username: profileData.username,
+      displayName: profileData.displayName,
+      avatarUrl: profileData.avatarUrl,
       createdAt: createdAt,
-      updatedAt: profileData['updated_at'] != null
-          ? DateTime.parse(profileData['updated_at'] as String)
-          : null,
+      updatedAt: profileData.updatedAt,
     );
   }
 

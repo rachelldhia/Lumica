@@ -2,7 +2,7 @@ import 'package:either_dart/either.dart';
 import 'package:lumica_app/core/errors/exceptions.dart';
 import 'package:lumica_app/core/errors/failures.dart';
 import 'package:lumica_app/data/datasources/auth_remote_datasource.dart';
-import 'package:lumica_app/data/models/user_model.dart';
+import 'package:lumica_app/features/auth/data/models/user_model.dart';
 import 'package:lumica_app/domain/repositories/auth_repository.dart';
 
 /// Implementation of AuthRepository using Supabase

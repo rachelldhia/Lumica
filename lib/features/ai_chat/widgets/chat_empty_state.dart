@@ -9,8 +9,8 @@ class ChatEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 24.w),
+      child: SingleChildScrollView(
+        padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 24.h),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

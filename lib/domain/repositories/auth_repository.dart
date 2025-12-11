@@ -1,6 +1,6 @@
 import 'package:either_dart/either.dart';
 import 'package:lumica_app/core/errors/failures.dart';
-import 'package:lumica_app/data/models/user_model.dart';
+import 'package:lumica_app/features/auth/data/models/user_model.dart';
 
 /// Authentication repository interface
 abstract class AuthRepository {

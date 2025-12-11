@@ -1,14 +1,17 @@
-import 'dart:async';
 import 'package:get/get.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lumica_app/features/dashboard/controllers/dashboard_controller.dart';
+import 'package:lumica_app/features/profile/controllers/profile_controller.dart';
 
 class HomeController extends GetxController {
+  // Dependencies
+  late final ProfileController _profileController;
+
   // Selected mood index (0: Happy, 1: Calm, 2: Exited, 3: Angry, 4: Sad)
   var selectedMoodIndex = RxnInt();
 
-  // User name
-  var userName = ''.obs;
+  // User name (Get from ProfileController)
+  RxString get userName => _profileController.userName;
+  RxString get userAvatarUrl => _profileController.userAvatarUrl;
 
   // Time-based greeting
   var greeting = 'Good Morning,'.obs;
@@ -18,9 +21,6 @@ class HomeController extends GetxController {
 
   // Navigation index for bottom nav bar
   var currentNavIndex = 0.obs;
-
-  // Timer for auto-rotating quotes
-  Timer? _quoteTimer;
 
   // List of inspirational quotes
   final List<String> quotes = [
@@ -35,55 +35,12 @@ class HomeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _loadUserData();
+    // Initialize ProfileController
+    _profileController = Get.find<ProfileController>();
+
     _updateGreeting();
     _setRandomQuote();
     _startQuoteRotation();
-  }
-
-  @override
-  void onClose() {
-    _quoteTimer?.cancel();
-    super.onClose();
-  }
-
-  // Load user data from Supabase
-  void _loadUserData() {
-    final user = Supabase.instance.client.auth.currentUser;
-    if (user != null) {
-      // Extract username from email (part before @) or use metadata name
-      String username = user.userMetadata?['name'] as String? ?? '';
-
-      if (username.isEmpty && user.email != null) {
-        // Get part before @ from email
-        username = user.email!.split('@').first;
-        // Format username: replace dots/underscores with spaces and capitalize
-        username = _formatUsername(username);
-      }
-
-      userName.value = username.isNotEmpty ? username : 'Friend';
-    } else {
-      userName.value = 'Friend';
-    }
-  }
-
-  // Format username: replace separators with spaces and capitalize
-  String _formatUsername(String username) {
-    // Replace common separators with spaces
-    String formatted = username
-        .replaceAll('.', ' ')
-        .replaceAll('_', ' ')
-        .replaceAll('-', ' ');
-
-    // Capitalize first letter of each word
-    return formatted
-        .split(' ')
-        .map(
-          (word) => word.isEmpty
-              ? ''
-              : word[0].toUpperCase() + word.substring(1).toLowerCase(),
-        )
-        .join(' ');
   }
 
   void _updateGreeting() {
@@ -104,9 +61,6 @@ class HomeController extends GetxController {
 
   void _startQuoteRotation() {
     // Auto-rotate quotes every 5 minutes
-    _quoteTimer = Timer.periodic(const Duration(minutes: 5), (timer) {
-      _setRandomQuote();
-    });
   }
 
   void selectMood(int index) {

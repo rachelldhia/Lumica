@@ -26,37 +26,10 @@ class HomePage extends GetView<HomeController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header with profile and notification
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const ProfileAvatar(size: 48),
-                    NotificationBell(badgeCount: 3, onTap: () {}),
-                  ],
-                ),
-                const SizedBox(height: 20),
-
-                // Greeting
-                Obx(
-                  () => Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        controller.greeting.value,
-                        style: AppTextTheme.textTheme.displayLarge?.copyWith(
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                      Text(
-                        controller.userName.value,
-                        style: AppTextTheme.textTheme.displayLarge,
-                      ),
-                    ],
-                  ),
-                ),
+                _buildHeader(),
                 SizedBox(height: 20.h),
-
-                // How are you feeling today
+                _buildGreeting(),
+                SizedBox(height: 20.h),
                 Text(
                   'home.howAreYou'.tr,
                   style: AppTextTheme.textTheme.titleLarge?.copyWith(
@@ -64,118 +37,155 @@ class HomePage extends GetView<HomeController> {
                     fontFamily: 'Poppins',
                   ),
                 ),
-                const SizedBox(height: 18),
-
-                // Mood selector
-                Obx(
-                  () => Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      MoodButton(
-                        imagePath: AppImages.emoHappy,
-                        label: 'mood.happy'.tr,
-                        color: AppColors.brightYellow,
-                        isSelected: controller.selectedMoodIndex.value == 0,
-                        onTap: () => controller.selectMood(0),
-                      ),
-                      MoodButton(
-                        imagePath: AppImages.emoCalm,
-                        label: 'mood.calm'.tr,
-                        color: AppColors.lightSkyBlue,
-                        isSelected: controller.selectedMoodIndex.value == 1,
-                        onTap: () => controller.selectMood(1),
-                      ),
-                      MoodButton(
-                        imagePath: AppImages.emoExited,
-                        label: 'mood.excited'.tr,
-                        color: AppColors.brightPink,
-                        isSelected: controller.selectedMoodIndex.value == 2,
-                        onTap: () => controller.selectMood(2),
-                      ),
-                      MoodButton(
-                        imagePath: AppImages.emoAngry,
-                        label: 'mood.angry'.tr,
-                        color: AppColors.brightRed,
-                        isSelected: controller.selectedMoodIndex.value == 3,
-                        onTap: () => controller.selectMood(3),
-                      ),
-                      MoodButton(
-                        imagePath: AppImages.emoSad,
-                        label: 'mood.sad'.tr,
-                        color: AppColors.darkBlue,
-                        isSelected: controller.selectedMoodIndex.value == 4,
-                        onTap: () => controller.selectMood(4),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // 1 on 1 Sessions Card
+                SizedBox(height: 18.h),
+                _buildMoodSelector(),
+                SizedBox(height: 20.h),
                 const SessionCard(),
-                const SizedBox(height: 18),
-
-                // Journal and Mood Track buttons
-                Row(
-                  children: [
-                    ActionButton(
-                      icon: Icons.book_outlined,
-                      label: 'journal.journal'.tr,
-                      onTap: () {
-                        // Navigate to journal
-                      },
-                    ),
-                    const SizedBox(width: 12),
-                    ActionButton(
-                      icon: Icons.insert_chart_outlined,
-                      label: 'home.moodTrack'.tr,
-                      onTap: () {
-                        // Navigate to mood track
-                      },
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-
-                // Quote section (auto-rotating)
-                Obx(
-                  () => Container(
-                    padding: EdgeInsets.all(16.w),
-                    decoration: BoxDecoration(
-                      color: AppColors.stoneGray.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            controller.currentQuote.value,
-                            style: AppTextTheme.textTheme.bodyMedium?.copyWith(
-                              color: AppColors.darkSlateGray,
-                              fontStyle: FontStyle.italic,
-                              fontFamily: 'Epilogue',
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: 12.w),
-                        Image.asset(
-                          AppImages.imageQuoteLeft,
-                          width: 32.w,
-                          height: 32.h,
-                          fit: BoxFit.contain,
-                          color: AppColors.darkSlateGray.withValues(alpha: 0.3),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // Plan Expired Card
+                SizedBox(height: 18.h),
+                _buildActionButtons(),
+                SizedBox(height: 20.h),
+                _buildQuoteSection(),
+                SizedBox(height: 20.h),
                 const PlanExpiredCard(),
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Obx(
+          () => ProfileAvatar(
+            size: 48,
+            imagePath: controller.userAvatarUrl.value,
+          ),
+        ),
+        NotificationBell(badgeCount: 3, onTap: () {}),
+      ],
+    );
+  }
+
+  Widget _buildGreeting() {
+    return Obx(
+      () => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            controller.greeting.value,
+            style: AppTextTheme.textTheme.displayLarge?.copyWith(
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+          Text(
+            controller.userName.value,
+            style: AppTextTheme.textTheme.displayLarge,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMoodSelector() {
+    return Obx(
+      () => Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          MoodButton(
+            imagePath: AppImages.emoHappy,
+            label: 'mood.happy'.tr,
+            color: AppColors.brightYellow,
+            isSelected: controller.selectedMoodIndex.value == 0,
+            onTap: () => controller.selectMood(0),
+          ),
+          MoodButton(
+            imagePath: AppImages.emoCalm,
+            label: 'mood.calm'.tr,
+            color: AppColors.lightSkyBlue,
+            isSelected: controller.selectedMoodIndex.value == 1,
+            onTap: () => controller.selectMood(1),
+          ),
+          MoodButton(
+            imagePath: AppImages.emoExited,
+            label: 'mood.excited'.tr,
+            color: AppColors.brightPink,
+            isSelected: controller.selectedMoodIndex.value == 2,
+            onTap: () => controller.selectMood(2),
+          ),
+          MoodButton(
+            imagePath: AppImages.emoAngry,
+            label: 'mood.angry'.tr,
+            color: AppColors.brightRed,
+            isSelected: controller.selectedMoodIndex.value == 3,
+            onTap: () => controller.selectMood(3),
+          ),
+          MoodButton(
+            imagePath: AppImages.emoSad,
+            label: 'mood.sad'.tr,
+            color: AppColors.darkBlue,
+            isSelected: controller.selectedMoodIndex.value == 4,
+            onTap: () => controller.selectMood(4),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButtons() {
+    return Row(
+      children: [
+        ActionButton(
+          icon: Icons.book_outlined,
+          label: 'journal.journal'.tr,
+          onTap: () {
+            // Navigate to journal
+          },
+        ),
+        SizedBox(width: 12.w),
+        ActionButton(
+          icon: Icons.insert_chart_outlined,
+          label: 'home.moodTrack'.tr,
+          onTap: () {
+            // Navigate to mood track
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQuoteSection() {
+    return Obx(
+      () => Container(
+        padding: EdgeInsets.all(16.w),
+        decoration: BoxDecoration(
+          color: AppColors.stoneGray.withValues(alpha: 0.2),
+          borderRadius: BorderRadius.circular(12.r),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                controller.currentQuote.value,
+                style: AppTextTheme.textTheme.bodyMedium?.copyWith(
+                  color: AppColors.darkSlateGray,
+                  fontStyle: FontStyle.italic,
+                  fontFamily: 'Epilogue',
+                ),
+              ),
+            ),
+            SizedBox(width: 12.w),
+            Image.asset(
+              AppImages.imageQuoteLeft,
+              width: 32.w,
+              height: 32.h,
+              fit: BoxFit.contain,
+              color: AppColors.darkSlateGray.withValues(alpha: 0.3),
+            ),
+          ],
         ),
       ),
     );

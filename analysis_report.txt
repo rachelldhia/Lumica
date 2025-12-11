@@ -1,0 +1,4 @@
+Analyzing Lumica...                                             
+
+   info - Don't invoke 'print' in production code - lib\features\profile\controllers\personal_info_controller.dart:336:9 - avoid_print
+

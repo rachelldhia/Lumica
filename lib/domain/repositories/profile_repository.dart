@@ -1,6 +1,6 @@
 import 'package:either_dart/either.dart';
 import 'package:lumica_app/core/errors/failures.dart';
-import 'package:lumica_app/data/models/user_model.dart';
+import 'package:lumica_app/features/auth/data/models/user_model.dart';
 
 /// Profile repository interface for managing user profile data
 abstract class ProfileRepository {
@@ -24,6 +24,9 @@ abstract class ProfileRepository {
     String userId,
     String avatarUrl,
   );
+
+  /// Upload avatar file and get URL
+  Future<Either<Failure, String>> uploadAvatar(String userId, dynamic file);
 
   /// Check if username is available
   Future<Either<Failure, bool>> isUsernameAvailable(
