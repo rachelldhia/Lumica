@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:lumica_app/core/config/text_theme.dart';
 import 'package:lumica_app/core/config/theme.dart';
-import 'package:lumica_app/core/widgets/notification_bell.dart';
+
 import 'package:lumica_app/core/widgets/profile_avatar.dart';
 import 'package:lumica_app/features/vidcall/controllers/vidcall_controller.dart';
 
@@ -68,10 +68,7 @@ class VidcallPage extends GetView<VidcallController> {
   Widget _buildHeader() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        const ProfileAvatar(size: 48),
-        NotificationBell(badgeCount: 3, onTap: () {}),
-      ],
+      children: [const ProfileAvatar(size: 48)],
     );
   }
 

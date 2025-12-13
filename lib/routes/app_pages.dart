@@ -10,6 +10,8 @@ import 'package:lumica_app/features/home/bindings/home_binding.dart';
 import 'package:lumica_app/features/home/pages/home_page.dart';
 import 'package:lumica_app/features/journal/bindings/journal_binding.dart';
 import 'package:lumica_app/features/journal/pages/journal_page.dart';
+import 'package:lumica_app/features/mood_track/bindings/mood_track_binding.dart';
+import 'package:lumica_app/features/mood_track/pages/mood_track_page.dart';
 import 'package:lumica_app/features/onboarding/bindings/onboarding_binding.dart';
 import 'package:lumica_app/features/onboarding/pages/onboarding_page.dart';
 import 'package:lumica_app/features/profile/bindings/profile_binding.dart';
@@ -56,6 +58,11 @@ class AppPages {
           name: AppRoutes.journal,
           page: () => const JournalPage(),
           binding: JournalBinding(),
+        ),
+        GetPage(
+          name: AppRoutes.moodTrack,
+          page: () => const MoodTrackPage(),
+          binding: MoodTrackBinding(),
         ),
         GetPage(
           name: AppRoutes.profile,

@@ -1,6 +1,14 @@
+import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lumica_app/core/widgets/app_snackbar.dart';
+import 'package:lumica_app/domain/entities/mood_entry.dart';
+import 'package:lumica_app/domain/repositories/mood_repository.dart';
 import 'package:lumica_app/features/dashboard/controllers/dashboard_controller.dart';
 import 'package:lumica_app/features/profile/controllers/profile_controller.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
 
 class HomeController extends GetxController {
   // Dependencies
@@ -61,13 +69,77 @@ class HomeController extends GetxController {
 
   void _startQuoteRotation() {
     // Auto-rotate quotes every 5 minutes
+    _quoteTimer = Timer.periodic(const Duration(minutes: 5), (_) {
+      _setRandomQuote();
+    });
   }
 
-  void selectMood(int index) {
+  // Timer for quote rotation
+  Timer? _quoteTimer;
+
+  @override
+  void onClose() {
+    _quoteTimer?.cancel();
+    super.onClose();
+  }
+
+  void selectMood(int index) async {
     if (selectedMoodIndex.value == index) {
       selectedMoodIndex.value = null; // Deselect if already selected
     } else {
       selectedMoodIndex.value = index;
+
+      // Save mood to database with proper error handling
+      final success = await _saveMoodEntry(index);
+      if (!success) {
+        AppSnackbar.warning(
+          'Mood selected but not saved. Please try again.',
+          title: 'Warning',
+        );
+      }
+    }
+  }
+
+  /// Save mood entry to database with proper error handling
+  /// Returns true if successful, false otherwise
+  Future<bool> _saveMoodEntry(int index) async {
+    final moodNames = ['happy', 'calm', 'excited', 'angry', 'sad', 'stress'];
+
+    // Validate index
+    if (index < 0 || index >= moodNames.length) {
+      debugPrint('❌ Invalid mood index: $index');
+      return false;
+    }
+
+    try {
+      // Check authentication
+      final userId = Supabase.instance.client.auth.currentUser?.id;
+      if (userId == null) {
+        debugPrint('⚠️ User not authenticated');
+        return false;
+      }
+
+      // Check if MoodRepository is available
+      if (!Get.isRegistered<MoodRepository>()) {
+        debugPrint('⚠️ MoodRepository not available yet');
+        return false;
+      }
+
+      // Get repository and save
+      final moodRepository = Get.find<MoodRepository>();
+      final entry = MoodEntry(
+        id: const Uuid().v4(),
+        userId: userId,
+        mood: moodNames[index],
+        timestamp: DateTime.now(),
+      );
+
+      await moodRepository.saveMoodEntry(entry);
+      debugPrint('✅ Mood saved successfully: ${moodNames[index]}');
+      return true;
+    } catch (e) {
+      debugPrint('❌ Failed to save mood: $e');
+      return false;
     }
   }
 

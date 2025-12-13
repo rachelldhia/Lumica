@@ -24,7 +24,7 @@ class UserMessageBubble extends StatelessWidget {
         children: [
           Flexible(
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
               decoration: BoxDecoration(
                 color: AppColors.skyBlue,
                 borderRadius: BorderRadius.circular(16.r),
@@ -33,6 +33,9 @@ class UserMessageBubble extends StatelessWidget {
                 message,
                 style: AppTextTheme.textTheme.bodyMedium?.copyWith(
                   color: AppColors.darkBrown,
+                  fontSize: 15.sp,
+                  height: 1.6,
+                  letterSpacing: 0.2,
                 ),
               ),
             ),

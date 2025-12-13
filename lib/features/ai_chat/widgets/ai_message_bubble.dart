@@ -31,7 +31,7 @@ class AiMessageBubble extends StatelessWidget {
           SizedBox(width: 8.w),
           Flexible(
             child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
               decoration: BoxDecoration(
                 color: AppColors.paleSalmon,
                 borderRadius: BorderRadius.circular(16.r),
@@ -40,6 +40,9 @@ class AiMessageBubble extends StatelessWidget {
                 message,
                 style: AppTextTheme.textTheme.bodyMedium?.copyWith(
                   color: AppColors.darkBrown,
+                  fontSize: 15.sp, // Slightly larger
+                  height: 1.6, // Better line spacing for readability
+                  letterSpacing: 0.2, // Subtle spacing
                 ),
               ),
             ),

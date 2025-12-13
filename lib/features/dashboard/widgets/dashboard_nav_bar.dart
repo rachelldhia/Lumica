@@ -6,8 +6,16 @@ import 'package:lumica_app/core/constants/app_icon.dart';
 import 'package:lumica_app/features/dashboard/controllers/dashboard_controller.dart';
 import 'package:lumica_app/routes/app_routes.dart';
 
-class DashboardNavBar extends GetView<DashboardController> {
+class DashboardNavBar extends StatefulWidget {
   const DashboardNavBar({super.key});
+
+  @override
+  State<DashboardNavBar> createState() => _DashboardNavBarState();
+}
+
+class _DashboardNavBarState extends State<DashboardNavBar> {
+  final controller = Get.find<DashboardController>();
+  bool _isFabPressed = false;
 
   @override
   Widget build(BuildContext context) {
@@ -16,18 +24,20 @@ class DashboardNavBar extends GetView<DashboardController> {
         color: AppColors.whiteColor,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 20,
+            offset: const Offset(0, -4),
           ),
         ],
       ),
       child: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 12.h),
+        child: Container(
+          height: 70.h,
+          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 8.h),
           child: Obx(
             () => Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 _buildNavItem(
                   imagePath: AppIcon.home,
@@ -64,30 +74,61 @@ class DashboardNavBar extends GetView<DashboardController> {
   }
 
   Widget _buildFab() {
-    return GestureDetector(
-      onTap: () => controller.changeTabIndex(2),
-      child: Container(
-        width: 60.w,
-        height: 60.h,
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [AppColors.vividOrange, Color(0xFFFF9D5C)],
-          ),
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.vividOrange.withValues(alpha: 0.4),
-              blurRadius: 12,
-              spreadRadius: 2,
+    final isActive = controller.tabIndex.value == 2;
+
+    return AnimatedScale(
+      scale: _isFabPressed ? 0.85 : 1.0,
+      duration: const Duration(milliseconds: 150),
+      curve: Curves.easeInOut,
+      child: GestureDetector(
+        onTapDown: (_) => setState(() => _isFabPressed = true),
+        onTapUp: (_) {
+          setState(() => _isFabPressed = false);
+          Future.delayed(const Duration(milliseconds: 50), () {
+            controller.changeTabIndex(2);
+          });
+        },
+        onTapCancel: () => setState(() => _isFabPressed = false),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+          width: 64.w,
+          height: 64.h,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: isActive
+                  ? [AppColors.vividOrange, const Color(0xFFFF9D5C)]
+                  : [
+                      AppColors.vividOrange.withValues(alpha: 0.9),
+                      const Color(0xFFFF9D5C).withValues(alpha: 0.9),
+                    ],
             ),
-          ],
-        ),
-        child: Center(
-          child: Image.asset(
-            AppIcon.iconChatAI,
-            width: 32.w,
-            height: 32.h,
-            fit: BoxFit.contain,
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.vividOrange.withValues(
+                  alpha: _isFabPressed ? 0.6 : (isActive ? 0.5 : 0.3),
+                ),
+                blurRadius: _isFabPressed ? 20 : (isActive ? 16 : 12),
+                spreadRadius: _isFabPressed ? 4 : (isActive ? 3 : 2),
+                offset: Offset(0, _isFabPressed ? 6 : 4),
+              ),
+            ],
+          ),
+          child: Center(
+            child: AnimatedScale(
+              scale: isActive ? 1.1 : 1.0,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              child: Image.asset(
+                AppIcon.iconChatAI,
+                width: 32.w,
+                height: 32.h,
+                fit: BoxFit.contain,
+              ),
+            ),
           ),
         ),
       ),
@@ -102,34 +143,42 @@ class DashboardNavBar extends GetView<DashboardController> {
   }) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        height: 60.h, // Match FAB height
-        width: 40.w, // Sufficient width for hit target
-        color: Colors.transparent,
-        child: Stack(
-          alignment: Alignment.center,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+        decoration: BoxDecoration(
+          color: isActive
+              ? AppColors.vividOrange.withValues(alpha: 0.1)
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(16.r),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Dot indicator - sticks to top
-            Positioned(
-              top: 0,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                width: 8.w,
-                height: 8.h,
-                decoration: BoxDecoration(
-                  color: isActive ? AppColors.vividOrange : Colors.transparent,
-                  shape: BoxShape.circle,
-                ),
+            AnimatedScale(
+              scale: isActive ? 1.1 : 1.0,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              child: Image.asset(
+                imagePath,
+                width: 26.w,
+                height: 26.h,
+                fit: BoxFit.contain,
+                color: isActive ? AppColors.vividOrange : AppColors.stoneGray,
               ),
             ),
-            // Icon - Centered
-            Image.asset(
-              imagePath,
-              width: 30.w,
-              height: 30.h,
-              fit: BoxFit.contain,
-              color: isActive ? AppColors.vividOrange : AppColors.stoneGray,
+            SizedBox(height: 4.h),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              width: isActive ? 6.w : 0,
+              height: 6.h,
+              decoration: BoxDecoration(
+                color: AppColors.vividOrange,
+                shape: BoxShape.circle,
+              ),
             ),
           ],
         ),

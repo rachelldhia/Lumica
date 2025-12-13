@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lumica_app/core/config/theme.dart';
@@ -20,64 +21,33 @@ class ChatEmptyState extends StatelessWidget {
               child: Stack(
                 alignment: Alignment.center,
                 children: [
-                  // Main illustration
+                  // Main illustration with subtle pulse
                   Positioned(
-                    child: Image.asset(
-                      AppImages.lumiRobot,
+                    child: _PulsingImage(
+                      imagePath: AppImages.lumiRobot,
                       height: 180.h,
-                      fit: BoxFit.contain,
                     ),
                   ),
-                  // Chart icon (top-left)
+                  // Chart icon (top-left) - floating
                   Positioned(
                     top: 20.h,
                     left: 20.w,
-                    child: Container(
-                      padding: EdgeInsets.all(12.r),
-                      decoration: BoxDecoration(
-                        color: AppColors.paleSalmon,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.bar_chart_rounded,
-                        color: AppColors.vividOrange,
-                        size: 24.sp,
-                      ),
+                    child: _FloatingIcon(
+                      icon: Icons.bar_chart_rounded,
+                      delay: 0,
                     ),
                   ),
-                  // Trophy icon (top-right)
+                  // Trophy icon (top-right) - floating
                   Positioned(
                     top: 40.h,
                     right: 30.w,
-                    child: Container(
-                      padding: EdgeInsets.all(12.r),
-                      decoration: BoxDecoration(
-                        color: AppColors.paleSalmon,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.emoji_events,
-                        color: AppColors.vividOrange,
-                        size: 24.sp,
-                      ),
-                    ),
+                    child: _FloatingIcon(icon: Icons.emoji_events, delay: 1),
                   ),
-                  // Calendar icon (bottom-left)
+                  // Calendar icon (bottom-left) - floating
                   Positioned(
                     bottom: 30.h,
                     left: 30.w,
-                    child: Container(
-                      padding: EdgeInsets.all(12.r),
-                      decoration: BoxDecoration(
-                        color: AppColors.paleSalmon,
-                        shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        Icons.calendar_today,
-                        color: AppColors.vividOrange,
-                        size: 24.sp,
-                      ),
-                    ),
+                    child: _FloatingIcon(icon: Icons.calendar_today, delay: 2),
                   ),
                   // Wavy line decoration
                   Positioned(
@@ -120,6 +90,129 @@ class ChatEmptyState extends StatelessWidget {
   }
 }
 
+/// Floating icon with gentle up-down animation
+class _FloatingIcon extends StatefulWidget {
+  final IconData icon;
+  final int delay;
+
+  const _FloatingIcon({required this.icon, required this.delay});
+
+  @override
+  State<_FloatingIcon> createState() => _FloatingIconState();
+}
+
+class _FloatingIconState extends State<_FloatingIcon>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _floatAnimation;
+  late Animation<double> _rotateAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 2500 + (widget.delay * 300)),
+    )..repeat(reverse: true);
+
+    _floatAnimation = Tween<double>(
+      begin: -6.0,
+      end: 6.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+
+    _rotateAnimation = Tween<double>(
+      begin: -0.05,
+      end: 0.05,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(0, _floatAnimation.value),
+          child: Transform.rotate(angle: _rotateAnimation.value, child: child),
+        );
+      },
+      child: Container(
+        padding: EdgeInsets.all(12.r),
+        decoration: BoxDecoration(
+          color: AppColors.paleSalmon,
+          shape: BoxShape.circle,
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.vividOrange.withValues(alpha: 0.2),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Icon(widget.icon, color: AppColors.vividOrange, size: 24.sp),
+      ),
+    );
+  }
+}
+
+/// Pulsing image animation for the main illustration
+class _PulsingImage extends StatefulWidget {
+  final String imagePath;
+  final double height;
+
+  const _PulsingImage({required this.imagePath, required this.height});
+
+  @override
+  State<_PulsingImage> createState() => _PulsingImageState();
+}
+
+class _PulsingImageState extends State<_PulsingImage>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 3000),
+    )..repeat(reverse: true);
+
+    _scaleAnimation = Tween<double>(
+      begin: 0.98,
+      end: 1.02,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Transform.scale(scale: _scaleAnimation.value, child: child);
+      },
+      child: Image.asset(
+        widget.imagePath,
+        height: widget.height,
+        fit: BoxFit.contain,
+      ),
+    );
+  }
+}
+
 class WavyLinePainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
@@ -133,7 +226,7 @@ class WavyLinePainter extends CustomPainter {
     path.moveTo(0, size.height / 2);
 
     for (double i = 0; i < size.width; i += 10) {
-      path.lineTo(i, size.height / 2 + (i % 20 == 0 ? -5 : 5));
+      path.lineTo(i, size.height / 2 + (sin(i / 10 * pi) * 5));
     }
 
     canvas.drawPath(path, paint);

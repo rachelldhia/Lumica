@@ -51,6 +51,51 @@ class AppColors {
   ); // Lighter green for dark mode
 }
 
+/// Centralized animation constants for consistent UX across the app
+class AppAnimations {
+  // Durations
+  static const Duration fast = Duration(milliseconds: 150);
+  static const Duration medium = Duration(milliseconds: 300);
+  static const Duration slow = Duration(milliseconds: 500);
+  static const Duration page = Duration(milliseconds: 350);
+
+  // Curves
+  static const Curve standard = Curves.easeInOut;
+  static const Curve enter = Curves.easeOut;
+  static const Curve exit = Curves.easeIn;
+  static const Curve bounce = Curves.easeOutBack;
+  static const Curve smooth = Curves.fastOutSlowIn;
+  static const Curve spring = Curves.elasticOut;
+}
+
+/// Standardized border radius values for consistent UI
+class AppRadius {
+  static const double xs = 4.0;
+  static const double sm = 8.0;
+  static const double md = 12.0;
+  static const double lg = 16.0;
+  static const double xl = 24.0;
+  static const double xxl = 32.0;
+  static const double circular = 999.0;
+
+  // Pre-built BorderRadius objects for convenience
+  static BorderRadius get smallAll => BorderRadius.circular(sm);
+  static BorderRadius get mediumAll => BorderRadius.circular(md);
+  static BorderRadius get largeAll => BorderRadius.circular(lg);
+  static BorderRadius get xlAll => BorderRadius.circular(xl);
+}
+
+/// Standardized spacing values for consistent layouts
+class AppSpacing {
+  static const double xs = 4.0;
+  static const double sm = 8.0;
+  static const double md = 12.0;
+  static const double lg = 16.0;
+  static const double xl = 24.0;
+  static const double xxl = 32.0;
+  static const double xxxl = 48.0;
+}
+
 class AppTheme {
   static ThemeData lightTheme() {
     return ThemeData(

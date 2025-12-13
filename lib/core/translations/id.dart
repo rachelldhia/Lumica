@@ -90,11 +90,16 @@ class IdTranslations {
     'home.howAreYou': 'Bagaimana perasaanmu hari ini ?',
     'home.moodTrack': 'Lacak Mood',
 
+    // Mood Track
+    'moodTrack.title': 'Pelacak Mood',
+    'moodTrack.yourMoodIs': 'Mood kamu adalah',
+
     // Moods
     'mood.happy': 'Senang',
     'mood.calm': 'Tenang',
     'mood.excited': 'Bersemangat',
     'mood.angry': 'Marah',
     'mood.sad': 'Sedih',
+    'mood.stress': 'Stres',
   };
 }

@@ -4,13 +4,13 @@ import 'package:get/get.dart';
 import 'package:lumica_app/core/config/text_theme.dart';
 import 'package:lumica_app/core/config/theme.dart';
 import 'package:lumica_app/core/constants/app_images.dart';
-import 'package:lumica_app/core/widgets/notification_bell.dart';
 import 'package:lumica_app/core/widgets/profile_avatar.dart';
 import 'package:lumica_app/features/home/controllers/home_controller.dart';
 import 'package:lumica_app/features/home/widgets/action_button.dart';
 import 'package:lumica_app/features/home/widgets/mood_button.dart';
 import 'package:lumica_app/features/home/widgets/plan_expired_card.dart';
 import 'package:lumica_app/features/home/widgets/session_card.dart';
+import 'package:lumica_app/routes/app_routes.dart';
 
 class HomePage extends GetView<HomeController> {
   const HomePage({super.key});
@@ -32,12 +32,13 @@ class HomePage extends GetView<HomeController> {
                 SizedBox(height: 20.h),
                 Text(
                   'home.howAreYou'.tr,
-                  style: AppTextTheme.textTheme.titleLarge?.copyWith(
+                  style: AppTextTheme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w500,
                     fontFamily: 'Poppins',
+                    color: AppColors.darkSlateGray,
                   ),
                 ),
-                SizedBox(height: 18.h),
+                SizedBox(height: 16.h),
                 _buildMoodSelector(),
                 SizedBox(height: 20.h),
                 const SessionCard(),
@@ -56,17 +57,8 @@ class HomePage extends GetView<HomeController> {
   }
 
   Widget _buildHeader() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Obx(
-          () => ProfileAvatar(
-            size: 48,
-            imagePath: controller.userAvatarUrl.value,
-          ),
-        ),
-        NotificationBell(badgeCount: 3, onTap: () {}),
-      ],
+    return Obx(
+      () => ProfileAvatar(size: 48, imagePath: controller.userAvatarUrl.value),
     );
   }
 
@@ -91,46 +83,64 @@ class HomePage extends GetView<HomeController> {
   }
 
   Widget _buildMoodSelector() {
-    return Obx(
-      () => Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          MoodButton(
-            imagePath: AppImages.emoHappy,
-            label: 'mood.happy'.tr,
-            color: AppColors.brightYellow,
-            isSelected: controller.selectedMoodIndex.value == 0,
-            onTap: () => controller.selectMood(0),
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 8.h),
+      child: Obx(
+        () => SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
+          child: Row(
+            children: [
+              MoodButton(
+                imagePath: AppImages.emoHappy,
+                label: 'mood.happy'.tr,
+                color: AppColors.brightYellow,
+                isSelected: controller.selectedMoodIndex.value == 0,
+                onTap: () => controller.selectMood(0),
+              ),
+              SizedBox(width: 16.w),
+              MoodButton(
+                imagePath: AppImages.emoCalm,
+                label: 'mood.calm'.tr,
+                color: AppColors.lightSkyBlue,
+                isSelected: controller.selectedMoodIndex.value == 1,
+                onTap: () => controller.selectMood(1),
+              ),
+              SizedBox(width: 16.w),
+              MoodButton(
+                imagePath: AppImages.emoExited,
+                label: 'mood.excited'.tr,
+                color: AppColors.brightPink,
+                isSelected: controller.selectedMoodIndex.value == 2,
+                onTap: () => controller.selectMood(2),
+              ),
+              SizedBox(width: 16.w),
+              MoodButton(
+                imagePath: AppImages.emoAngry,
+                label: 'mood.angry'.tr,
+                color: AppColors.brightRed,
+                isSelected: controller.selectedMoodIndex.value == 3,
+                onTap: () => controller.selectMood(3),
+              ),
+              SizedBox(width: 16.w),
+              MoodButton(
+                imagePath: AppImages.emoSad,
+                label: 'mood.sad'.tr,
+                color: AppColors.darkBlue,
+                isSelected: controller.selectedMoodIndex.value == 4,
+                onTap: () => controller.selectMood(4),
+              ),
+              SizedBox(width: 16.w),
+              MoodButton(
+                imagePath: AppImages.emoStress,
+                label: 'mood.stress'.tr,
+                color: AppColors.darkGray,
+                isSelected: controller.selectedMoodIndex.value == 5,
+                onTap: () => controller.selectMood(5),
+              ),
+            ],
           ),
-          MoodButton(
-            imagePath: AppImages.emoCalm,
-            label: 'mood.calm'.tr,
-            color: AppColors.lightSkyBlue,
-            isSelected: controller.selectedMoodIndex.value == 1,
-            onTap: () => controller.selectMood(1),
-          ),
-          MoodButton(
-            imagePath: AppImages.emoExited,
-            label: 'mood.excited'.tr,
-            color: AppColors.brightPink,
-            isSelected: controller.selectedMoodIndex.value == 2,
-            onTap: () => controller.selectMood(2),
-          ),
-          MoodButton(
-            imagePath: AppImages.emoAngry,
-            label: 'mood.angry'.tr,
-            color: AppColors.brightRed,
-            isSelected: controller.selectedMoodIndex.value == 3,
-            onTap: () => controller.selectMood(3),
-          ),
-          MoodButton(
-            imagePath: AppImages.emoSad,
-            label: 'mood.sad'.tr,
-            color: AppColors.darkBlue,
-            isSelected: controller.selectedMoodIndex.value == 4,
-            onTap: () => controller.selectMood(4),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -142,7 +152,7 @@ class HomePage extends GetView<HomeController> {
           icon: Icons.book_outlined,
           label: 'journal.journal'.tr,
           onTap: () {
-            // Navigate to journal
+            Get.toNamed('/dashboard${AppRoutes.journal}');
           },
         ),
         SizedBox(width: 12.w),
@@ -150,7 +160,7 @@ class HomePage extends GetView<HomeController> {
           icon: Icons.insert_chart_outlined,
           label: 'home.moodTrack'.tr,
           onTap: () {
-            // Navigate to mood track
+            Get.toNamed('/dashboard${AppRoutes.moodTrack}');
           },
         ),
       ],

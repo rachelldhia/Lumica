@@ -75,4 +75,37 @@ class ChatMessage {
         return 'Despair';
     }
   }
+
+  // Serialization for Supabase
+  Map<String, dynamic> toJson() {
+    return {
+      // 'id': id, // Let Supabase generate ID or handle it if we want client-side generation
+      'type': type.name,
+      'content': content,
+      // 'created_at': timestamp.toIso8601String(), // Let Supabase handle timestamps on insert
+      'emotion': emotion?.name,
+      'emotion_confidence': emotionConfidence,
+    };
+  }
+
+  factory ChatMessage.fromJson(Map<String, dynamic> json) {
+    return ChatMessage(
+      id: json['id'] as String,
+      type: MessageType.values.firstWhere(
+        (e) => e.name == json['type'],
+        orElse: () => MessageType.ai,
+      ),
+      content: json['content'] as String,
+      timestamp: DateTime.parse(
+        json['created_at'] as String,
+      ).toLocal(), // Convert to local time
+      emotion: json['emotion'] != null
+          ? EmotionType.values.firstWhere(
+              (e) => e.name == json['emotion'],
+              orElse: () => EmotionType.calm,
+            )
+          : null,
+      emotionConfidence: json['emotion_confidence'] as String?,
+    );
+  }
 }

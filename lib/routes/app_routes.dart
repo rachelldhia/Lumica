@@ -5,6 +5,7 @@ abstract class AppRoutes {
   static const vidcall = '/vidcall';
   static const aiChat = '/ai-chat';
   static const journal = '/journal';
+  static const moodTrack = '/mood-track';
   static const profile = '/profile';
   static const signup = '/signup';
   static const onboarding = '/onboarding';

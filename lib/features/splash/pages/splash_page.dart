@@ -132,23 +132,50 @@ class _SplashPageState extends State<SplashPage>
 
               const Spacer(flex: 2),
 
-              // Loading indicator with dark overlay effect
+              // Loading indicator with pulsing animation
               Obx(
                 () => AnimatedOpacity(
                   opacity: controller.isLoading.value ? 1.0 : 0.0,
                   duration: const Duration(milliseconds: 300),
                   child: Column(
                     children: [
-                      // Custom loading indicator
-                      SizedBox(
-                        width: 32.w,
-                        height: 32.h,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 3,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            AppColors.vividOrange.withValues(alpha: 0.8),
-                          ),
-                        ),
+                      // Custom branded pulsing dots
+                      TweenAnimationBuilder<double>(
+                        duration: const Duration(milliseconds: 1200),
+                        tween: Tween(begin: 0.0, end: 1.0),
+                        curve: Curves.easeInOut,
+                        builder: (context, value, child) {
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: List.generate(3, (index) {
+                              final delay = index * 0.2;
+                              final progress = (value - delay).clamp(0.0, 1.0);
+                              final opacity = (1 - (progress - 0.5).abs() * 2)
+                                  .clamp(0.3, 1.0);
+
+                              return Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 4.w),
+                                child: AnimatedContainer(
+                                  duration: const Duration(milliseconds: 300),
+                                  width: 8.w,
+                                  height: 8.h,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.vividOrange.withValues(
+                                      alpha: opacity,
+                                    ),
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              );
+                            }),
+                          );
+                        },
+                        onEnd: () {
+                          // Restart animation if still loading
+                          if (controller.isLoading.value) {
+                            setState(() {});
+                          }
+                        },
                       ),
                       SizedBox(height: 16.h),
                       Text(

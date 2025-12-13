@@ -1,34 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:flutter_quill/flutter_quill.dart';
-import 'package:lumica_app/features/dashboard/controllers/network_controller.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:lumica_app/core/config/supabase_config.dart';
 import 'package:lumica_app/core/config/theme.dart';
 import 'package:lumica_app/core/translations/app_translations.dart';
 import 'package:lumica_app/routes/app_pages.dart';
-import 'package:lumica_app/storage/storage_service.dart';
 
-void main() async {
+void main() {
+  debugPrint('🚀 App Launching...');
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Load connection strings from .env
-  await dotenv.load(fileName: ".env");
-
-  // Initialize Supabase
-  await Supabase.initialize(
-    url: SupabaseConfig.supabaseUrl,
-    anonKey: SupabaseConfig.supabaseAnonKey,
-  );
-
-  await StorageService.init();
-
-  // Initialize Global Network Controller
-  Get.put(NetworkController(), permanent: true);
-
+  debugPrint('✅ WidgetsBinding Initialized');
   runApp(const App());
+  debugPrint('✅ runApp called');
 }
 
 class App extends StatelessWidget {

@@ -90,11 +90,16 @@ class EnTranslations {
     'home.howAreYou': 'How are you feeling today ?',
     'home.moodTrack': 'Mood Track',
 
+    // Mood Track
+    'moodTrack.title': 'Mood Tracker',
+    'moodTrack.yourMoodIs': 'Your mood is',
+
     // Moods
     'mood.happy': 'Happy',
     'mood.calm': 'Calm',
     'mood.excited': 'Excited',
     'mood.angry': 'Angry',
     'mood.sad': 'Sad',
+    'mood.stress': 'Stress',
   };
 }

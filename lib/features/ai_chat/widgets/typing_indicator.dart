@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lumica_app/core/config/theme.dart';
@@ -19,7 +20,7 @@ class _TypingIndicatorState extends State<TypingIndicator>
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 1200),
+      duration: const Duration(milliseconds: 1500),
       vsync: this,
     )..repeat();
   }
@@ -47,7 +48,7 @@ class _TypingIndicatorState extends State<TypingIndicator>
           Container(
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
             decoration: BoxDecoration(
-              color: AppColors.stoneGray.withValues(alpha: 0.3),
+              color: AppColors.paleSalmon.withValues(alpha: 0.6),
               borderRadius: BorderRadius.circular(16.r),
             ),
             child: Row(
@@ -56,20 +57,34 @@ class _TypingIndicatorState extends State<TypingIndicator>
                 return AnimatedBuilder(
                   animation: _controller,
                   builder: (context, child) {
-                    final delay = index * 0.2;
-                    final value = (_controller.value - delay) % 1.0;
-                    final opacity = value < 0.5 ? (value * 2) : (2 - value * 2);
+                    final delay = index * 0.15;
+                    final value = (_controller.value + delay) % 1.0;
+                    // Bouncy sine wave animation
+                    final bounce = sin(value * 2 * pi) * 4;
+                    final scale = 0.8 + (sin(value * 2 * pi) + 1) * 0.2;
 
                     return Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 2.w),
-                      child: Opacity(
-                        opacity: opacity.clamp(0.3, 1.0),
-                        child: Container(
-                          width: 6.w,
-                          height: 6.w,
-                          decoration: BoxDecoration(
-                            color: AppColors.darkSlateGray,
-                            shape: BoxShape.circle,
+                      padding: EdgeInsets.symmetric(horizontal: 3.w),
+                      child: Transform.translate(
+                        offset: Offset(0, -bounce),
+                        child: Transform.scale(
+                          scale: scale,
+                          child: Container(
+                            width: 8.w,
+                            height: 8.w,
+                            decoration: BoxDecoration(
+                              color: AppColors.vividOrange,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.vividOrange.withValues(
+                                    alpha: 0.4,
+                                  ),
+                                  blurRadius: 4,
+                                  offset: Offset(0, bounce.abs() / 2),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),

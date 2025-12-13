@@ -4,12 +4,11 @@ import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lumica_app/core/config/text_theme.dart';
 import 'package:lumica_app/core/config/theme.dart';
-import 'package:lumica_app/core/utils/loading_util.dart';
 import 'package:lumica_app/core/widgets/app_snackbar.dart';
 import 'package:lumica_app/domain/repositories/profile_repository.dart';
 import 'package:lumica_app/features/profile/bindings/personal_info_binding.dart';
 import 'package:lumica_app/features/profile/pages/personal_info_page.dart';
-import 'package:lumica_app/routes/app_routes.dart';
+import 'package:lumica_app/features/auth/controllers/auth_controller.dart';
 import 'package:lumica_app/storage/storage_service.dart';
 
 class ProfileController extends GetxController {
@@ -295,19 +294,8 @@ class ProfileController extends GetxController {
           TextButton(
             onPressed: () async {
               Get.back();
-              LoadingUtil.show(message: 'Logging out...');
-              try {
-                await Supabase.instance.client.auth.signOut();
-                LoadingUtil.hide();
-                AppSnackbar.success('You have been logged out');
-                Get.offAllNamed(AppRoutes.signin);
-              } catch (e) {
-                LoadingUtil.hide();
-                AppSnackbar.error(
-                  'Failed to log out. Please try again.',
-                  title: 'Error',
-                );
-              }
+              final authController = Get.find<AuthController>();
+              await authController.signOut();
             },
             child: const Text('Log Out'),
           ),

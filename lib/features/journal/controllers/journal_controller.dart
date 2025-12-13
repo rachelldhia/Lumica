@@ -4,10 +4,13 @@ import 'package:get/get.dart';
 import 'package:lumica_app/core/config/text_theme.dart';
 import 'package:lumica_app/core/config/theme.dart';
 import 'package:lumica_app/core/utils/loading_util.dart';
+import 'package:lumica_app/core/utils/validators.dart';
 import 'package:lumica_app/core/widgets/app_snackbar.dart';
 import 'package:lumica_app/domain/entities/note.dart';
 import 'package:lumica_app/domain/entities/note_category.dart';
 import 'package:lumica_app/domain/repositories/note_repository.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
 
 class JournalController extends GetxController {
   final NoteRepository _noteRepository;
@@ -57,7 +60,7 @@ class JournalController extends GetxController {
       debugPrint('❌ Unexpected crash in loadNotes: $e');
       debugPrint('Stack trace: ${StackTrace.current}');
       AppSnackbar.error('Failed to load notes', title: 'Error');
-      notes.clear();
+      // Do not clear notes on error to preserve potentially cached/existing data
     } finally {
       debugPrint('🏁 loadNotes finished.');
       isLoading.value = false;
@@ -272,11 +275,18 @@ class JournalController extends GetxController {
     Note? existingNote, // Optional: if we have the original note object
     bool showSnackbar = true,
   }) async {
-    // Basic validation
-    if (title.isEmpty &&
-        (contentJson.isEmpty || contentJson == '[{"insert":"\\n"}]')) {
-      // Maybe allow empty notes? Or return false?
-      // For now let's proceed but maybe defaulting title is enough
+    // Validate input
+    final validation = NoteValidator.validateNote(
+      title: title.isEmpty ? 'Untitled' : title,
+      content: contentJson,
+    );
+
+    if (!validation.isValid) {
+      AppSnackbar.error(
+        validation.message ?? 'Invalid note data',
+        title: 'Validation Error',
+      );
+      return false;
     }
 
     final now = DateTime.now();
@@ -293,8 +303,11 @@ class JournalController extends GetxController {
     } else {
       // Create
       final newNote = Note(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        userId: '00000000-0000-0000-0000-000000000000', // Get from Auth Service
+        id: const Uuid().v4(), // Use UUID for consistency
+        // Get generic user ID if not logged in (should usually not happen in this app structure)
+        userId:
+            Supabase.instance.client.auth.currentUser?.id ??
+            '00000000-0000-0000-0000-000000000000',
         title: title.isEmpty ? 'Untitled' : title,
         content: contentJson,
         category: category,

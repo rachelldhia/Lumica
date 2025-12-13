@@ -179,13 +179,46 @@ class PersonalInfoPage extends GetView<PersonalInfoController> {
                     elevation: 0,
                   ),
                   child: controller.isLoading.value
-                      ? SizedBox(
-                          width: 20.w,
-                          height: 20.h,
-                          child: const CircularProgressIndicator(
-                            color: Colors.white,
-                            strokeWidth: 2,
-                          ),
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            ...List.generate(3, (index) {
+                              return TweenAnimationBuilder<double>(
+                                key: ValueKey('dot_$index'),
+                                duration: const Duration(milliseconds: 1200),
+                                tween: Tween(begin: 0.0, end: 1.0),
+                                curve: Curves.easeInOut,
+                                builder: (context, value, child) {
+                                  final delay = index * 0.2;
+                                  final progress = (value - delay).clamp(
+                                    0.0,
+                                    1.0,
+                                  );
+                                  final opacity =
+                                      (1 - (progress - 0.5).abs() * 2).clamp(
+                                        0.3,
+                                        1.0,
+                                      );
+
+                                  return Padding(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 3.w,
+                                    ),
+                                    child: Container(
+                                      width: 6.w,
+                                      height: 6.h,
+                                      decoration: BoxDecoration(
+                                        color: AppColors.whiteColor.withValues(
+                                          alpha: opacity,
+                                        ),
+                                        shape: BoxShape.circle,
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            }),
+                          ],
                         )
                       : Row(
                           mainAxisAlignment: MainAxisAlignment.center,

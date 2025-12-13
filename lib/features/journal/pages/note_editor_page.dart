@@ -173,8 +173,6 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
   }
 
   void _showDeleteConfirmation() {
-    // Delegate entirely to controller
-    // This handles Dialog -> Loading -> Delete -> Navigation safely
     if (widget.noteId != null) {
       controller.promptDeleteNote(
         widget.noteId!,
@@ -268,16 +266,16 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
           hintText: 'Title',
           hintStyle: AppTextTheme.textTheme.headlineSmall?.copyWith(
             color: AppColors.darkSlateGray.withValues(alpha: 0.4),
-            fontSize: 26.sp,
-            fontWeight: FontWeight.w600,
+            fontSize: 32.sp,
+            fontWeight: FontWeight.w700,
           ),
           border: InputBorder.none,
           contentPadding: EdgeInsets.zero,
         ),
         style: AppTextTheme.textTheme.headlineSmall?.copyWith(
           color: AppColors.darkBrown,
-          fontSize: 26.sp,
-          fontWeight: FontWeight.w600,
+          fontSize: 32.sp,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );
@@ -286,7 +284,7 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
   Widget _buildToolbar() {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.darkBrown,
+        color: Colors.black,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20.r)),
       ),
       child: SafeArea(
@@ -348,22 +346,26 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
   }) {
     return Obx(() {
       final active = isActive.value;
-      return GestureDetector(
-        onTap: () => _toggleFormat(attribute, isActive),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 150),
-          padding: EdgeInsets.all(8.w),
-          constraints: BoxConstraints(minWidth: 40.w, minHeight: 40.h),
-          decoration: BoxDecoration(
-            color: active
-                ? AppColors.vividOrange.withValues(alpha: 0.3)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(8.r),
-          ),
-          child: Icon(
-            icon,
-            color: active ? AppColors.vividOrange : AppColors.whiteColor,
-            size: 20.sp,
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () => _toggleFormat(attribute, isActive),
+          borderRadius: BorderRadius.circular(8.r),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 150),
+            padding: EdgeInsets.all(8.w),
+            constraints: BoxConstraints(minWidth: 40.w, minHeight: 40.h),
+            decoration: BoxDecoration(
+              color: active
+                  ? AppColors.vividOrange.withValues(alpha: 0.3)
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            child: Icon(
+              icon,
+              color: active ? AppColors.vividOrange : AppColors.whiteColor,
+              size: 20.sp,
+            ),
           ),
         ),
       );
@@ -371,16 +373,24 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
   }
 
   Widget _buildEditor() {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
-      child: QuillEditor.basic(
-        controller: quillController,
-        config: QuillEditorConfig(
-          padding: EdgeInsets.zero,
-          scrollable: true,
-          autoFocus: false,
-          placeholder: 'Start writing...',
-          expands: false,
+    return TweenAnimationBuilder<double>(
+      duration: const Duration(milliseconds: 300),
+      tween: Tween(begin: 0.0, end: 1.0),
+      curve: Curves.easeOut,
+      builder: (context, value, child) {
+        return Opacity(opacity: value, child: child);
+      },
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+        child: QuillEditor.basic(
+          controller: quillController,
+          config: QuillEditorConfig(
+            padding: EdgeInsets.zero,
+            scrollable: true,
+            autoFocus: false,
+            placeholder: 'Start writing...',
+            expands: false,
+          ),
         ),
       ),
     );
