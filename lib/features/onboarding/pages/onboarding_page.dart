@@ -53,7 +53,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             ),
                             SizedBox(height: 10.h),
                             Text(
-                              'Welcome to the ultimate UI Kit!',
+                              'Welcome to Lumica!',
                               style: AppTextTheme.textTheme.displaySmall
                                   ?.copyWith(fontWeight: FontWeight.bold),
                               textAlign: TextAlign.center,
