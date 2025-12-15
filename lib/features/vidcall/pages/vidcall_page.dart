@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:get/get.dart';
 import 'package:lumica_app/core/config/text_theme.dart';
 import 'package:lumica_app/core/config/theme.dart';
-
+import 'package:lumica_app/core/widgets/app_states.dart';
 import 'package:lumica_app/core/widgets/profile_avatar.dart';
+import 'package:lumica_app/core/widgets/replayable_animated_list.dart';
 import 'package:lumica_app/features/vidcall/controllers/vidcall_controller.dart';
 
 class VidcallPage extends GetView<VidcallController> {
@@ -15,49 +18,77 @@ class VidcallPage extends GetView<VidcallController> {
     return Scaffold(
       backgroundColor: AppColors.whiteColor,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(),
-                SizedBox(height: 24.h),
-                _buildUpcomingSessionCard(),
-                SizedBox(height: 24.h),
-                _buildSessionsHeader(),
-                SizedBox(height: 16.h),
-                _buildSessionCard(
-                  name: 'Sahana V',
-                  credentials: 'Msc in Clinical Psychology',
-                  date: '31st March \'22',
-                  time: '7:30 PM - 8:30 PM',
-                  primaryButtonText: 'Reschedule',
-                  secondaryButtonText: 'Join Now',
-                  isRebook: false,
+        child: AppRefreshIndicator(
+          onRefresh: () async {
+            // TODO: Implement actual refresh when backend is ready
+            await Future.delayed(const Duration(milliseconds: 500));
+          },
+          // Use ReplayableAnimatedList to replay animations on tab switch
+          child: ReplayableAnimatedList(
+            animationKey: controller.animationKey,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: AnimationConfiguration.toStaggeredList(
+                    duration: const Duration(milliseconds: 450),
+                    childAnimationBuilder: (widget) => SlideAnimation(
+                      verticalOffset: 40.0,
+                      curve: Curves.easeOutCubic,
+                      child: FadeInAnimation(
+                        child: ScaleAnimation(
+                          scale: 0.95,
+                          curve: Curves.easeOutBack,
+                          child: widget,
+                        ),
+                      ),
+                    ),
+                    children: [
+                      _buildHeader(),
+                      SizedBox(height: 24.h),
+                      _buildUpcomingSessionCard(),
+                      SizedBox(height: 24.h),
+                      _buildSessionsHeader(),
+                      SizedBox(height: 16.h),
+                      _buildSessionCard(
+                        name: 'Sahana V',
+                        credentials: 'Msc in Clinical Psychology',
+                        date: '31st March \'22',
+                        time: '7:30 PM - 8:30 PM',
+                        primaryButtonText: 'vidcall.reschedule'.tr,
+                        secondaryButtonText: 'vidcall.joinNow'.tr,
+                        isRebook: false,
+                        index: 0,
+                      ),
+                      SizedBox(height: 12.h),
+                      _buildSessionCard(
+                        name: 'Sahana V',
+                        credentials: 'Msc in Clinical Psychology',
+                        date: '31st March \'22',
+                        time: '7:30 PM - 8:30 PM',
+                        primaryButtonText: 'vidcall.rebook'.tr,
+                        secondaryButtonText: 'common.viewProfile'.tr,
+                        isRebook: true,
+                        index: 1,
+                      ),
+                      SizedBox(height: 12.h),
+                      _buildSessionCard(
+                        name: 'Sahana V',
+                        credentials: 'Msc in Clinical Psychology',
+                        date: '31st March \'22',
+                        time: '7:30 PM - 8:30 PM',
+                        primaryButtonText: 'vidcall.rebook'.tr,
+                        secondaryButtonText: 'common.viewProfile'.tr,
+                        isRebook: true,
+                        index: 2,
+                      ),
+                      SizedBox(height: 20.h),
+                    ],
+                  ),
                 ),
-                SizedBox(height: 12.h),
-                _buildSessionCard(
-                  name: 'Sahana V',
-                  credentials: 'Msc in Clinical Psychology',
-                  date: '31st March \'22',
-                  time: '7:30 PM - 8:30 PM',
-                  primaryButtonText: 'Re-book',
-                  secondaryButtonText: 'View Profile',
-                  isRebook: true,
-                ),
-                SizedBox(height: 12.h),
-                _buildSessionCard(
-                  name: 'Sahana V',
-                  credentials: 'Msc in Clinical Psychology',
-                  date: '31st March \'22',
-                  time: '7:30 PM - 8:30 PM',
-                  primaryButtonText: 'Re-book',
-                  secondaryButtonText: 'View Profile',
-                  isRebook: true,
-                ),
-                SizedBox(height: 20.h),
-              ],
+              ),
             ),
           ),
         ),
@@ -77,13 +108,69 @@ class VidcallPage extends GetView<VidcallController> {
       padding: EdgeInsets.all(20.w),
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppColors.paleSalmon,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.paleSalmon,
+            AppColors.paleSalmon.withValues(alpha: 0.8),
+          ],
+        ),
         borderRadius: BorderRadius.circular(16.r),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.paleSalmon.withValues(alpha: 0.4),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Upcoming Session', style: AppTextTheme.textTheme.headlineLarge),
+          Row(
+            children: [
+              Text(
+                'vidcall.upcomingSession'.tr,
+                style: AppTextTheme.textTheme.headlineLarge,
+              ),
+              const Spacer(),
+              // Pulsing live indicator
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+                decoration: BoxDecoration(
+                  color: AppColors.limeGreen.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                          width: 8.w,
+                          height: 8.w,
+                          decoration: BoxDecoration(
+                            color: AppColors.limeGreen,
+                            shape: BoxShape.circle,
+                          ),
+                        )
+                        .animate(onPlay: (c) => c.repeat(reverse: true))
+                        .scale(
+                          begin: const Offset(1, 1),
+                          end: const Offset(1.3, 1.3),
+                          duration: 800.ms,
+                        ),
+                    SizedBox(width: 4.w),
+                    Text(
+                      'vidcall.live'.tr,
+                      style: AppTextTheme.textTheme.labelSmall?.copyWith(
+                        color: AppColors.limeGreen,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
           SizedBox(height: 8.h),
           Text(
             'Sahana V, Msc in Clinical Psychology',
@@ -93,17 +180,43 @@ class VidcallPage extends GetView<VidcallController> {
           ),
           SizedBox(height: 8.h),
           Text('7:30 PM - 8:30 PM', style: AppTextTheme.textTheme.titleMedium),
-          SizedBox(height: 12.h),
-          Row(
-            children: [
-              Text('Join Now', style: AppTextTheme.textTheme.labelLarge),
-              SizedBox(width: 6.w),
-              Icon(
-                Icons.play_circle,
+          SizedBox(height: 16.h),
+          // Enhanced Join Now button
+          GestureDetector(
+            onTap: () {
+              // TODO: Implement join functionality
+            },
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+              decoration: BoxDecoration(
                 color: AppColors.vividOrange,
-                size: 20.sp,
+                borderRadius: BorderRadius.circular(24.r),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.vividOrange.withValues(alpha: 0.4),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-            ],
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'vidcall.joinNow'.tr,
+                    style: AppTextTheme.textTheme.labelLarge?.copyWith(
+                      color: AppColors.whiteColor,
+                    ),
+                  ),
+                  SizedBox(width: 6.w),
+                  Icon(
+                    Icons.play_circle,
+                    color: AppColors.whiteColor,
+                    size: 20.sp,
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
@@ -116,7 +229,10 @@ class VidcallPage extends GetView<VidcallController> {
       children: [
         Row(
           children: [
-            Text('All Sessions', style: AppTextTheme.textTheme.headlineSmall),
+            Text(
+              'vidcall.allSessions'.tr,
+              style: AppTextTheme.textTheme.headlineSmall,
+            ),
             SizedBox(width: 6.w),
             Icon(
               Icons.keyboard_arrow_down,
@@ -125,7 +241,14 @@ class VidcallPage extends GetView<VidcallController> {
             ),
           ],
         ),
-        Icon(Icons.sort, color: AppColors.stoneGray, size: 24.sp),
+        Container(
+          padding: EdgeInsets.all(8.w),
+          decoration: BoxDecoration(
+            color: AppColors.stoneGray.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+          child: Icon(Icons.sort, color: AppColors.darkSlateGray, size: 20.sp),
+        ),
       ],
     );
   }
@@ -138,15 +261,22 @@ class VidcallPage extends GetView<VidcallController> {
     required String primaryButtonText,
     required String secondaryButtonText,
     required bool isRebook,
+    required int index,
   }) {
     return Container(
       padding: EdgeInsets.all(16.w),
       width: double.infinity,
       decoration: BoxDecoration(
         color: isRebook
-            ? AppColors.stoneGray.withValues(alpha: 0.15)
-            : AppColors.paleSalmon,
+            ? AppColors.stoneGray.withValues(alpha: 0.1)
+            : AppColors.paleSalmon.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(
+          color: isRebook
+              ? AppColors.stoneGray.withValues(alpha: 0.2)
+              : AppColors.paleSalmon.withValues(alpha: 0.5),
+          width: 1,
+        ),
       ),
       child: Column(
         children: [
@@ -198,7 +328,7 @@ class VidcallPage extends GetView<VidcallController> {
                     elevation: 0,
                     padding: EdgeInsets.symmetric(vertical: 12.h),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8.r),
+                      borderRadius: BorderRadius.circular(12.r),
                     ),
                   ),
                   child: Text(
@@ -216,10 +346,18 @@ class VidcallPage extends GetView<VidcallController> {
                   style: TextButton.styleFrom(
                     foregroundColor: AppColors.vividOrange,
                     padding: EdgeInsets.symmetric(vertical: 12.h),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                      side: BorderSide(
+                        color: AppColors.vividOrange.withValues(alpha: 0.3),
+                      ),
+                    ),
                   ),
                   child: Text(
                     secondaryButtonText,
-                    style: AppTextTheme.textTheme.labelMedium,
+                    style: AppTextTheme.textTheme.labelMedium?.copyWith(
+                      color: AppColors.vividOrange,
+                    ),
                   ),
                 ),
               ),

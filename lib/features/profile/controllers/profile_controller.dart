@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lumica_app/core/config/text_theme.dart';
 import 'package:lumica_app/core/config/theme.dart';
-import 'package:lumica_app/core/widgets/app_snackbar.dart';
 import 'package:lumica_app/domain/repositories/profile_repository.dart';
 import 'package:lumica_app/features/profile/bindings/personal_info_binding.dart';
 import 'package:lumica_app/features/profile/pages/personal_info_page.dart';
@@ -24,6 +23,9 @@ class ProfileController extends GetxController {
   // Settings state
   final RxBool notificationsEnabled = true.obs;
   final RxString selectedLanguage = 'English (EN)'.obs;
+
+  // Animation key for forcing animation replay on navigation
+  final RxInt animationKey = 0.obs;
 
   @override
   void onInit() {
@@ -60,7 +62,8 @@ class ProfileController extends GetxController {
               profile.username ??
               _formatUsername(user.email?.split('@').first ?? 'User');
           userAvatarUrl.value = profile.avatarUrl ?? '';
-          userLocation.value = 'Tokyo, Japan'; // Placeholder until added to DB
+          userLocation.value =
+              profile.location ?? 'Tokyo, Japan'; // Load from DB or fallback
         },
       );
     }
@@ -125,12 +128,10 @@ class ProfileController extends GetxController {
     }
   }
 
-  // Navigate to notifications settings
   void navigateToNotifications() {
-    AppSnackbar.info(
-      'Navigate to notifications settings',
-      title: 'Notifications',
-    );
+    debugPrint('Navigate to notifications (Not implemented yet)');
+    // TODO: Implement notifications page
+    // Get.toNamed(AppRoutes.notifications);
   }
 
   // Navigate to personal information

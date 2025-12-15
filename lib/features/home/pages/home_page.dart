@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:lumica_app/core/config/text_theme.dart';
 import 'package:lumica_app/core/config/theme.dart';
 import 'package:lumica_app/core/constants/app_images.dart';
+import 'package:lumica_app/core/widgets/app_states.dart';
 import 'package:lumica_app/core/widgets/profile_avatar.dart';
+import 'package:lumica_app/core/widgets/replayable_animated_list.dart';
 import 'package:lumica_app/features/home/controllers/home_controller.dart';
 import 'package:lumica_app/features/home/widgets/action_button.dart';
 import 'package:lumica_app/features/home/widgets/mood_button.dart';
-import 'package:lumica_app/features/home/widgets/plan_expired_card.dart';
+import 'package:lumica_app/features/home/widgets/mood_chart_card.dart';
 import 'package:lumica_app/features/home/widgets/session_card.dart';
 import 'package:lumica_app/routes/app_routes.dart';
 
@@ -20,35 +23,112 @@ class HomePage extends GetView<HomeController> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(),
-                SizedBox(height: 20.h),
-                _buildGreeting(),
-                SizedBox(height: 20.h),
-                Text(
-                  'home.howAreYou'.tr,
-                  style: AppTextTheme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w500,
-                    fontFamily: 'Poppins',
-                    color: AppColors.darkSlateGray,
-                  ),
+        child: AppRefreshIndicator(
+          onRefresh: () => controller.refreshData(),
+          // Wrap with ReplayableAnimateWrapper to replay animations on tab switch
+          child: ReplayableAnimateWrapper(
+            animationKey: controller.animationKey,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Avatar with pop effect
+                    _buildHeader()
+                        .animate()
+                        .fadeIn(duration: 300.ms, curve: Curves.easeOut)
+                        .scale(
+                          begin: const Offset(0.8, 0.8),
+                          end: const Offset(1, 1),
+                          curve: Curves.elasticOut,
+                          duration: 600.ms,
+                        ),
+                    SizedBox(height: 20.h),
+                    // Greeting with slide and blur
+                    _buildGreeting()
+                        .animate()
+                        .fadeIn(duration: 400.ms, delay: 80.ms)
+                        .slideX(
+                          begin: -0.15,
+                          end: 0,
+                          curve: Curves.easeOutCubic,
+                        )
+                        .blur(begin: const Offset(4, 0), end: Offset.zero),
+                    SizedBox(height: 20.h),
+                    // Question text with subtle animation
+                    Text(
+                          'home.howAreYou'.tr,
+                          style: AppTextTheme.textTheme.titleMedium?.copyWith(
+                            fontWeight: FontWeight.w500,
+                            fontFamily: 'Poppins',
+                            color: AppColors.darkSlateGray,
+                          ),
+                        )
+                        .animate()
+                        .fadeIn(duration: 350.ms, delay: 160.ms)
+                        .slideY(begin: 0.2, end: 0, curve: Curves.easeOutCubic),
+                    SizedBox(height: 16.h),
+                    // Mood selector with shimmer effect
+                    _buildMoodSelector()
+                        .animate()
+                        .fadeIn(duration: 400.ms, delay: 220.ms)
+                        .slideY(begin: 0.15, end: 0, curve: Curves.easeOutCubic)
+                        .shimmer(
+                          delay: 500.ms,
+                          duration: 1200.ms,
+                          color: AppColors.vividOrange.withValues(alpha: 0.15),
+                        ),
+                    SizedBox(height: 20.h),
+                    // Session card with bounce scale
+                    const SessionCard()
+                        .animate()
+                        .fadeIn(duration: 450.ms, delay: 300.ms)
+                        .scale(
+                          begin: const Offset(0.92, 0.92),
+                          end: const Offset(1, 1),
+                          curve: Curves.easeOutBack,
+                        )
+                        .blur(begin: const Offset(2, 2), end: Offset.zero),
+                    SizedBox(height: 18.h),
+                    // Action buttons with staggered pop
+                    _buildActionButtons()
+                        .animate()
+                        .fadeIn(duration: 400.ms, delay: 380.ms)
+                        .slideY(begin: 0.12, end: 0, curve: Curves.easeOutCubic)
+                        .scale(
+                          begin: const Offset(0.95, 0.95),
+                          end: const Offset(1, 1),
+                        ),
+                    SizedBox(height: 20.h),
+                    // Quote section with elegant slide
+                    _buildQuoteSection()
+                        .animate()
+                        .fadeIn(duration: 400.ms, delay: 460.ms)
+                        .slideX(
+                          begin: 0.08,
+                          end: 0,
+                          curve: Curves.easeOutCubic,
+                        ),
+                    SizedBox(height: 20.h),
+                    // Mood Chart with elegant entrance
+                    Obx(
+                          () => MoodChartCard(
+                            moodEntries: controller.moodEntries,
+                            isLoading: controller.isLoadingMoods.value,
+                          ),
+                        )
+                        .animate()
+                        .fadeIn(duration: 400.ms, delay: 540.ms)
+                        .slideY(
+                          begin: 0.15,
+                          end: 0,
+                          curve: Curves.easeOutCubic,
+                        ),
+                  ],
                 ),
-                SizedBox(height: 16.h),
-                _buildMoodSelector(),
-                SizedBox(height: 20.h),
-                const SessionCard(),
-                SizedBox(height: 18.h),
-                _buildActionButtons(),
-                SizedBox(height: 20.h),
-                _buildQuoteSection(),
-                SizedBox(height: 20.h),
-                const PlanExpiredCard(),
-              ],
+              ),
             ),
           ),
         ),
@@ -146,22 +226,47 @@ class HomePage extends GetView<HomeController> {
   }
 
   Widget _buildActionButtons() {
-    return Row(
+    return Column(
       children: [
+        // Wellness Toolkit Button (Full width)
         ActionButton(
-          icon: Icons.book_outlined,
-          label: 'journal.journal'.tr,
-          onTap: () {
-            Get.toNamed('/dashboard${AppRoutes.journal}');
-          },
-        ),
-        SizedBox(width: 12.w),
-        ActionButton(
-          icon: Icons.insert_chart_outlined,
-          label: 'home.moodTrack'.tr,
-          onTap: () {
-            Get.toNamed('/dashboard${AppRoutes.moodTrack}');
-          },
+              icon: Icons.spa_outlined,
+              label: 'Wellness Toolkit',
+              color: AppColors.oceanBlue,
+              onTap: () async {
+                await Get.toNamed(
+                  '${AppRoutes.dashboard}${AppRoutes.wellness}',
+                );
+                controller.replayAnimations();
+              },
+            )
+            .animate()
+            .fadeIn(duration: 400.ms, delay: 350.ms)
+            .slideY(begin: 0.1, end: 0),
+        SizedBox(height: 12.h),
+        // Journal & Mood Track Row
+        Row(
+          children: [
+            Expanded(
+              child: ActionButton(
+                icon: Icons.book_outlined,
+                label: 'journal.journal'.tr,
+                onTap: () {
+                  Get.toNamed('/dashboard${AppRoutes.journal}');
+                },
+              ).animate().fadeIn(delay: 500.ms).slideX(begin: -0.1, end: 0),
+            ),
+            SizedBox(width: 12.w),
+            Expanded(
+              child: ActionButton(
+                icon: Icons.insert_chart_outlined,
+                label: 'home.moodTrack'.tr,
+                onTap: () {
+                  Get.toNamed('/dashboard${AppRoutes.moodTrack}');
+                },
+              ).animate().fadeIn(delay: 550.ms).slideX(begin: 0.1, end: 0),
+            ),
+          ],
         ),
       ],
     );
@@ -169,33 +274,57 @@ class HomePage extends GetView<HomeController> {
 
   Widget _buildQuoteSection() {
     return Obx(
-      () => Container(
-        padding: EdgeInsets.all(16.w),
-        decoration: BoxDecoration(
-          color: AppColors.stoneGray.withValues(alpha: 0.2),
-          borderRadius: BorderRadius.circular(12.r),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                controller.currentQuote.value,
-                style: AppTextTheme.textTheme.bodyMedium?.copyWith(
-                  color: AppColors.darkSlateGray,
-                  fontStyle: FontStyle.italic,
-                  fontFamily: 'Epilogue',
+      () => AnimatedSwitcher(
+        duration: AppAnimations.medium,
+        transitionBuilder: (child, animation) {
+          return FadeTransition(
+            opacity: animation,
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0, 0.1),
+                end: Offset.zero,
+              ).animate(animation),
+              child: child,
+            ),
+          );
+        },
+        child: Container(
+          key: ValueKey(controller.currentQuote.value),
+          padding: EdgeInsets.all(16.w),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                AppColors.stoneGray.withValues(alpha: 0.15),
+                AppColors.stoneGray.withValues(alpha: 0.08),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(12.r),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  controller.currentQuote.value,
+                  style: AppTextTheme.textTheme.bodyMedium?.copyWith(
+                    color: AppColors.darkSlateGray,
+                    fontStyle: FontStyle.italic,
+                    fontFamily: 'Epilogue',
+                    height: 1.5,
+                  ),
                 ),
               ),
-            ),
-            SizedBox(width: 12.w),
-            Image.asset(
-              AppImages.imageQuoteLeft,
-              width: 32.w,
-              height: 32.h,
-              fit: BoxFit.contain,
-              color: AppColors.darkSlateGray.withValues(alpha: 0.3),
-            ),
-          ],
+              SizedBox(width: 12.w),
+              Image.asset(
+                AppImages.imageQuoteLeft,
+                width: 32.w,
+                height: 32.h,
+                fit: BoxFit.contain,
+                color: AppColors.vividOrange.withValues(alpha: 0.5),
+              ),
+            ],
+          ),
         ),
       ),
     );

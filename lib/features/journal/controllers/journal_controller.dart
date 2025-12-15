@@ -6,6 +6,7 @@ import 'package:lumica_app/core/config/theme.dart';
 import 'package:lumica_app/core/utils/loading_util.dart';
 import 'package:lumica_app/core/utils/validators.dart';
 import 'package:lumica_app/core/widgets/app_snackbar.dart';
+import 'package:lumica_app/data/services/gemini_service.dart';
 import 'package:lumica_app/domain/entities/note.dart';
 import 'package:lumica_app/domain/entities/note_category.dart';
 import 'package:lumica_app/domain/repositories/note_repository.dart';
@@ -14,9 +15,13 @@ import 'package:uuid/uuid.dart';
 
 class JournalController extends GetxController {
   final NoteRepository _noteRepository;
+  final GeminiService _geminiService;
 
-  JournalController({NoteRepository? noteRepository})
-    : _noteRepository = noteRepository ?? Get.find<NoteRepository>();
+  JournalController({
+    NoteRepository? noteRepository,
+    GeminiService? geminiService,
+  }) : _noteRepository = noteRepository ?? Get.find<NoteRepository>(),
+       _geminiService = geminiService ?? GeminiService();
 
   // Observable list of all notes
   final RxList<Note> notes = <Note>[].obs;
@@ -29,6 +34,9 @@ class JournalController extends GetxController {
 
   // Loading state - used for skeleton UI while LoadingUtil shows dialog
   final RxBool isLoading = false.obs;
+
+  // Animation key for forcing animation replay on navigation
+  final RxInt animationKey = 0.obs;
 
   @override
   void onInit() {
@@ -48,7 +56,7 @@ class JournalController extends GetxController {
       result.fold(
         (failure) {
           debugPrint('❌ Failed to load notes: ${failure.message}');
-          AppSnackbar.error(failure.message, title: 'Error');
+          AppSnackbar.error(failure.message, title: 'common.error'.tr);
           notes.clear();
         },
         (data) {
@@ -59,7 +67,7 @@ class JournalController extends GetxController {
     } catch (e) {
       debugPrint('❌ Unexpected crash in loadNotes: $e');
       debugPrint('Stack trace: ${StackTrace.current}');
-      AppSnackbar.error('Failed to load notes', title: 'Error');
+      AppSnackbar.error('journal.loadFailed'.tr, title: 'common.error'.tr);
       // Do not clear notes on error to preserve potentially cached/existing data
     } finally {
       debugPrint('🏁 loadNotes finished.');
@@ -126,7 +134,7 @@ class JournalController extends GetxController {
       final result = await _noteRepository.createNote(note);
       return result.fold(
         (failure) {
-          AppSnackbar.error(failure.message, title: 'Error');
+          AppSnackbar.error(failure.message, title: 'common.error'.tr);
           return false;
         },
         (newNote) {
@@ -135,13 +143,13 @@ class JournalController extends GetxController {
           setSelectedDate(newNote.createdAt);
 
           if (showSnackbar) {
-            AppSnackbar.success('Note created successfully');
+            AppSnackbar.success('journal.noteCreated'.tr);
           }
           return true;
         },
       );
     } catch (e) {
-      AppSnackbar.error('Failed to create note', title: 'Error');
+      AppSnackbar.error('journal.createFailed'.tr, title: 'common.error'.tr);
       return false;
     } finally {
       LoadingUtil.hide();
@@ -155,7 +163,7 @@ class JournalController extends GetxController {
       final result = await _noteRepository.updateNote(updatedNote);
       return result.fold(
         (failure) {
-          AppSnackbar.error(failure.message, title: 'Error');
+          AppSnackbar.error(failure.message, title: 'common.error'.tr);
           return false;
         },
         (note) {
@@ -164,13 +172,13 @@ class JournalController extends GetxController {
             notes[index] = note;
           }
           if (showSnackbar) {
-            AppSnackbar.success('Note updated successfully');
+            AppSnackbar.success('journal.noteUpdated'.tr);
           }
           return true;
         },
       );
     } catch (e) {
-      AppSnackbar.error('Failed to update note', title: 'Error');
+      AppSnackbar.error('journal.updateFailed'.tr, title: 'common.error'.tr);
       return false;
     } finally {
       LoadingUtil.hide();
@@ -191,7 +199,7 @@ class JournalController extends GetxController {
           borderRadius: BorderRadius.circular(16.r),
         ),
         title: Text(
-          'Delete Note?',
+          'journal.deleteConfirmTitle'.tr,
           style: AppTextTheme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w600,
             color: AppColors.darkBrown,
@@ -207,7 +215,7 @@ class JournalController extends GetxController {
           TextButton(
             onPressed: () => Get.back(result: false),
             child: Text(
-              'Cancel',
+              'common.cancel'.tr,
               style: AppTextTheme.textTheme.titleSmall?.copyWith(
                 color: AppColors.darkBrown,
                 fontWeight: FontWeight.w500,
@@ -217,7 +225,7 @@ class JournalController extends GetxController {
           TextButton(
             onPressed: () => Get.back(result: true),
             child: Text(
-              'Delete',
+              'common.delete'.tr,
               style: AppTextTheme.textTheme.titleSmall?.copyWith(
                 color: Colors.red,
                 fontWeight: FontWeight.w600,
@@ -240,7 +248,7 @@ class JournalController extends GetxController {
       await result.fold(
         (failure) async {
           LoadingUtil.hide();
-          AppSnackbar.error(failure.message, title: 'Error');
+          AppSnackbar.error(failure.message, title: 'common.error'.tr);
         },
         (_) async {
           // Success!
@@ -253,15 +261,15 @@ class JournalController extends GetxController {
             // Safety delay just to ensure Dialog is 100% gone physically
             await Future.delayed(const Duration(milliseconds: 100));
             Get.back(); // Close Notice Editor
-            AppSnackbar.success('Note deleted successfully');
+            AppSnackbar.success('journal.noteDeleted'.tr);
           } else {
-            AppSnackbar.success('Note deleted successfully');
+            AppSnackbar.success('journal.noteDeleted'.tr);
           }
         },
       );
     } catch (e) {
       LoadingUtil.hide();
-      AppSnackbar.error('Failed to delete note: $e', title: 'Error');
+      AppSnackbar.error('journal.deleteFailed'.tr, title: 'common.error'.tr);
     }
   }
 
@@ -353,7 +361,7 @@ class JournalController extends GetxController {
       // Show snackbar AFTER navigation to avoid overlay conflict
       // Short delay to let the route transition happen
       Future.delayed(const Duration(milliseconds: 350), () {
-        AppSnackbar.success('Note saved successfully');
+        AppSnackbar.success('journal.noteSaved'.tr);
       });
     }
   }
@@ -377,5 +385,18 @@ class JournalController extends GetxController {
   // Set selected date
   void setSelectedDate(DateTime date) {
     selectedDate.value = date;
+  }
+
+  // Generate AI Prompt for Journaling
+  Future<String> generateAiPrompt() async {
+    try {
+      LoadingUtil.show(message: 'Consulting Lumica...');
+      final prompt = await _geminiService.generateJournalPrompt();
+      return prompt;
+    } catch (e) {
+      return "What are you grateful for right now?";
+    } finally {
+      LoadingUtil.hide();
+    }
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:lumica_app/core/widgets/app_snackbar.dart';
 import 'package:lumica_app/domain/entities/mood_entry.dart';
@@ -30,6 +31,13 @@ class HomeController extends GetxController {
   // Navigation index for bottom nav bar
   var currentNavIndex = 0.obs;
 
+  // Animation key for forcing animation replay on navigation
+  final RxInt animationKey = 0.obs;
+
+  // Mood entries for chart
+  final RxList<MoodEntry> moodEntries = <MoodEntry>[].obs;
+  final RxBool isLoadingMoods = false.obs;
+
   // List of inspirational quotes
   final List<String> quotes = [
     '"It is better to conquer yourself than to win a thousand battles"',
@@ -49,6 +57,7 @@ class HomeController extends GetxController {
     _updateGreeting();
     _setRandomQuote();
     _startQuoteRotation();
+    _loadMoodEntries();
   }
 
   void _updateGreeting() {
@@ -77,6 +86,52 @@ class HomeController extends GetxController {
   // Timer for quote rotation
   Timer? _quoteTimer;
 
+  /// Refresh all data - called by pull-to-refresh
+  Future<void> refreshData() async {
+    _updateGreeting();
+    _setRandomQuote();
+
+    // Reload profile data
+    await _profileController.refreshProfile();
+
+    // Reload mood data
+    await _loadMoodEntries();
+
+    debugPrint('🔄 Home data refreshed');
+  }
+
+  /// Load recent mood entries for chart
+  Future<void> _loadMoodEntries() async {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) {
+      debugPrint('⚠️ User not authenticated');
+      return;
+    }
+
+    if (!Get.isRegistered<MoodRepository>()) {
+      debugPrint('⚠️ MoodRepository not available');
+      return;
+    }
+
+    try {
+      isLoadingMoods.value = true;
+      final repository = Get.find<MoodRepository>();
+      final entries = await repository.getMoodEntries(userId);
+
+      debugPrint('✅ Loaded ${entries.length} mood entries');
+      // Only keep last 30 days for chart
+      final cutoffDate = DateTime.now().subtract(const Duration(days: 30));
+      moodEntries.value = entries
+          .where((e) => e.timestamp.isAfter(cutoffDate))
+          .toList();
+    } catch (e) {
+      debugPrint('❌ Error loading mood entries: $e');
+      moodEntries.clear();
+    } finally {
+      isLoadingMoods.value = false;
+    }
+  }
+
   @override
   void onClose() {
     _quoteTimer?.cancel();
@@ -88,14 +143,12 @@ class HomeController extends GetxController {
       selectedMoodIndex.value = null; // Deselect if already selected
     } else {
       selectedMoodIndex.value = index;
+      HapticFeedback.lightImpact();
 
       // Save mood to database with proper error handling
       final success = await _saveMoodEntry(index);
       if (!success) {
-        AppSnackbar.warning(
-          'Mood selected but not saved. Please try again.',
-          title: 'Warning',
-        );
+        AppSnackbar.warning('home.moodNotSaved'.tr, title: 'common.warning'.tr);
       }
     }
   }
@@ -148,5 +201,9 @@ class HomeController extends GetxController {
     // Delegate to DashboardController for actual navigation
     final dashboardController = Get.find<DashboardController>();
     dashboardController.changeTabIndex(index);
+  }
+
+  void replayAnimations() {
+    animationKey.value++;
   }
 }

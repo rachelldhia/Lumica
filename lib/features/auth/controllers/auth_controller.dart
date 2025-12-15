@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:lumica_app/core/utils/loading_util.dart';
+import 'package:lumica_app/core/utils/validators.dart';
 import 'package:lumica_app/core/widgets/app_snackbar.dart';
 import 'package:lumica_app/features/auth/data/models/user_model.dart';
 import 'package:lumica_app/domain/repositories/auth_repository.dart';
@@ -61,17 +62,43 @@ class AuthController extends GetxController {
   Future<void> signUp() async {
     if (isLoading.value) return;
 
+    // Sanitize inputs before validation
+    final sanitizedEmail = InputSanitizer.sanitizeEmail(emailController.text);
+    final sanitizedName = InputSanitizer.sanitizeName(nameController.text);
+
+    // Validate with enhanced validators
+    final nameValidation = InputValidator.validateName(sanitizedName);
+    if (!nameValidation.isValid) {
+      nameError.value = nameValidation.message ?? 'Invalid name';
+      AppSnackbar.error(nameError.value, title: 'Validation Error');
+      return;
+    }
+
+    final emailValidation = InputValidator.validateEmail(sanitizedEmail);
+    if (!emailValidation.isValid) {
+      emailError.value = emailValidation.message ?? 'Invalid email';
+      AppSnackbar.error(emailError.value, title: 'Validation Error');
+      return;
+    }
+
+    final passwordValidation = InputValidator.validatePassword(
+      passwordController.text,
+    );
+    if (!passwordValidation.isValid) {
+      passwordError.value = passwordValidation.message ?? 'Invalid password';
+      AppSnackbar.error(passwordError.value, title: 'Validation Error');
+      return;
+    }
+
     isLoading.value = true;
     LoadingUtil.show(message: 'Creating account...');
     errorMessage.value = '';
 
     try {
       final result = await _authRepository.signUpWithEmail(
-        email: emailController.text.trim(),
+        email: sanitizedEmail,
         password: passwordController.text,
-        name: nameController.text.trim().isNotEmpty
-            ? nameController.text.trim()
-            : null,
+        name: sanitizedName,
       );
 
       await result.fold(
@@ -79,7 +106,7 @@ class AuthController extends GetxController {
           LoadingUtil.hide(); // Hide first on error
           errorMessage.value = failure.message;
           debugPrint('Sign up failed: ${failure.message}');
-          AppSnackbar.error(failure.message, title: 'Sign Up Failed');
+          AppSnackbar.error(failure.message, title: 'auth.signUpFailed'.tr);
         },
         (authUser) async {
           debugPrint('Sign up successful: ${authUser.id}');
@@ -92,8 +119,8 @@ class AuthController extends GetxController {
           LoadingUtil.hide(); // Hide BEFORE Nav
 
           AppSnackbar.success(
-            'Your account has been created successfully!',
-            title: 'Welcome!',
+            'auth.accountCreated'.tr,
+            title: 'common.success'.tr,
           );
 
           // Navigate to dashboard (profile check optional for now)
@@ -103,10 +130,7 @@ class AuthController extends GetxController {
     } catch (e) {
       LoadingUtil.hide();
       debugPrint('Sign up error: $e');
-      AppSnackbar.error(
-        'An unexpected error occurred. Please try again.',
-        title: 'Error',
-      );
+      AppSnackbar.error('auth.unexpectedError'.tr, title: 'common.error'.tr);
     } finally {
       isLoading.value = false;
       // Do NOT call LoadingUtil.hide() here blindly, as we might have already navigated
@@ -117,13 +141,18 @@ class AuthController extends GetxController {
   Future<void> signIn() async {
     if (isLoading.value) return;
 
+    // Sanitize email input
+    final sanitizedEmail = InputSanitizer.sanitizeEmail(
+      signInEmailController.text,
+    );
+
     isLoading.value = true;
     LoadingUtil.show(message: 'Signing in...');
     errorMessage.value = '';
 
     try {
       final result = await _authRepository.signInWithEmail(
-        email: signInEmailController.text.trim(),
+        email: sanitizedEmail,
         password: signInPasswordController.text,
       );
 
@@ -132,7 +161,7 @@ class AuthController extends GetxController {
           LoadingUtil.hide(); // Hide on error
           errorMessage.value = failure.message;
           debugPrint('Sign in failed: ${failure.message}');
-          AppSnackbar.error(failure.message, title: 'Sign In Failed');
+          AppSnackbar.error(failure.message, title: 'auth.signInFailed'.tr);
         },
         (authUser) async {
           debugPrint('Sign in successful: ${authUser.id}');
@@ -144,7 +173,10 @@ class AuthController extends GetxController {
 
           LoadingUtil.hide(); // Hide BEFORE Nav
 
-          AppSnackbar.success('Welcome back!', title: 'Success');
+          AppSnackbar.success(
+            'auth.welcomeBack'.tr,
+            title: 'common.success'.tr,
+          );
 
           // Navigate to dashboard
           Get.offAllNamed(AppRoutes.dashboard);
@@ -221,20 +253,20 @@ class AuthController extends GetxController {
       result.fold(
         (failure) {
           LoadingUtil.hide();
-          AppSnackbar.error(failure.message, title: 'Sign Out Failed');
+          AppSnackbar.error(failure.message, title: 'auth.signOutFailed'.tr);
         },
         (_) {
           LoadingUtil.hide(); // Hide before nav
 
           currentUser.value = null;
-          AppSnackbar.success('You have been logged out');
+          AppSnackbar.success('auth.signedOut'.tr);
           Get.offAllNamed(AppRoutes.signin);
         },
       );
     } catch (e) {
       LoadingUtil.hide();
       debugPrint('Sign out error: $e');
-      AppSnackbar.error('Failed to sign out');
+      AppSnackbar.error('auth.failedToSignOut'.tr);
     } finally {
       isLoading.value = false;
     }
@@ -246,8 +278,8 @@ class AuthController extends GetxController {
 
     if (!GetUtils.isEmail(email)) {
       AppSnackbar.warning(
-        'Please enter a valid email address first.',
-        title: 'Invalid Email',
+        'auth.emailRequired'.tr,
+        title: 'auth.invalidEmail'.tr,
       );
       return;
     }
@@ -260,18 +292,18 @@ class AuthController extends GetxController {
 
       result.fold(
         (failure) {
-          AppSnackbar.error(failure.message, title: 'Reset Failed');
+          AppSnackbar.error(failure.message, title: 'auth.resetFailed'.tr);
         },
         (_) {
           AppSnackbar.success(
-            'Check your email for password reset instructions.',
-            title: 'Email Sent',
+            'auth.resetEmailSent'.tr,
+            title: 'common.success'.tr,
           );
         },
       );
     } catch (e) {
       debugPrint('Password reset error: $e');
-      AppSnackbar.error('Failed to send reset email');
+      AppSnackbar.error('auth.failedToSendReset'.tr);
     } finally {
       isLoading.value = false;
       LoadingUtil.hide(); // Safe to use here as no navigation happens

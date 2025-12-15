@@ -40,18 +40,27 @@ class LocationSelectionDialog extends StatelessWidget {
             ),
             SizedBox(height: 20.h),
 
-            // Location options
-            ...locations.map(
-              (location) => Padding(
-                padding: EdgeInsets.only(bottom: 12.h),
-                child: Obx(
-                  () => _buildLocationOption(
-                    location,
-                    tempSelected.value == location,
-                    () {
-                      tempSelected.value = location;
-                    },
-                  ),
+            // Location options - Scrollable
+            Flexible(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: locations
+                      .map(
+                        (location) => Padding(
+                          padding: EdgeInsets.only(bottom: 12.h),
+                          child: Obx(
+                            () => _buildLocationOption(
+                              location,
+                              tempSelected.value == location,
+                              () {
+                                tempSelected.value = location;
+                              },
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
                 ),
               ),
             ),

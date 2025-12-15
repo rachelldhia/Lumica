@@ -163,6 +163,28 @@ class ProfileRepositoryImpl implements ProfileRepository {
   }
 
   @override
+  Future<Either<Failure, UserModel>> updateLocation(
+    String userId,
+    String location,
+  ) async {
+    try {
+      final profileData = await _remoteDataSource.updateLocation(
+        userId: userId,
+        location: location,
+      );
+
+      // Cache updated profile
+      await _localDataSource.cacheProfile(profileData);
+
+      return _mergeWithAuth(profileData);
+    } on ServerException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, String>> uploadAvatar(
     String userId,
     dynamic file,

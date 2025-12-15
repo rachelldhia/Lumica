@@ -1,7 +1,5 @@
 class AppImages {
   //image
-  static const String logo = 'assets/images/lumica-logo.png';
-  static const String lumiBot = 'assets/images/lumi-robot-image.png';
   static const String lumicaLogo = 'assets/images/lumica-logo.png';
   static const String lumiRobot = 'assets/images/lumi-robot-image.png';
   static const String emoAngry = 'assets/images/angry.png';

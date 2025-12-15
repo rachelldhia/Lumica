@@ -2,6 +2,8 @@ class IdTranslations {
   static Map<String, String> get translations => {
     // App
     'app.name': 'Lumica',
+    'app.tagline': 'Pendamping Kesehatan Mental Anda',
+    'app.loading': 'Memuat...',
 
     // Common
     'common.done': 'Selesai',
@@ -11,6 +13,18 @@ class IdTranslations {
     'common.delete': 'Hapus',
     'common.success': 'Berhasil',
     'common.error': 'Error',
+    'common.warning': 'Peringatan',
+    'common.info': 'Info',
+    'common.online': 'Online',
+    'common.offline': 'Offline',
+    'common.retry': 'Coba Lagi',
+    'common.confirm': 'Konfirmasi',
+    'common.yes': 'Ya',
+    'common.no': 'Tidak',
+    'common.ok': 'OK',
+    'common.close': 'Tutup',
+    'common.viewProfile': 'Lihat Profil',
+    'common.user': 'Pengguna',
 
     // Auth
     'auth.signIn': 'Masuk',
@@ -31,6 +45,20 @@ class IdTranslations {
     'auth.agreeTerms': 'Saya Setuju dengan ',
     'auth.terms': 'Syarat & Ketentuan',
     'auth.signUpForFree': 'Daftar Gratis',
+    'auth.welcomeBack': 'Selamat datang kembali!',
+    'auth.signUpFailed': 'Pendaftaran Gagal',
+    'auth.signInFailed': 'Masuk Gagal',
+    'auth.signOutFailed': 'Keluar Gagal',
+    'auth.signedOut': 'Anda telah keluar',
+    'auth.failedToSignOut': 'Gagal keluar',
+    'auth.resetFailed': 'Reset Gagal',
+    'auth.resetEmailSent':
+        'Email reset kata sandi terkirim. Silakan periksa kotak masuk Anda.',
+    'auth.failedToSendReset': 'Gagal mengirim email reset',
+    'auth.emailRequired': 'Silakan masukkan alamat email Anda',
+    'auth.unexpectedError': 'Terjadi kesalahan. Silakan coba lagi.',
+    'auth.accountCreated':
+        'Akun berhasil dibuat! Silakan cek email untuk verifikasi akun Anda.',
 
     // Profile
     'profile.profile': 'Profil',
@@ -40,6 +68,8 @@ class IdTranslations {
     'profile.language': 'Bahasa',
     'profile.darkMode': 'Mode Gelap',
     'profile.logOut': 'Keluar',
+    'profile.logOutConfirm': 'Apakah Anda yakin ingin keluar?',
+    'profile.navigateToNotifications': 'Buka pengaturan notifikasi',
 
     // Personal Info
     'personalInfo.title': 'Informasi Pribadi',
@@ -51,6 +81,12 @@ class IdTranslations {
     'personalInfo.saveSettings': 'Simpan Pengaturan',
     'personalInfo.yourName': 'Nama Anda',
     'personalInfo.success': 'Informasi pribadi berhasil diperbarui',
+    'personalInfo.loadFailed': 'Gagal memuat data profil',
+    'personalInfo.imageSelected': 'Gambar berhasil dipilih',
+    'personalInfo.imageSelectFailed': 'Gagal memilih gambar',
+    'personalInfo.avatarUploadFailed': 'Gagal mengunggah avatar',
+    'personalInfo.saveFailed': 'Gagal menyimpan pengaturan',
+    'personalInfo.imageTooBig': 'Gambar harus lebih kecil dari 5MB',
 
     // Gender
     'gender.male': 'Laki-laki',
@@ -80,6 +116,13 @@ class IdTranslations {
     'home.feature1': 'Jurnal',
     'home.feature2': 'AI Chat',
     'home.feature3': 'Video Call',
+    'home.howAreYou': 'Bagaimana perasaanmu hari ini?',
+    'home.moodTrack': 'Lacak Mood',
+    'home.goodMorning': 'Selamat Pagi,',
+    'home.goodAfternoon': 'Selamat Siang,',
+    'home.goodEvening': 'Selamat Malam,',
+    'home.moodNotSaved':
+        'Mood dipilih tapi tidak tersimpan. Silakan coba lagi.',
 
     // Journal
     'journal.journal': 'Jurnal',
@@ -87,12 +130,30 @@ class IdTranslations {
     'journal.createNote': 'Buat Catatan',
     'journal.editNote': 'Ubah Catatan',
     'journal.deleteNote': 'Hapus Catatan',
-    'home.howAreYou': 'Bagaimana perasaanmu hari ini ?',
-    'home.moodTrack': 'Lacak Mood',
+    'journal.noteCreated': 'Catatan berhasil dibuat',
+    'journal.noteUpdated': 'Catatan berhasil diperbarui',
+    'journal.noteDeleted': 'Catatan berhasil dihapus',
+    'journal.noteSaved': 'Catatan berhasil disimpan',
+    'journal.loadFailed': 'Gagal memuat catatan',
+    'journal.createFailed': 'Gagal membuat catatan',
+    'journal.updateFailed': 'Gagal memperbarui catatan',
+    'journal.deleteFailed': 'Gagal menghapus catatan',
+    'journal.noNotes': 'Belum ada catatan',
+    'journal.startJournaling': 'Mulai menulis jurnal Anda',
+    'journal.deleteConfirmTitle': 'Hapus Catatan',
+    'journal.deleteConfirmMessage':
+        'Apakah Anda yakin ingin menghapus catatan ini?',
+    'journal.unsavedChanges': 'Anda memiliki perubahan yang belum disimpan',
+    'journal.discardChanges': 'Buang perubahan?',
 
     // Mood Track
     'moodTrack.title': 'Pelacak Mood',
     'moodTrack.yourMoodIs': 'Mood kamu adalah',
+    'moodTrack.moodSaved': 'Mood berhasil disimpan',
+    'moodTrack.saveFailed': 'Gagal menyimpan mood',
+    'moodTrack.loadFailed': 'Gagal memuat data mood',
+    'moodTrack.noMoods': 'Belum ada data mood',
+    'moodTrack.startTracking': 'Mulai lacak mood Anda',
 
     // Moods
     'mood.happy': 'Senang',
@@ -101,5 +162,72 @@ class IdTranslations {
     'mood.angry': 'Marah',
     'mood.sad': 'Sedih',
     'mood.stress': 'Stres',
+
+    // AI Chat
+    'aiChat.title': 'AI Chat',
+    'aiChat.lumi': 'Lumi',
+    'aiChat.typeMessage': 'Ketik pesan...',
+    'aiChat.send': 'Kirim',
+    'aiChat.emptyTitle': 'Mulai percakapan',
+    'aiChat.emptySubtitle': 'Bagikan perasaanmu dengan AI',
+    'aiChat.filterByDate': 'Filter berdasarkan tanggal',
+    'aiChat.showAll': 'Tampilkan semua',
+    'aiChat.today': 'Hari ini',
+    'aiChat.yesterday': 'Kemarin',
+    'aiChat.clearChat': 'Hapus percakapan',
+    'aiChat.conversationDeleted': 'Percakapan berhasil dihapus',
+
+    // Video Call / Session
+    'vidcall.title': 'Video Call',
+    'vidcall.upcomingSession': 'Sesi Mendatang',
+    'vidcall.allSessions': 'Semua Sesi',
+    'vidcall.joinNow': 'Gabung Sekarang',
+    'vidcall.reschedule': 'Jadwal Ulang',
+    'vidcall.rebook': 'Pesan Ulang',
+    'vidcall.live': 'LIVE',
+    'vidcall.noSessions': 'Tidak ada sesi terjadwal',
+    'vidcall.bookSession': 'Pesan sesi dengan terapis',
+
+    // Session
+    'session.title': 'Sesi',
+    'session.content': 'Konten Halaman Sesi',
+
+    // Network
+    'network.connectionLost': 'Koneksi terputus. Periksa internet Anda.',
+    'network.connectionRestored': 'Koneksi pulih!',
+    'network.noInternet': 'Tidak Ada Koneksi Internet',
+
+    // Splash
+    'splash.loading': 'Memuat...',
+
+    // Empty States
+    'empty.noData': 'Tidak ada data',
+    'empty.tryAgain': 'Coba lagi',
+
+    // Error Messages
+    'connection_error': 'Kesalahan koneksi. Periksa internet Anda.',
+    'auth_error': 'Autentikasi gagal. Silakan masuk kembali.',
+    'permission_error': 'Anda tidak memiliki izin untuk melakukan ini.',
+    'not_found_error': 'Sumber daya tidak ditemukan.',
+    'server_error': 'Kesalahan server. Coba lagi nanti.',
+    'timeout_error': 'Permintaan timeout. Silakan coba lagi.',
+    'general_error': 'Terjadi kesalahan. Silakan coba lagi.',
+
+    // Wellness
+    'wellness.title': 'Alat Kesehatan Mental',
+    'wellness.subtitle':
+        'Alat untuk membantu Anda menemukan keseimbangan dan ketenangan.',
+    'wellness.breathing': 'Latihan Pernapasan',
+    'wellness.breathingDesc': 'Teknik 4-7-8 untuk relaksasi',
+    'wellness.grounding': 'Teknik Grounding',
+    'wellness.groundingDesc': 'Kesadaran sensorik 5-4-3-2-1',
+    'wellness.panicTitle': 'Merasa Kewalahan?',
+    'wellness.panicDesc': 'Dapatkan bantuan segera',
+    'wellness.panicDialogTitle': 'Bantuan Darurat',
+    'wellness.panicDialogMessage':
+        'Fokus pada napas Anda. Anda aman. Apakah Anda perlu menghubungi bantuan?',
+    'wellness.callHelper': 'Hubungi Bantuan',
+    'wellness.comingSoon': 'Segera Hadir',
+    'wellness.comingSoonMessage': 'Integrasi kontak darurat segera hadir.',
   };
 }

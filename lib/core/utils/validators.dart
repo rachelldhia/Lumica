@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
+import 'package:image/image.dart' as img;
 
 /// Validation result for input data
 class ValidationResult {
@@ -94,15 +97,23 @@ class InputValidator {
     return const ValidationResult.success();
   }
 
-  /// Validate password strength
+  /// Validate password strength (enhanced)
   static ValidationResult validatePassword(String password) {
     if (password.isEmpty) {
       return const ValidationResult.error('Password cannot be empty');
     }
 
-    if (password.length < 6) {
+    if (password.length < 8) {
       return const ValidationResult.error(
-        'Password must be at least 6 characters',
+        'Password must be at least 8 characters',
+      );
+    }
+
+    // Check for at least one number or special character for stronger security
+    final hasNumberOrSpecial = RegExp(r'[0-9!@#$%^&*(),.?":{}|<>]');
+    if (!hasNumberOrSpecial.hasMatch(password)) {
+      return const ValidationResult.error(
+        'Password must contain at least one number or special character',
       );
     }
 
@@ -128,5 +139,148 @@ class InputValidator {
     }
 
     return const ValidationResult.success();
+  }
+
+  /// Validate display name (full name)
+  static ValidationResult validateName(String name, {int maxLength = 50}) {
+    final trimmed = name.trim();
+
+    if (trimmed.isEmpty) {
+      return const ValidationResult.error('Name cannot be empty');
+    }
+
+    if (trimmed.length > maxLength) {
+      return ValidationResult.error(
+        'Name too long (max $maxLength characters)',
+      );
+    }
+
+    // Only allow letters, spaces, hyphens, dots, and apostrophes
+    final nameRegex = RegExp(r"^[a-zA-Z\s\-\.']+$");
+    if (!nameRegex.hasMatch(trimmed)) {
+      return const ValidationResult.error(
+        'Name can only contain letters, spaces, hyphens, dots, and apostrophes',
+      );
+    }
+
+    return const ValidationResult.success();
+  }
+
+  /// Validate image file
+  static Future<ValidationResult> validateImage(File imageFile) async {
+    const maxSizeBytes = 5 * 1024 * 1024; // 5MB
+    const maxWidth = 2048;
+    const maxHeight = 2048;
+
+    try {
+      // Check file size
+      final bytes = await imageFile.length();
+      if (bytes > maxSizeBytes) {
+        return const ValidationResult.error('Image size must be less than 5MB');
+      }
+
+      // Check dimensions
+      final imageBytes = await imageFile.readAsBytes();
+      final image = img.decodeImage(imageBytes);
+
+      if (image == null) {
+        return const ValidationResult.error('Invalid image file');
+      }
+
+      if (image.width > maxWidth || image.height > maxHeight) {
+        return ValidationResult.error(
+          'Image dimensions must be less than ${maxWidth}x${maxHeight}px',
+        );
+      }
+
+      return const ValidationResult.success();
+    } catch (e) {
+      debugPrint('❌ Image validation error: $e');
+      return const ValidationResult.error('Failed to validate image');
+    }
+  }
+}
+
+/// Sanitization utilities for user input
+class InputSanitizer {
+  /// Sanitize general text input (remove HTML tags and special chars)
+  static String sanitizeText(String input) {
+    return input
+        .trim()
+        // Remove script tags
+        .replaceAll(
+          RegExp(
+            r'<script[^>]*>.*?</script>',
+            caseSensitive: false,
+            multiLine: true,
+          ),
+          '',
+        )
+        // Remove all HTML tags
+        .replaceAll(RegExp(r'<[^>]*>'), '')
+        // Remove potentially dangerous special characters
+        .replaceAll(RegExp(r'''[<>&"']'''), '')
+        .trim();
+  }
+
+  /// Sanitize for SQL-like inputs (basic protection)
+  static String sanitizeQuery(String input) {
+    return input
+        .trim()
+        // Remove common SQL injection patterns
+        .replaceAll(RegExp(r'''[;'"\/\\]'''), '')
+        .replaceAll('--', '')
+        .replaceAll('/*', '')
+        .replaceAll('*/', '')
+        .trim();
+  }
+
+  /// Sanitize email (remove extra spaces and convert to lowercase)
+  static String sanitizeEmail(String email) {
+    return email.trim().toLowerCase();
+  }
+
+  /// Sanitize name (trim and proper case)
+  static String sanitizeName(String name) {
+    final trimmed = name.trim();
+    // Remove multiple spaces
+    return trimmed.replaceAll(RegExp(r'\s+'), ' ');
+  }
+
+  /// Check for XSS patterns
+  static bool containsXSS(String input) {
+    final xssPatterns = [
+      RegExp(r'<script', caseSensitive: false),
+      RegExp(r'javascript:', caseSensitive: false),
+      RegExp(r'onerror=', caseSensitive: false),
+      RegExp(r'onload=', caseSensitive: false),
+      RegExp(r'onclick=', caseSensitive: false),
+      RegExp(r'<iframe', caseSensitive: false),
+    ];
+
+    for (final pattern in xssPatterns) {
+      if (pattern.hasMatch(input)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /// Validate and sanitize URL
+  static String? sanitizeUrl(String url) {
+    final trimmed = url.trim();
+
+    // Only allow http and https protocols
+    if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
+      return null;
+    }
+
+    // Check for XSS in URL
+    if (containsXSS(trimmed)) {
+      return null;
+    }
+
+    return trimmed;
   }
 }

@@ -1,8 +1,10 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 import 'package:lumica_app/core/config/theme.dart';
 import 'package:lumica_app/core/constants/app_images.dart';
+import 'package:lumica_app/features/ai_chat/controllers/ai_chat_controller.dart';
 
 class ChatEmptyState extends StatelessWidget {
   const ChatEmptyState({super.key});
@@ -83,6 +85,9 @@ class ChatEmptyState extends StatelessWidget {
                 height: 1.5,
               ),
             ),
+            SizedBox(height: 24.h),
+            // Quick Prompts
+            _QuickPromptsGrid(),
           ],
         ),
       ),
@@ -234,4 +239,76 @@ class WavyLinePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+/// Grid of quick prompt buttons
+class _QuickPromptsGrid extends StatelessWidget {
+  final List<String> prompts = const [
+    "How are you feeling today?",
+    "I need someone to talk to",
+    "Feeling stressed lately",
+    "Tell me about your day",
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      spacing: 12.w,
+      runSpacing: 12.h,
+      alignment: WrapAlignment.center,
+      children: prompts.map((prompt) => _PromptChip(prompt: prompt)).toList(),
+    );
+  }
+}
+
+/// Individual prompt chip button
+class _PromptChip extends StatelessWidget {
+  final String prompt;
+
+  const _PromptChip({required this.prompt});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          // Import Get to access controller
+          final controller = Get.find<AiChatController>();
+          controller.startWithPrompt(prompt);
+        },
+        borderRadius: BorderRadius.circular(20.r),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+          decoration: BoxDecoration(
+            color: AppColors.skyBlue,
+            borderRadius: BorderRadius.circular(20.r),
+            border: Border.all(
+              color: AppColors.lavenderBlue.withValues(alpha: 0.3),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.lightbulb_outline_rounded,
+                size: 16.sp,
+                color: AppColors.darkBlue,
+              ),
+              SizedBox(width: 6.w),
+              Text(
+                prompt,
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.darkBlue,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

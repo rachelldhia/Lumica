@@ -1,17 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:flutter_quill/flutter_quill.dart';
 import 'package:lumica_app/core/config/theme.dart';
+import 'package:lumica_app/core/config/transitions.dart';
 import 'package:lumica_app/core/translations/app_translations.dart';
+import 'package:lumica_app/core/widgets/custom_error_widget.dart';
+// import 'package:lumica_app/features/splash/controllers/splash_controller.dart'; // Unused
 import 'package:lumica_app/routes/app_pages.dart';
 
-void main() {
-  debugPrint('🚀 App Launching...');
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  debugPrint('✅ WidgetsBinding Initialized');
+
+  // Global Error Handling
+  ErrorWidget.builder = (FlutterErrorDetails details) {
+    return CustomErrorWidget(errorDetails: details);
+  };
+
+  // Lock orientation to portrait for better UX
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
   runApp(const App());
-  debugPrint('✅ runApp called');
 }
 
 class App extends StatelessWidget {
@@ -26,7 +39,9 @@ class App extends StatelessWidget {
       builder: (context, child) {
         return GetMaterialApp(
           debugShowCheckedModeBanner: false,
-          defaultTransition: Transition.cupertino,
+          // Custom smooth transition
+          customTransition: CustomTransitionBuilder(),
+          transitionDuration: const Duration(milliseconds: 350),
           initialRoute: AppPages.initial,
           getPages: AppPages.pages,
 

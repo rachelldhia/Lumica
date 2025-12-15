@@ -10,6 +10,10 @@ class AppColors {
   static const Color skyBlue = Color(0xFFD9E8FC);
   static const Color amethyst = Color(0xFFAEAFF7);
   static const Color mossGreen = Color(0xFF9BB068);
+  static const Color limeGreen = Color(
+    0xFF4CAF50,
+  ); // Success/Live indicator color
+  static const Color oceanBlue = Color(0xFF48CAE4); // Wellness Blue
   //------warna mood icon-----
   static const Color lightSkyBlue = Color(0xFFB6F3FF);
   static const Color darkBlue = Color(0xFF3B5284);
@@ -25,8 +29,10 @@ class AppColors {
   //-----warna basic------
   static const Color whiteColor = Color(0xFFFFFFFF);
   static const Color blackColor = Color(0xFF000000);
-  static const Color orange = Color(0xFFFE8235);
-  static const Color orangeAccent = Color(0xFFFFD2C2);
+  @Deprecated('Use vividOrange instead')
+  static const Color orange = vividOrange;
+  @Deprecated('Use paleSalmon instead')
+  static const Color orangeAccent = paleSalmon;
   static const Color greyText = Color(0xFF9E9E9E);
   static const Color circlePurple = Color(0xffFCDDEC);
 
@@ -94,6 +100,68 @@ class AppSpacing {
   static const double xl = 24.0;
   static const double xxl = 32.0;
   static const double xxxl = 48.0;
+}
+
+/// Standardized padding values for consistent page margins
+class AppPadding {
+  // Page-level padding
+  static EdgeInsets get pageHorizontal =>
+      const EdgeInsets.symmetric(horizontal: 20.0);
+  static EdgeInsets get pageVertical =>
+      const EdgeInsets.symmetric(vertical: 12.0);
+  static EdgeInsets get page =>
+      const EdgeInsets.symmetric(horizontal: 20.0, vertical: 12.0);
+
+  // Card-level padding
+  static EdgeInsets get cardSmall => const EdgeInsets.all(12.0);
+  static EdgeInsets get cardMedium => const EdgeInsets.all(16.0);
+  static EdgeInsets get cardLarge => const EdgeInsets.all(20.0);
+
+  // List item padding
+  static EdgeInsets get listItem =>
+      const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0);
+
+  // Button padding
+  static EdgeInsets get buttonSmall =>
+      const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0);
+  static EdgeInsets get buttonMedium =>
+      const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0);
+  static EdgeInsets get buttonLarge =>
+      const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0);
+}
+
+/// Breakpoint helpers for responsive design
+class AppBreakpoints {
+  // Screen width breakpoints
+  static const double phone = 360.0;
+  static const double phoneWide = 414.0;
+  static const double tablet = 600.0;
+  static const double tabletWide = 768.0;
+  static const double desktop = 1024.0;
+
+  /// Check if screen is considered a tablet
+  static bool isTablet(BuildContext context) =>
+      MediaQuery.of(context).size.shortestSide >= tablet;
+
+  /// Check if screen is in landscape mode
+  static bool isLandscape(BuildContext context) =>
+      MediaQuery.of(context).orientation == Orientation.landscape;
+
+  /// Get adaptive grid columns based on screen width
+  static int getGridColumns(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    if (width >= desktop) return 4;
+    if (width >= tablet) return 3;
+    return 2;
+  }
+
+  /// Get adaptive horizontal padding based on screen width
+  static double getHorizontalPadding(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    if (width >= desktop) return 48.0;
+    if (width >= tablet) return 32.0;
+    return 20.0;
+  }
 }
 
 class AppTheme {

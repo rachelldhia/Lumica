@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lumica_app/core/config/theme.dart';
 
-enum CirclePosition { topCenter, centerLeft }
+enum CirclePosition { topCenter, centerLeft, topLeft, bottomRight }
 
 class BackgroundCircle extends StatelessWidget {
   const BackgroundCircle({super.key, required this.position, this.circleColor});
@@ -34,6 +34,16 @@ class BackgroundCircle extends StatelessWidget {
 
         left = -130.w;
 
+        break;
+      case CirclePosition.topLeft:
+        circleSize = 500.w;
+        top = -200.h;
+        left = -150.w;
+        break;
+      case CirclePosition.bottomRight:
+        circleSize = 500.w;
+        top = ScreenUtil().screenHeight * 0.7;
+        left = ScreenUtil().screenWidth * 0.5;
         break;
     }
 

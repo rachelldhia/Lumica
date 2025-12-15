@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lumica_app/core/config/theme.dart';
+import 'package:lumica_app/core/constants/profile_constants.dart';
 
 class ProfileAvatarSelector extends StatelessWidget {
   final int selectedAvatarIndex;
@@ -18,28 +19,14 @@ class ProfileAvatarSelector extends StatelessWidget {
     this.onUploadTap,
   });
 
-  // Avatar options with colors and icons
-  static final List<AvatarOption> avatarOptions = [
-    AvatarOption(
-      color: const Color(0xFFFFC107),
-      icon: Icons.sentiment_satisfied_alt,
-    ),
-    AvatarOption(
-      color: const Color(0xFF81D4FA),
-      icon: Icons.sentiment_very_satisfied,
-    ),
-    AvatarOption(color: const Color(0xFFFF4081), icon: Icons.favorite),
-    AvatarOption(color: const Color(0xFF5C6BC0), icon: Icons.star),
-    AvatarOption(color: const Color(0xFF66BB6A), icon: Icons.emoji_emotions),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return SizedBox(
       height: 70.h,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        itemCount: avatarOptions.length + 1, // +1 for upload button
+        itemCount:
+            ProfileConstants.avatarPresets.length + 1, // +1 for upload button
         itemBuilder: (context, index) {
           if (index == 0) {
             // Upload button or uploaded avatar
@@ -47,10 +34,10 @@ class ProfileAvatarSelector extends StatelessWidget {
           }
 
           final avatarIndex = index - 1;
-          final avatar = avatarOptions[avatarIndex];
-          final isSelected = selectedAvatarIndex == avatarIndex;
+          final avatar = ProfileConstants.avatarPresets[avatarIndex];
+          final isSelected = selectedAvatarIndex == avatar.id;
 
-          return _buildAvatarOption(avatar, avatarIndex, isSelected);
+          return _buildAvatarOption(avatar, avatar.id, isSelected);
         },
       ),
     );
@@ -147,14 +134,6 @@ class ProfileAvatarSelector extends StatelessWidget {
       ),
     );
   }
-}
-
-// Avatar option model
-class AvatarOption {
-  final Color color;
-  final IconData icon;
-
-  AvatarOption({required this.color, required this.icon});
 }
 
 // Custom painter for smooth dashed circle

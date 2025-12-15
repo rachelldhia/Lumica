@@ -69,7 +69,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                             ConstrainedBox(
                               constraints: BoxConstraints(maxHeight: 250.h),
                               child: Image.asset(
-                                AppImages.lumiBot,
+                                AppImages.lumiRobot,
                                 fit: BoxFit.contain,
                               ),
                             ),

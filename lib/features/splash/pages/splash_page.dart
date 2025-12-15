@@ -12,10 +12,10 @@ class SplashPage extends StatefulWidget {
   State<SplashPage> createState() => _SplashPageState();
 }
 
-class _SplashPageState extends State<SplashPage>
-    with SingleTickerProviderStateMixin {
+class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
   late final SplashController controller;
   late final AnimationController _animationController;
+  late final AnimationController _loadingController;
   late final Animation<double> _fadeAnimation;
   late final Animation<double> _scaleAnimation;
 
@@ -29,6 +29,12 @@ class _SplashPageState extends State<SplashPage>
       vsync: this,
       duration: const Duration(milliseconds: 1500),
     );
+
+    // Loading dots animation controller (loops continuously)
+    _loadingController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1200),
+    )..repeat();
 
     // Fade animation
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
@@ -53,6 +59,7 @@ class _SplashPageState extends State<SplashPage>
   @override
   void dispose() {
     _animationController.dispose();
+    _loadingController.dispose();
     super.dispose();
   }
 
@@ -90,7 +97,11 @@ class _SplashPageState extends State<SplashPage>
                     ),
                   );
                 },
-                child: Image.asset(AppImages.logo, width: 180.w, height: 180.h),
+                child: Image.asset(
+                  AppImages.lumicaLogo,
+                  width: 180.w,
+                  height: 180.h,
+                ),
               ),
 
               SizedBox(height: 24.h),
@@ -139,24 +150,25 @@ class _SplashPageState extends State<SplashPage>
                   duration: const Duration(milliseconds: 300),
                   child: Column(
                     children: [
-                      // Custom branded pulsing dots
-                      TweenAnimationBuilder<double>(
-                        duration: const Duration(milliseconds: 1200),
-                        tween: Tween(begin: 0.0, end: 1.0),
-                        curve: Curves.easeInOut,
-                        builder: (context, value, child) {
+                      // Continuously looping pulsing dots
+                      AnimatedBuilder(
+                        animation: _loadingController,
+                        builder: (context, child) {
                           return Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: List.generate(3, (index) {
                               final delay = index * 0.2;
-                              final progress = (value - delay).clamp(0.0, 1.0);
+                              final progress =
+                                  (_loadingController.value - delay).clamp(
+                                    0.0,
+                                    1.0,
+                                  );
                               final opacity = (1 - (progress - 0.5).abs() * 2)
                                   .clamp(0.3, 1.0);
 
                               return Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 4.w),
-                                child: AnimatedContainer(
-                                  duration: const Duration(milliseconds: 300),
+                                child: Container(
                                   width: 8.w,
                                   height: 8.h,
                                   decoration: BoxDecoration(
@@ -169,12 +181,6 @@ class _SplashPageState extends State<SplashPage>
                               );
                             }),
                           );
-                        },
-                        onEnd: () {
-                          // Restart animation if still loading
-                          if (controller.isLoading.value) {
-                            setState(() {});
-                          }
                         },
                       ),
                       SizedBox(height: 16.h),

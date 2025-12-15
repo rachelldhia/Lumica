@@ -25,6 +25,12 @@ abstract class ProfileRepository {
     String avatarUrl,
   );
 
+  /// Update location
+  Future<Either<Failure, UserModel>> updateLocation(
+    String userId,
+    String location,
+  );
+
   /// Upload avatar file and get URL
   Future<Either<Failure, String>> uploadAvatar(String userId, dynamic file);
 

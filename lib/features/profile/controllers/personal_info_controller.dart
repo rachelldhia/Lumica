@@ -1,9 +1,14 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:lumica_app/core/utils/permission_helper.dart';
 import 'package:lumica_app/core/utils/loading_util.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:lumica_app/core/widgets/app_snackbar.dart';
 import 'package:lumica_app/domain/repositories/profile_repository.dart';
 import 'package:lumica_app/features/profile/controllers/profile_controller.dart';
@@ -20,6 +25,7 @@ class PersonalInfoController extends GetxController {
 
   // Selected values
   final RxString selectedAvatar = ''.obs;
+  // -1 means custom/uploaded, 0-4 means preset, default is 0
   final RxInt selectedAvatarIndex = 0.obs;
   final RxString selectedLocation = 'Tokyo, Japan'.obs;
   final RxString selectedGender = 'Female'.obs;
@@ -33,32 +39,37 @@ class PersonalInfoController extends GetxController {
 
   // Loading state (local usage if needed, but we use LoadingUtil mostly)
   final RxBool isLoading = false.obs;
+  final RxBool isLocating = false.obs;
 
   // Form validation
   final RxString usernameError = ''.obs;
   final RxString passwordError = ''.obs;
 
-  // Available locations
-  final List<String> locations = [
+  // Available locations (Initial list, can be expanded)
+  final RxList<String> locations = [
     'Tokyo, Japan',
     'Jakarta, Indonesia',
     'Seoul, South Korea',
     'Bangkok, Thailand',
     'Singapore',
     'Manila, Philippines',
-  ];
+    'New York, USA',
+    'London, UK',
+  ].obs;
+
+  // Animation key for forcing animation replay on navigation
+  final RxInt animationKey = 0.obs;
 
   @override
   void onInit() {
     super.onInit();
+    // Increment animation key to force animation replay
+    animationKey.value++;
+
     // Initialize dependencies
     if (Get.isRegistered<ProfileRepository>()) {
       _profileRepository = Get.find<ProfileRepository>();
     } else {
-      // Fallback: This should ideally not happen if Binding is correct,
-      // but if it does, we should probably throw or lazy put it here.
-      // For now, let's assume binding logic in DashboardBinding covers it.
-      // But if we are here via a separate route, we might need it.
       debugPrint(
         '⚠️ ProfileRepository not found in GetX. Checking bindings...',
       );
@@ -91,22 +102,40 @@ class PersonalInfoController extends GetxController {
         result.fold(
           (failure) {
             debugPrint('❌ Failed to load Personal Info: ${failure.message}');
-            // Don't show error to user immediately on load to avoid nagging,
-            // but log it. Maybe set a local error state UI if needed.
           },
           (userModel) {
             usernameController.text = userModel.username ?? '';
+
+            // Load location
+            if (userModel.location != null && userModel.location!.isNotEmpty) {
+              selectedLocation.value = userModel.location!;
+            }
+
+            // Handle Avatar Display
             if (userModel.avatarUrl != null &&
                 userModel.avatarUrl!.isNotEmpty) {
               selectedAvatar.value = userModel.avatarUrl!;
-              selectedAvatarIndex.value = -1; // Custom
+
+              if (userModel.avatarUrl!.startsWith('preset:')) {
+                try {
+                  final index = int.parse(userModel.avatarUrl!.split(':')[1]);
+                  selectedAvatarIndex.value = index;
+                } catch (e) {
+                  selectedAvatarIndex.value = 0;
+                }
+              } else {
+                selectedAvatarIndex.value = -1; // Custom/URL
+              }
+            } else {
+              // Default if no avatar
+              selectedAvatarIndex.value = 0;
             }
           },
         );
       }
     } catch (e) {
       debugPrint('❌ Unexpected error in _loadUserData: $e');
-      AppSnackbar.error('Failed to load profile data', title: 'Error');
+      AppSnackbar.error('personalInfo.loadFailed'.tr, title: 'common.error'.tr);
     } finally {
       isLoading.value = false;
     }
@@ -149,6 +178,56 @@ class PersonalInfoController extends GetxController {
   // Upload custom avatar
   Future<void> uploadCustomAvatar() async {
     try {
+      // Check permission based on platform/version (simplified)
+      // Check SDK version check if possible, or just try both
+      // For now, on Android 13+ it's photos, below is storage
+      // We'll let PermissionHelper handle the UI
+      bool hasPermission = false;
+
+      if (Platform.isAndroid) {
+        // Try photos first (Android 13+)
+        var status = await Permission.photos.status;
+        if (status.isGranted) {
+          hasPermission = true;
+        } else {
+          // If not granted, it might be Android < 13 requiring storage
+          // Or Android 13 requiring photos
+          // We'll try requesting photos if it's not permanently denied?
+          // Actually, easiest is to just rely on PermissionHelper
+          // tailored for the likely specific permission
+          // Since we don't have device_info, we might assume modern
+          if (await Permission.photos.request().isGranted) {
+            hasPermission = true;
+          } else if (await Permission.storage.request().isGranted) {
+            // Fallback for older Android
+            hasPermission = true;
+          } else {
+            // Check if permanently denied
+            if (await Permission.photos.isPermanentlyDenied ||
+                await Permission.storage.isPermanentlyDenied) {
+              await PermissionHelper.requestPermission(
+                Permission.photos, // Just trigger the helper dialog
+                title: 'Gallery Permission',
+                message: 'Access to photos is needed to upload an avatar.',
+              );
+              return;
+            }
+          }
+        }
+      } else {
+        // iOS
+        hasPermission = await PermissionHelper.requestPermission(
+          Permission.photos,
+          title: 'Photos Permission',
+          message: 'Access to photos is needed to upload an avatar.',
+        );
+      }
+
+      // If permission flow completed but we don't have permission, stop
+      if (!hasPermission) {
+        return;
+      }
+
       final XFile? pickedFile = await _picker.pickImage(
         source: ImageSource.gallery,
         maxWidth: 512,
@@ -161,10 +240,10 @@ class PersonalInfoController extends GetxController {
         // Set index to -1 to indicate custom avatar is selected
         selectedAvatarIndex.value = -1;
 
-        AppSnackbar.success('Image selected successfully');
+        AppSnackbar.success('personalInfo.imageSelected'.tr);
       }
     } catch (e) {
-      AppSnackbar.error('Failed to select image: $e');
+      AppSnackbar.error('personalInfo.imageSelectFailed'.tr);
     }
   }
 
@@ -172,6 +251,87 @@ class PersonalInfoController extends GetxController {
   void updateLocation(String? location) {
     if (location != null) {
       selectedLocation.value = location;
+    }
+  }
+
+  // Detect Location
+  Future<void> detectLocation() async {
+    isLocating.value = true;
+    try {
+      bool serviceEnabled;
+      LocationPermission permission;
+
+      // Test if location services are enabled.
+      serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        AppSnackbar.error('Location services are disabled.');
+        return;
+      }
+
+      permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          AppSnackbar.error('Location permissions are denied');
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        await Get.dialog(
+          AlertDialog(
+            title: const Text('Location Required'),
+            content: const Text(
+              'Location permissions are permanently denied. Please enable them in settings to use this feature.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Get.back(),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Get.back();
+                  Geolocator.openAppSettings();
+                },
+                child: const Text('Open Settings'),
+              ),
+            ],
+          ),
+        );
+        return;
+      }
+
+      // Get current position
+      final position = await Geolocator.getCurrentPosition();
+
+      // Decode to address
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+        position.latitude,
+        position.longitude,
+      );
+
+      if (placemarks.isNotEmpty) {
+        final place = placemarks.first;
+        final city =
+            place.locality ?? place.subAdministrativeArea ?? 'Unknown City';
+        final country = place.country ?? 'Unknown Country';
+        final fullLocation = '$city, $country';
+
+        selectedLocation.value = fullLocation;
+
+        // Add to list if not exists
+        if (!locations.contains(fullLocation)) {
+          locations.insert(0, fullLocation);
+        }
+
+        AppSnackbar.success('Location detected: $fullLocation');
+      }
+    } catch (e) {
+      debugPrint('Error detecting location: $e');
+      AppSnackbar.error('Failed to detect location');
+    } finally {
+      isLocating.value = false;
     }
   }
 
@@ -190,10 +350,7 @@ class PersonalInfoController extends GetxController {
     _validatePassword();
 
     if (usernameError.value.isNotEmpty || passwordError.value.isNotEmpty) {
-      AppSnackbar.error(
-        'Please fix all errors before saving',
-        title: 'Validation Error',
-      );
+      AppSnackbar.error('auth.unexpectedError'.tr, title: 'common.error'.tr);
       return;
     }
 
@@ -201,16 +358,18 @@ class PersonalInfoController extends GetxController {
       isLoading.value = true;
       LoadingUtil.show(message: 'Saving changes...');
 
+      // Timeout for operations to prevent hanging
+      const timeout = Duration(seconds: 15);
+
       final user = Supabase.instance.client.auth.currentUser;
       if (user == null) throw Exception('No user found');
 
       // 1. Update Username if changed
       final username = usernameController.text.trim();
       if (username.isNotEmpty) {
-        final result = await _profileRepository.updateUsername(
-          user.id,
-          username,
-        );
+        final result = await _profileRepository
+            .updateUsername(user.id, username)
+            .timeout(timeout);
         if (result.isLeft) {
           throw Exception(result.left.message);
         }
@@ -219,53 +378,88 @@ class PersonalInfoController extends GetxController {
       // 2. Update Password if provided
       final password = passwordController.text;
       if (password.isNotEmpty) {
-        await Supabase.instance.client.auth.updateUser(
-          UserAttributes(password: password),
-        );
+        await Supabase.instance.client.auth
+            .updateUser(UserAttributes(password: password))
+            .timeout(timeout);
       }
 
-      // 3. Update Avatar if provided
-      if (uploadedAvatar.value != null) {
-        final uploadResult = await _profileRepository.uploadAvatar(
-          user.id,
-          uploadedAvatar.value,
-        );
+      // 3. Update Location
+      if (selectedLocation.value.isNotEmpty) {
+        await _profileRepository
+            .updateLocation(user.id, selectedLocation.value)
+            .timeout(timeout);
+      }
 
-        // Handle upload result
+      // 4. Update Avatar
+      if (uploadedAvatar.value != null) {
+        // CASE A: Custom Upload
+        final uploadResult = await _profileRepository
+            .uploadAvatar(user.id, uploadedAvatar.value)
+            .timeout(timeout);
+
         await uploadResult.fold(
           (failure) async {
-            // Just log error but don't stop the whole process
             debugPrint('Avatar upload failed: ${failure.message}');
-            AppSnackbar.error('Avatar upload failed: ${failure.message}');
+            AppSnackbar.error('personalInfo.avatarUploadFailed'.tr);
           },
           (url) async {
-            // If upload success, update the profile record with new URL
-            await _profileRepository.updateAvatarUrl(user.id, url);
+            await _profileRepository
+                .updateAvatarUrl(user.id, url)
+                .timeout(timeout);
           },
         );
+      } else if (selectedAvatarIndex.value != -1) {
+        // CASE B: Preset Avatar selected
+        final presetString = 'preset:${selectedAvatarIndex.value}';
+        await _profileRepository
+            .updateAvatarUrl(user.id, presetString)
+            .timeout(timeout);
       }
 
+      // Hide loading BEFORE refreshing profile to UI doesn't feel stuck
       LoadingUtil.hide();
 
-      // Refresh profile data in ProfileController to update UI
+      // Refresh profile data properly
       if (Get.isRegistered<ProfileController>()) {
         final profileController = Get.find<ProfileController>();
-        await profileController.refreshProfile(); // Reload user data from DB
+        // Fire and forget refresh so user isn't blocked?
+        // Or wait continuously? Ideally wait, but with short timeout.
+        try {
+          await profileController.refreshProfile().timeout(
+            const Duration(seconds: 5),
+          );
+        } catch (e) {
+          debugPrint(
+            '⚠️ Profile refresh timed out or failed, but save was successful.',
+          );
+        }
       }
 
-      Get.back();
-      AppSnackbar.success('Personal information updated successfully');
+      // Proceed back
+      Get.back(); // Go back to profile page
+      AppSnackbar.success('personalInfo.success'.tr);
     } catch (e) {
       debugPrint('❌ Profile Update Error: $e');
       debugPrint('Stack trace: ${StackTrace.current}');
 
+      // Hide loading FIRST so it doesn't close the snackbar later
       LoadingUtil.hide();
-      AppSnackbar.error(
-        'Failed to save settings. ${e.toString().replaceAll('Exception:', '').trim()}',
-        title: 'Error',
-      );
+
+      // If timeout
+      if (e is TimeoutException) {
+        AppSnackbar.error(
+          'Connection timed out. Please check your internet.',
+          title: 'common.error'.tr,
+        );
+      } else {
+        AppSnackbar.error(
+          'personalInfo.saveFailed'.tr,
+          title: 'common.error'.tr,
+        );
+      }
     } finally {
       isLoading.value = false;
+      // LoadingUtil.hide(); // Already handled above
     }
   }
 

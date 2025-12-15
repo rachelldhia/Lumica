@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:lumica_app/core/config/supabase_config.dart';
+import 'package:lumica_app/core/controllers/network_controller.dart';
 import 'package:lumica_app/data/datasources/auth_remote_datasource.dart';
 import 'package:lumica_app/data/datasources/profile_local_datasource.dart';
 import 'package:lumica_app/data/datasources/profile_remote_datasource.dart';
@@ -11,7 +12,7 @@ import 'package:lumica_app/data/repositories/profile_repository_impl.dart';
 import 'package:lumica_app/domain/repositories/auth_repository.dart';
 import 'package:lumica_app/domain/repositories/profile_repository.dart';
 import 'package:lumica_app/features/auth/controllers/auth_controller.dart';
-import 'package:lumica_app/features/dashboard/controllers/network_controller.dart';
+// import 'package:lumica_app/features/dashboard/controllers/network_controller.dart'; // Deleted
 import 'package:lumica_app/routes/app_routes.dart';
 import 'package:lumica_app/storage/storage_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -23,47 +24,41 @@ class SplashController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _initializeApp();
+    // Initialize services
+    _initServices();
+
+    // Start network monitoring
+    Get.put<NetworkController>(NetworkController(), permanent: true);
   }
 
   /// Initialize all core services and dependencies
-  Future<void> _initializeApp() async {
+  Future<void> _initServices() async {
     try {
-      debugPrint('🏁 Splash: Starting Init...');
-
       // 1. Load Environment Variables
       await dotenv.load(fileName: ".env");
-      debugPrint('✅ Splash: DotEnv Loaded');
 
       // 2. Initialize Core Services (Parallel)
-      debugPrint('⏳ Splash: Init Supabase & Storage...');
       await Future.wait([
         // Supabase
         Supabase.initialize(
           url: SupabaseConfig.supabaseUrl,
           anonKey: SupabaseConfig.supabaseAnonKey,
-        ).then((_) => debugPrint('✅ Splash: Supabase Ready')),
-        // Local Storage
-        StorageService.init().then(
-          (_) => debugPrint('✅ Splash: Storage Ready'),
         ),
+        // Local Storage
+        StorageService.init(),
       ]);
 
       // 3. Initialize Global Controllers & Dependencies
       _initDependencies();
-      debugPrint('✅ Splash: Dependencies Injected');
 
       // 4. Minimum Splash Delay (for smooth animation)
-      debugPrint('⏳ Splash: Waiting for Animation...');
-      await Future.delayed(const Duration(seconds: 2));
+      await Future.delayed(const Duration(milliseconds: 1000));
 
       // 5. Check Auth & Redirect
-      debugPrint('🔍 Splash: Checking Auth...');
       _checkAuthAndRedirect();
     } catch (e, stack) {
       debugPrint('❌ Initialization Error: $e');
       debugPrint(stack.toString());
-      // If critical init fails, we might want to show an error or try to proceed to onboarding
       Get.offAllNamed(AppRoutes.onboarding);
     }
   }

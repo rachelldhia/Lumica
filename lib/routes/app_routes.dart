@@ -12,4 +12,7 @@ abstract class AppRoutes {
   static const signin = '/signin';
   static const session = '/session';
   static const completeProfile = '/complete-profile';
+  static const wellness = '/wellness';
+  static const breathing = '/breathing';
+  static const grounding = '/grounding';
 }

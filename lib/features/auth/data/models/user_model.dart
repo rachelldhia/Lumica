@@ -9,6 +9,7 @@ class UserModel extends UserEntity {
     super.username,
     super.displayName,
     super.avatarUrl,
+    super.location,
     super.createdAt,
     super.updatedAt,
   });
@@ -32,6 +33,7 @@ class UserModel extends UserEntity {
       username: json['username'] as String?,
       displayName: json['display_name'] as String?,
       avatarUrl: json['avatar_url'] as String?,
+      location: json['location'] as String?,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : null,
@@ -49,6 +51,7 @@ class UserModel extends UserEntity {
       username: profileData.username,
       displayName: profileData.displayName,
       avatarUrl: profileData.avatarUrl,
+      location: profileData.location,
       createdAt: createdAt,
       updatedAt: profileData.updatedAt,
     );
@@ -61,6 +64,7 @@ class UserModel extends UserEntity {
       'username': username,
       'display_name': displayName,
       'avatar_url': avatarUrl,
+      'location': location,
       'created_at': createdAt?.toIso8601String(),
       'updated_at': updatedAt?.toIso8601String(),
     };
@@ -73,6 +77,7 @@ class UserModel extends UserEntity {
     String? username,
     String? displayName,
     String? avatarUrl,
+    String? location,
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
@@ -82,6 +87,7 @@ class UserModel extends UserEntity {
       username: username ?? this.username,
       displayName: displayName ?? this.displayName,
       avatarUrl: avatarUrl ?? this.avatarUrl,
+      location: location ?? this.location,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
     );

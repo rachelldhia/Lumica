@@ -6,6 +6,7 @@ class SettingsTile extends StatefulWidget {
   final String? iconAsset;
   final IconData? icon;
   final String title;
+  final String? subtitle;
   final Widget? trailing;
   final VoidCallback? onTap;
 
@@ -14,6 +15,7 @@ class SettingsTile extends StatefulWidget {
     this.iconAsset,
     this.icon,
     required this.title,
+    this.subtitle,
     this.trailing,
     this.onTap,
   }) : assert(
@@ -66,13 +68,29 @@ class _SettingsTileState extends State<SettingsTile> {
               ),
               SizedBox(width: 16.w),
 
-              // Title
+              // Title and Subtitle
               Expanded(
-                child: Text(
-                  widget.title,
-                  style: AppTextTheme.textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.w500,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.title,
+                      style: AppTextTheme.textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    if (widget.subtitle != null) ...[
+                      SizedBox(height: 2.h),
+                      Text(
+                        widget.subtitle!,
+                        style: AppTextTheme.textTheme.bodySmall?.copyWith(
+                          color: Theme.of(
+                            context,
+                          ).textTheme.bodySmall?.color?.withValues(alpha: 0.7),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
 

@@ -6,6 +6,7 @@ import 'package:lumica_app/core/config/text_theme.dart';
 import 'package:lumica_app/core/config/theme.dart';
 import 'package:lumica_app/core/constants/app_icon.dart';
 import 'package:lumica_app/core/constants/app_images.dart';
+import 'package:lumica_app/core/widgets/app_snackbar.dart';
 import 'package:lumica_app/core/widgets/background_circle.dart';
 import 'package:lumica_app/core/widgets/primary_button.dart';
 import 'package:lumica_app/features/auth/controllers/auth_controller.dart';
@@ -41,10 +42,9 @@ class _SignUpPageState extends State<SignUpPage> {
 
     _termsTapRecognizer = TapGestureRecognizer()
       ..onTap = () {
-        Get.snackbar(
-          'Terms & Conditions',
+        AppSnackbar.info(
           'This page will be implemented soon',
-          snackPosition: SnackPosition.BOTTOM,
+          title: 'Terms & Conditions',
         );
       };
   }
@@ -86,7 +86,7 @@ class _SignUpPageState extends State<SignUpPage> {
                                 SizedBox(height: 40.h),
                                 // Logo
                                 Image.asset(
-                                  AppImages.logo,
+                                  AppImages.lumicaLogo,
                                   width: 120.w,
                                   height: 120.h,
                                 ),

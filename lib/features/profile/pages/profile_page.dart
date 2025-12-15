@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:lumica_app/core/config/text_theme.dart';
 import 'package:lumica_app/core/config/theme.dart';
 import 'package:lumica_app/core/constants/app_icon.dart';
+import 'package:lumica_app/core/widgets/app_states.dart';
 import 'package:lumica_app/core/widgets/background_circle.dart';
 import 'package:lumica_app/core/widgets/profile_avatar.dart';
+import 'package:lumica_app/core/widgets/replayable_animated_list.dart';
 import 'package:lumica_app/features/profile/controllers/profile_controller.dart';
 import 'package:lumica_app/features/profile/widgets/settings_section.dart';
 import 'package:lumica_app/features/profile/widgets/settings_tile.dart';
@@ -16,104 +19,144 @@ class ProfilePage extends GetView<ProfileController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // backgroundColor: AppColors.whiteColor, // Removed to use Theme background
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Stack(
-            children: [
-              // Background circle - ikut scroll
-              BackgroundCircle(
-                position: CirclePosition.topCenter,
-                circleColor: AppColors.amethyst,
-              ),
+        child: AppRefreshIndicator(
+          onRefresh: () => controller.refreshProfile(),
+          // Wrap with ReplayableAnimateWrapper to replay animations on tab switch
+          child: ReplayableAnimateWrapper(
+            animationKey: controller.animationKey,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Stack(
+                children: [
+                  // Background circle - ikut scroll
+                  BackgroundCircle(
+                    position: CirclePosition.topCenter,
+                    circleColor: AppColors.amethyst,
+                  ),
 
-              // Content
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.w),
-                child: Column(
-                  children: [
-                    SizedBox(height: 80.h),
+                  // Content
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 20.w),
+                    child: Column(
+                      children: [
+                        SizedBox(height: 80.h),
 
-                    // Profile Header
-                    _buildProfileHeader(),
+                        // Profile Header with bouncy pop effect
+                        _buildProfileHeader()
+                            .animate()
+                            .fadeIn(duration: 350.ms, curve: Curves.easeOut)
+                            .scale(
+                              begin: const Offset(0.85, 0.85),
+                              end: const Offset(1, 1),
+                              curve: Curves.elasticOut,
+                              duration: 700.ms,
+                            )
+                            .blur(begin: const Offset(3, 3), end: Offset.zero),
 
-                    SizedBox(height: 32.h),
+                        SizedBox(height: 32.h),
 
-                    // General Settings Section
-                    Obx(
-                      () => SettingsSection(
-                        title: 'profile.generalSettings'.tr,
-                        children: [
-                          SettingsTile(
-                            iconAsset: AppIcon.notification,
-                            title: 'profile.notifications'.tr,
-                            trailing: Image.asset(
-                              AppIcon.panahKanan,
-                              width: 20.w,
-                              height: 20.h,
-                            ),
-                            onTap: controller.navigateToNotifications,
-                          ),
-                          SettingsTile(
-                            iconAsset: AppIcon.personalInformation,
-                            title: 'profile.personalInfo'.tr,
-                            trailing: Image.asset(
-                              AppIcon.panahKanan,
-                              width: 20.w,
-                              height: 20.h,
-                            ),
-                            onTap: controller.navigateToPersonalInfo,
-                          ),
-                          SettingsTile(
-                            iconAsset: AppIcon.language,
-                            title: 'profile.language'.tr,
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
+                        // General Settings Section with slide from right
+                        Obx(
+                              () => SettingsSection(
+                                title: 'profile.generalSettings'.tr,
+                                children: [
+                                  SettingsTile(
+                                    iconAsset: AppIcon.notification,
+                                    title: 'profile.notifications'.tr,
+                                    trailing: Image.asset(
+                                      AppIcon.panahKanan,
+                                      width: 20.w,
+                                      height: 20.h,
+                                    ),
+                                    onTap: controller.navigateToNotifications,
+                                  ),
+                                  SettingsTile(
+                                    iconAsset: AppIcon.personalInformation,
+                                    title: 'profile.personalInfo'.tr,
+                                    trailing: Image.asset(
+                                      AppIcon.panahKanan,
+                                      width: 20.w,
+                                      height: 20.h,
+                                    ),
+                                    onTap: controller.navigateToPersonalInfo,
+                                  ),
+                                  SettingsTile(
+                                    iconAsset: AppIcon.language,
+                                    title: 'profile.language'.tr,
+                                    trailing: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Text(
+                                          controller.selectedLanguage.value,
+                                          style: AppTextTheme
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.copyWith(
+                                                color: AppColors.greyText,
+                                              ),
+                                        ),
+                                        SizedBox(width: 8.w),
+                                        Image.asset(
+                                          AppIcon.panahKanan,
+                                          width: 20.w,
+                                          height: 20.h,
+                                        ),
+                                      ],
+                                    ),
+                                    onTap:
+                                        controller.navigateToLanguageSelection,
+                                  ),
+                                ],
+                              ),
+                            )
+                            .animate()
+                            .fadeIn(duration: 400.ms, delay: 180.ms)
+                            .slideX(
+                              begin: 0.12,
+                              end: 0,
+                              curve: Curves.easeOutCubic,
+                            )
+                            .blur(begin: const Offset(2, 0), end: Offset.zero),
+
+                        SizedBox(height: 24.h),
+
+                        // Log Out Section with attention animation
+                        SettingsSection(
+                              title: 'profile.logOut'.tr,
+                              showMoreIcon: true,
                               children: [
-                                Text(
-                                  controller.selectedLanguage.value,
-                                  style: AppTextTheme.textTheme.bodyMedium
-                                      ?.copyWith(color: AppColors.greyText),
-                                ),
-                                SizedBox(width: 8.w),
-                                Image.asset(
-                                  AppIcon.panahKanan,
-                                  width: 20.w,
-                                  height: 20.h,
+                                SettingsTile(
+                                  icon: Icons.logout,
+                                  title: 'profile.logOut'.tr,
+                                  trailing: Image.asset(
+                                    AppIcon.panahKanan,
+                                    width: 20.w,
+                                    height: 20.h,
+                                  ),
+                                  onTap: controller.logout,
                                 ),
                               ],
+                            )
+                            .animate()
+                            .fadeIn(duration: 400.ms, delay: 280.ms)
+                            .slideY(
+                              begin: 0.15,
+                              end: 0,
+                              curve: Curves.easeOutCubic,
+                            )
+                            .scale(
+                              begin: const Offset(0.96, 0.96),
+                              end: const Offset(1, 1),
                             ),
-                            onTap: controller.navigateToLanguageSelection,
-                          ),
-                        ],
-                      ),
-                    ),
 
-                    SizedBox(height: 24.h),
-
-                    // Log Out Section
-                    SettingsSection(
-                      title: 'profile.logOut'.tr,
-                      showMoreIcon: true,
-                      children: [
-                        SettingsTile(
-                          icon: Icons.logout,
-                          title: 'profile.logOut'.tr,
-                          trailing: Image.asset(
-                            AppIcon.panahKanan,
-                            width: 20.w,
-                            height: 20.h,
-                          ),
-                          onTap: controller.logout,
-                        ),
+                        SizedBox(height: 32.h),
                       ],
                     ),
-
-                    SizedBox(height: 32.h),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
@@ -124,8 +167,19 @@ class ProfilePage extends GetView<ProfileController> {
     return Obx(
       () => Column(
         children: [
-          // Avatar
-          ProfileAvatar(size: 120, imagePath: controller.userAvatarUrl.value),
+          // Animated Avatar with scale effect
+          TweenAnimationBuilder<double>(
+            duration: const Duration(milliseconds: 500),
+            tween: Tween(begin: 0.8, end: 1.0),
+            curve: Curves.elasticOut,
+            builder: (context, value, child) {
+              return Transform.scale(scale: value, child: child);
+            },
+            child: ProfileAvatar(
+              size: 120,
+              imagePath: controller.userAvatarUrl.value,
+            ),
+          ),
 
           SizedBox(height: 12.h),
 
@@ -133,8 +187,6 @@ class ProfilePage extends GetView<ProfileController> {
           Text(
             controller.userName.value,
             style: AppTextTheme.textTheme.headlineSmall?.copyWith(
-              // Using theme color will handle dark mode automatically
-              // color: AppColors.darkBrown, // Removed hardcode
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -145,8 +197,7 @@ class ProfilePage extends GetView<ProfileController> {
           Text(
             controller.userEmail.value,
             style: AppTextTheme.textTheme.bodyMedium?.copyWith(
-              color: AppColors
-                  .darkSlateGray, // This might need a dark mode variant
+              color: AppColors.darkSlateGray,
               fontWeight: FontWeight.w500,
             ),
           ),

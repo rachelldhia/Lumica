@@ -122,4 +122,108 @@ class AppSnackbar {
   static void info(String message, {String? title}) {
     show(message: message, title: title, type: SnackbarType.info);
   }
+
+  /// Network-specific snackbars (persistent, bottom position)
+  static void noInternet() {
+    Get.showSnackbar(
+      GetSnackBar(
+        messageText: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(6.w),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.wifi_off_rounded,
+                color: Colors.white,
+                size: 18.sp,
+              ),
+            ),
+            SizedBox(width: 12.w),
+            Text(
+              'network.noInternet'.tr,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w500,
+                letterSpacing: 0.2,
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: AppColors.brightRed,
+        duration: const Duration(days: 1),
+        snackPosition: SnackPosition.BOTTOM,
+        margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+        borderRadius: 12.r,
+        isDismissible: false,
+        animationDuration: const Duration(
+          milliseconds: 300,
+        ), // Faster animation
+        boxShadows: [
+          BoxShadow(
+            color: AppColors.brightRed.withValues(alpha: 0.3),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static void backOnline() {
+    Get.showSnackbar(
+      GetSnackBar(
+        messageText: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(4.w),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.check_circle_rounded,
+                color: Colors.white,
+                size: 16.sp,
+              ),
+            ),
+            SizedBox(width: 8.w),
+            Text(
+              'network.connectionRestored'.tr,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w500,
+                letterSpacing: 0.2,
+              ),
+            ),
+          ],
+        ),
+        backgroundColor: AppColors.limeGreen,
+        duration: const Duration(milliseconds: 1500), // Reduced from 2500ms
+        snackPosition: SnackPosition.BOTTOM,
+        margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+        borderRadius: 12.r,
+        isDismissible: true,
+        animationDuration: const Duration(
+          milliseconds: 300,
+        ), // Faster animation
+        boxShadows: [
+          BoxShadow(
+            color: AppColors.limeGreen.withValues(alpha: 0.3),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Copy confirmation snackbar
+  static void copied() {
+    success('Copied to clipboard');
+  }
 }

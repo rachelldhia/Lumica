@@ -75,50 +75,27 @@ class LoadingUtil {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      // Modern spinner with pulse animation
-                      TweenAnimationBuilder<double>(
-                        tween: Tween(begin: 0.0, end: 1.0),
-                        duration: const Duration(milliseconds: 1200),
-                        curve: Curves.easeInOut,
-                        builder: (context, value, child) {
-                          return Transform.scale(
-                            scale: 1.0 + (value * 0.1),
-                            child: Opacity(
-                              opacity: 1.0 - (value * 0.3),
-                              child: child,
-                            ),
-                          );
-                        },
-                        onEnd: () {
-                          if (_isLoading) {
-                            Future.delayed(Duration.zero, () {
-                              if (_isLoading && Get.isDialogOpen == true) {
-                                // Keep animating
-                              }
-                            });
-                          }
-                        },
-                        child: Container(
-                          width: 56.w,
-                          height: 56.w,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: LinearGradient(
-                              colors: [
-                                AppColors.vividOrange,
-                                AppColors.vividOrange.withValues(alpha: 0.6),
-                              ],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
+                      // Modern spinner - CircularProgressIndicator animates continuously by default
+                      Container(
+                        width: 56.w,
+                        height: 56.w,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            colors: [
+                              AppColors.vividOrange,
+                              AppColors.vividOrange.withValues(alpha: 0.6),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
                           ),
-                          child: Padding(
-                            padding: EdgeInsets.all(12.w),
-                            child: CircularProgressIndicator(
-                              strokeWidth: 3.w,
-                              valueColor: const AlwaysStoppedAnimation<Color>(
-                                Colors.white,
-                              ),
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.all(12.w),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 3.w,
+                            valueColor: const AlwaysStoppedAnimation<Color>(
+                              Colors.white,
                             ),
                           ),
                         ),

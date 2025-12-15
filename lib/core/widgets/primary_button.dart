@@ -11,6 +11,8 @@ class PrimaryButton extends StatelessWidget {
     this.width,
     this.height,
     this.icon,
+    this.backgroundColor,
+    this.textStyle,
   });
 
   final String text;
@@ -18,6 +20,8 @@ class PrimaryButton extends StatelessWidget {
   final double? width;
   final double? height;
   final Widget? icon;
+  final Color? backgroundColor;
+  final TextStyle? textStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -26,9 +30,9 @@ class PrimaryButton extends StatelessWidget {
       height: height ?? 50.h,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: onPressed == null
-              ? AppColors.stoneGray
-              : AppColors.vividOrange,
+          backgroundColor:
+              backgroundColor ??
+              (onPressed == null ? AppColors.stoneGray : AppColors.vividOrange),
         ),
         onPressed: onPressed,
         child: Row(
@@ -36,10 +40,12 @@ class PrimaryButton extends StatelessWidget {
           children: [
             Text(
               text,
-              style: AppTextTheme.textTheme.labelLarge?.copyWith(
-                color: AppColors.whiteColor,
-                fontWeight: FontWeight.w500,
-              ),
+              style:
+                  textStyle ??
+                  AppTextTheme.textTheme.labelLarge?.copyWith(
+                    color: AppColors.whiteColor,
+                    fontWeight: FontWeight.w500,
+                  ),
             ),
             if (icon != null) ...[SizedBox(width: 10.w), icon!],
           ],

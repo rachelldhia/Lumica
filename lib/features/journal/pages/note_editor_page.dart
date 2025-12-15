@@ -172,6 +172,30 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
     );
   }
 
+  Future<void> _generatePrompt() async {
+    final prompt = await controller.generateAiPrompt();
+    if (!mounted) return;
+
+    // Get current selection or end of document
+    final selection = quillController.selection;
+    final index = selection.isValid
+        ? selection.baseOffset
+        : quillController.document.length - 1;
+    final safeIndex = index < 0 ? 0 : index;
+
+    // Add prefix newline if we are appending to existing text
+    final prefix = safeIndex > 0 ? '\n\n' : '';
+
+    quillController.document.insert(safeIndex, '$prefix$prompt');
+
+    // Move cursor to end of inserted text
+    final newIndex = safeIndex + prefix.length + prompt.length;
+    quillController.updateSelection(
+      TextSelection.collapsed(offset: newIndex),
+      ChangeSource.local,
+    );
+  }
+
   void _showDeleteConfirmation() {
     if (widget.noteId != null) {
       controller.promptDeleteNote(
@@ -195,6 +219,17 @@ class _NoteEditorPageState extends State<NoteEditorPage> {
         onPressed: () => Navigator.maybePop(context),
       ),
       actions: [
+        // Inspire Me Button
+        IconButton(
+          icon: Icon(
+            Icons.auto_awesome,
+            color: AppColors.vividOrange,
+            size: 24.sp,
+          ),
+          tooltip: 'Inspire Me',
+          onPressed: _generatePrompt,
+        ),
+        SizedBox(width: 8.w),
         // Delete button (only show when editing existing note)
         if (widget.noteId != null)
           IconButton(

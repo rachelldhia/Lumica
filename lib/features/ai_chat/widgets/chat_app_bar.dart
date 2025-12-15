@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import 'package:lumica_app/core/config/text_theme.dart';
 import 'package:lumica_app/core/config/theme.dart';
 import 'package:lumica_app/core/constants/app_icon.dart';
+import 'package:lumica_app/core/constants/app_images.dart';
+import 'package:lumica_app/core/widgets/app_snackbar.dart';
 import 'package:lumica_app/features/ai_chat/controllers/ai_chat_controller.dart';
 import 'package:lumica_app/features/ai_chat/widgets/delete_conversation_dialog.dart';
 
@@ -33,15 +35,12 @@ class ChatAppBar extends GetView<AiChatController>
               border: Border.all(color: AppColors.vividOrange, width: 2),
             ),
             child: ClipOval(
-              child: Image.asset(
-                'assets/images/lumi-robot-image.png',
-                fit: BoxFit.cover,
-              ),
+              child: Image.asset(AppImages.lumiRobot, fit: BoxFit.cover),
             ),
           ),
           SizedBox(width: 12.w),
           Text(
-            'Lumi',
+            'aiChat.lumi'.tr,
             style: AppTextTheme.textTheme.titleLarge?.copyWith(
               color: AppColors.darkBrown,
               fontWeight: FontWeight.w600,
@@ -65,7 +64,7 @@ class ChatAppBar extends GetView<AiChatController>
               height: 22.h,
               color: AppColors.darkBrown,
             ),
-            tooltip: 'Filter by date',
+            tooltip: 'aiChat.filterByDate'.tr,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12.r),
             ),
@@ -84,7 +83,7 @@ class ChatAppBar extends GetView<AiChatController>
                       ),
                       SizedBox(width: 12.w),
                       Text(
-                        'Show all',
+                        'aiChat.showAll'.tr,
                         style: AppTextTheme.textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.w500,
                           color: AppColors.darkBrown,
@@ -140,12 +139,12 @@ class ChatAppBar extends GetView<AiChatController>
           }
 
           return IconButton(
-            icon: Image.asset(
-              AppIcon.menuAI,
-              width: 22.w,
-              height: 22.h,
+            icon: Icon(
+              Icons.delete_outline_rounded,
               color: AppColors.darkBrown,
+              size: 22.sp,
             ),
+            tooltip: 'aiChat.clearChat'.tr,
             onPressed: () => _showDeleteDialog(context),
           );
         }),
@@ -161,9 +160,9 @@ class ChatAppBar extends GetView<AiChatController>
     final messageDate = DateTime(date.year, date.month, date.day);
 
     if (messageDate == today) {
-      return 'Today';
+      return 'aiChat.today'.tr;
     } else if (messageDate == yesterday) {
-      return 'Yesterday';
+      return 'aiChat.yesterday'.tr;
     } else {
       return DateFormat('MMM dd, yyyy').format(date);
     }
@@ -174,13 +173,9 @@ class ChatAppBar extends GetView<AiChatController>
       DeleteConversationDialog(
         onConfirm: () {
           Get.find<AiChatController>().clearChat();
-          Get.snackbar(
-            'Deleted',
-            'Conversation deleted successfully',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: AppColors.vividOrange,
-            colorText: AppColors.whiteColor,
-            duration: const Duration(seconds: 2),
+          AppSnackbar.success(
+            'aiChat.conversationDeleted'.tr,
+            title: 'common.success'.tr,
           );
         },
       ),

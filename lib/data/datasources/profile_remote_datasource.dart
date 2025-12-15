@@ -216,4 +216,27 @@ class ProfileRemoteDataSource {
       throw ServerException('Failed to ensure profile exists: ${e.toString()}');
     }
   }
+
+  /// Update location in public.profiles
+  Future<UserModel> updateLocation({
+    required String userId,
+    required String location,
+  }) async {
+    try {
+      final response = await _supabase
+          .from('profiles')
+          .update({
+            'location': location,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', userId)
+          .select()
+          .single();
+      return UserModel.fromJson(response);
+    } on PostgrestException catch (e) {
+      throw ServerException('Failed to update location: ${e.message}');
+    } catch (e) {
+      throw ServerException('Failed to update location: ${e.toString()}');
+    }
+  }
 }

@@ -14,6 +14,9 @@ class MoodTrackController extends GetxController {
   final moodStatistics = <String, double>{}.obs;
   final dominantMood = 'happy'.obs;
 
+  // Animation key for forcing animation replay on navigation
+  final RxInt animationKey = 0.obs;
+
   // Mood names mapping
   final moodNames = {
     'happy': 'Happy',
@@ -37,10 +40,7 @@ class MoodTrackController extends GetxController {
 
       if (userId == null) {
         debugPrint('❌ User not authenticated');
-        AppSnackbar.error(
-          'Please log in to view mood statistics',
-          title: 'Authentication Required',
-        );
+        AppSnackbar.error('auth.unexpectedError'.tr, title: 'common.error'.tr);
         return;
       }
 
@@ -51,10 +51,7 @@ class MoodTrackController extends GetxController {
       _calculateDominantMood();
     } catch (e) {
       debugPrint('❌ Error loading mood statistics: $e');
-      AppSnackbar.error(
-        'Failed to load mood statistics. Please try again.',
-        title: 'Error',
-      );
+      AppSnackbar.error('moodTrack.loadFailed'.tr, title: 'common.error'.tr);
     } finally {
       isLoading.value = false;
     }
@@ -90,10 +87,7 @@ class MoodTrackController extends GetxController {
 
       if (userId == null) {
         debugPrint('❌ User not authenticated');
-        AppSnackbar.error(
-          'Please log in to save mood',
-          title: 'Authentication Required',
-        );
+        AppSnackbar.error('auth.unexpectedError'.tr, title: 'common.error'.tr);
         return;
       }
 
@@ -110,13 +104,10 @@ class MoodTrackController extends GetxController {
       // Reload statistics after saving
       await loadMoodStatistics();
 
-      AppSnackbar.success('Mood saved successfully');
+      AppSnackbar.success('moodTrack.moodSaved'.tr);
     } catch (e) {
       debugPrint('❌ Error saving mood: $e');
-      AppSnackbar.error(
-        'Failed to save mood. Please try again.',
-        title: 'Error',
-      );
+      AppSnackbar.error('moodTrack.saveFailed'.tr, title: 'common.error'.tr);
     }
   }
 }

@@ -9,10 +9,15 @@ class GeminiService {
   late GenerativeModel _model;
   late ChatSession _chat;
 
+  // Rate limiting to prevent API abuse
+  static const _apiThrottle = Duration(seconds: 2);
+  DateTime? _lastRequestTime;
+
   GeminiService() {
     _initializeModel();
   }
 
+  /// Initialize the Gemini model with user's API key or default
   void _initializeModel() {
     final apiKey = dotenv.env['GEMINI_API_KEY'] ?? '';
 
@@ -20,6 +25,9 @@ class GeminiService {
       debugPrint('⚠️ GEMINI_API_KEY not found in .env file');
       debugPrint(
         'Please add your API key from https://makersuite.google.com/app/apikey',
+      );
+      throw Exception(
+        'No Gemini API key found. Please add your API key from https://makersuite.google.com/app/apikey',
       );
     }
 
@@ -147,6 +155,17 @@ Remember: Your goal is to be a light in someone's darkness - supportive, underst
 
   /// Send a message to Lumica and get a response
   Future<String> sendMessage(String message) async {
+    // Rate limiting: enforce minimum delay between requests
+    if (_lastRequestTime != null) {
+      final elapsed = DateTime.now().difference(_lastRequestTime!);
+      if (elapsed < _apiThrottle) {
+        final waitTime = _apiThrottle - elapsed;
+        debugPrint('⏱️ Rate limiting: waiting ${waitTime.inMilliseconds}ms');
+        await Future.delayed(waitTime);
+      }
+    }
+    _lastRequestTime = DateTime.now();
+
     try {
       final response = await _chat
           .sendMessage(Content.text(message))
@@ -202,6 +221,31 @@ Remember: Your goal is to be a light in someone's darkness - supportive, underst
   void resetChat() {
     _chat = _model.startChat();
     debugPrint('🔄 Chat session reset');
+  }
+
+  /// Generate a journal prompt using AI
+  Future<String> generateJournalPrompt({String? mood}) async {
+    try {
+      final moodContext = mood != null ? ' when feeling $mood' : '';
+      final promptRequest =
+          'Generate a thoughtful, single-line journaling prompt for someone$moodContext. Make it warm, personal, and introspective. Just respond with the prompt itself, no preamble.';
+
+      final response = await sendMessage(promptRequest);
+
+      // Clean up any extra formatting
+      return response.trim().replaceAll('"', '').replaceAll('*', '');
+    } catch (e) {
+      debugPrint('❌ Failed to generate journal prompt: $e');
+      // Fallback prompts
+      final fallbackPrompts = [
+        'What are you grateful for right now?',
+        'What made you smile today?',
+        'What challenge are you facing, and how can you approach it differently?',
+        'What would you like to tell your future self?',
+        'What does happiness mean to you today?',
+      ];
+      return (fallbackPrompts..shuffle()).first;
+    }
   }
 
   /// Get conversation history count

@@ -1,0 +1,22 @@
+flutter_native_splash:
+  color: "#FFFFFF"
+  image: IconKitchen-Output/android/play_store_512.png
+  
+  # Constrain image size for better appearance
+  android_gravity: center
+  ios_content_mode: center
+  
+  # Android 12+ with icon sizing
+  android_12:
+    color: "#FFFFFF"
+    image: IconKitchen-Output/android/play_store_512.png
+    icon_background_color: "#FFFFFF"
+    
+  # iOS
+  ios: true
+  
+  # Web
+  web: false
+  
+  # Fullscreen mode (removes status bar)
+  fullscreen: false

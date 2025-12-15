@@ -76,7 +76,7 @@ class _SignInPageState extends State<SignInPage> {
                                 SizedBox(height: 40.h),
                                 // Lumi Mascot
                                 Image.asset(
-                                  AppImages.logo,
+                                  AppImages.lumicaLogo,
                                   width: 120.w,
                                   height: 120.h,
                                 ),
