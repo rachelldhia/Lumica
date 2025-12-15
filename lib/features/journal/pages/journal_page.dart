@@ -89,7 +89,7 @@ class _JournalPageState extends State<JournalPage> {
 
                         return AnimationConfiguration.staggeredList(
                           position: index,
-                          duration: const Duration(milliseconds: 375),
+                          duration: const Duration(milliseconds: 250),
                           child: SlideAnimation(
                             horizontalOffset: 50.0,
                             child: FadeInAnimation(
@@ -236,14 +236,12 @@ class _JournalPageState extends State<JournalPage> {
                         return AnimationConfiguration.staggeredGrid(
                           position: index,
                           columnCount: 2,
-                          duration: const Duration(milliseconds: 450),
+                          duration: const Duration(milliseconds: 300),
                           child: SlideAnimation(
-                            verticalOffset: 30.0,
-                            curve: Curves.easeOutCubic,
-                            child: ScaleAnimation(
-                              scale: 0.9,
-                              curve: Curves.easeOutBack,
-                              child: FadeInAnimation(
+                            verticalOffset: 20.0,
+                            curve: Curves.easeOut,
+                            child: FadeInAnimation(
+                              child: RepaintBoundary(
                                 child: Hero(
                                   tag: 'note-${note.id}',
                                   child: Material(

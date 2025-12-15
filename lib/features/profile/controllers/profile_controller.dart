@@ -58,9 +58,20 @@ class ProfileController extends GetxController {
           debugPrint('✅ Profile loaded from Repo: ${profile.username}');
           debugPrint('🖼️ Avatar URL: ${profile.avatarUrl}');
 
-          userName.value =
-              profile.username ??
-              _formatUsername(user.email?.split('@').first ?? 'User');
+          // Prioritize displayName (Full Name), then username, then email fallback
+          final displayName = profile.displayName;
+          final username = profile.username;
+
+          if (displayName != null && displayName.isNotEmpty) {
+            userName.value = displayName;
+          } else if (username != null && username.isNotEmpty) {
+            userName.value = _formatUsername(username);
+          } else {
+            userName.value = _formatUsername(
+              user.email?.split('@').first ?? 'User',
+            );
+          }
+
           userAvatarUrl.value = profile.avatarUrl ?? '';
           userLocation.value =
               profile.location ?? 'Tokyo, Japan'; // Load from DB or fallback

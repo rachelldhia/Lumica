@@ -13,6 +13,7 @@ class AuthTextField extends StatelessWidget {
     this.obscureText = false,
     this.suffixIcon,
     this.keyboardType = TextInputType.text,
+    this.textCapitalization = TextCapitalization.none,
     this.onChanged,
   });
 
@@ -23,6 +24,7 @@ class AuthTextField extends StatelessWidget {
   final bool obscureText;
   final Widget? suffixIcon;
   final TextInputType keyboardType;
+  final TextCapitalization textCapitalization;
   final Function(String)? onChanged;
 
   @override
@@ -33,6 +35,7 @@ class AuthTextField extends StatelessWidget {
       validator: validator,
       obscureText: obscureText,
       keyboardType: keyboardType,
+      textCapitalization: textCapitalization,
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: AppTextTheme.textTheme.bodyMedium?.copyWith(
@@ -40,7 +43,12 @@ class AuthTextField extends StatelessWidget {
         ),
         prefixIcon: Padding(
           padding: const EdgeInsets.all(12.0),
-          child: Image.asset(prefixIconPath, width: 24.w, height: 24.h),
+          child: Image.asset(
+            prefixIconPath,
+            width: 24.w,
+            height: 24.h,
+            color: AppColors.darkBrown,
+          ),
         ),
         suffixIcon: suffixIcon,
         filled: true,

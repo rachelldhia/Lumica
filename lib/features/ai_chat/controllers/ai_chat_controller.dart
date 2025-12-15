@@ -66,7 +66,15 @@ class AiChatController extends GetxController {
     super.onInit();
 
     // Reinitialize Gemini with user name once profile loads
-    _geminiService.reinitializeWithUserName(_profileController.userName.value);
+    final currentName = _profileController.userName.value;
+    if (currentName.isNotEmpty) {
+      _geminiService.reinitializeWithUserName(currentName);
+    }
+
+    // Listen to changes in user name for personalization (e.g. after profile edit)
+    ever(_profileController.userName, (name) {
+      _geminiService.reinitializeWithUserName(name);
+    });
 
     _loadChatHistory();
     _initializeSpeech();

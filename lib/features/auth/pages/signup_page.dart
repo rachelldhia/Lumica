@@ -97,6 +97,49 @@ class _SignUpPageState extends State<SignUpPage> {
                                   style: AppTextTheme.textTheme.displayMedium,
                                 ),
                                 SizedBox(height: 30.h),
+                                // Full Name Label
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    'Full Name',
+                                    style: AppTextTheme.textTheme.titleMedium,
+                                  ),
+                                ),
+                                SizedBox(height: 10.h),
+                                // Name TextFormField
+                                AuthTextField(
+                                  controller: controller.nameController,
+                                  hintText: 'Enter your full name',
+                                  prefixIconPath: AppIcon.personalInformation,
+                                  keyboardType: TextInputType.name,
+                                  textCapitalization: TextCapitalization.words,
+                                  onChanged: (value) {
+                                    if (value.trim().isNotEmpty &&
+                                        value.length >= 2) {
+                                      controller.nameError.value = '';
+                                    } else {
+                                      controller.nameError.value =
+                                          'Name must be at least 2 characters';
+                                    }
+                                  },
+                                  validator: (value) {
+                                    final hasError =
+                                        value == null || value.trim().isEmpty;
+                                    WidgetsBinding.instance
+                                        .addPostFrameCallback((_) {
+                                          controller.nameError.value = hasError
+                                              ? 'Name cannot be empty'
+                                              : '';
+                                        });
+                                    return hasError ? '' : null;
+                                  },
+                                ),
+                                Obx(
+                                  () => ErrorMessageBox(
+                                    message: controller.nameError.value,
+                                  ),
+                                ),
+                                SizedBox(height: 15.h),
                                 // Email Address Label
                                 Align(
                                   alignment: Alignment.centerLeft,

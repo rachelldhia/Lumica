@@ -79,19 +79,16 @@ class MoodTrackPage extends GetView<MoodTrackController> {
                   // Header
                   _buildHeader()
                       .animate()
-                      .fadeIn(duration: 300.ms)
-                      .slideX(begin: -0.1, end: 0),
+                      .fadeIn(duration: 200.ms)
+                      .slideX(begin: -0.05, end: 0),
 
                   SizedBox(height: 24.h),
 
                   // Dominant mood display
-                  _buildDominantMood()
-                      .animate()
-                      .fadeIn(duration: 400.ms, delay: 100.ms)
-                      .scale(
-                        begin: const Offset(0.95, 0.95),
-                        end: const Offset(1, 1),
-                      ),
+                  _buildDominantMood().animate().fadeIn(
+                    duration: 200.ms,
+                    delay: 50.ms,
+                  ),
 
                   SizedBox(height: 32.h),
 
@@ -194,9 +191,9 @@ class MoodTrackPage extends GetView<MoodTrackController> {
           SizedBox(height: 24.h),
           // Animated emoji container
           TweenAnimationBuilder<double>(
-            duration: const Duration(milliseconds: 600),
+            duration: const Duration(milliseconds: 300),
             tween: Tween(begin: 0.0, end: 1.0),
-            curve: Curves.elasticOut,
+            curve: Curves.easeOut,
             builder: (context, value, child) {
               return Transform.scale(scale: value, child: child);
             },
@@ -260,7 +257,7 @@ class MoodTrackPage extends GetView<MoodTrackController> {
             return AnimationConfiguration.staggeredGrid(
               position: index,
               columnCount: 2,
-              duration: const Duration(milliseconds: 375),
+              duration: const Duration(milliseconds: 250),
               child: ScaleAnimation(
                 child: FadeInAnimation(
                   child: MoodStatCard(

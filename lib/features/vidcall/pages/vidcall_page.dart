@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 import 'package:lumica_app/core/config/text_theme.dart';
 import 'package:lumica_app/core/config/theme.dart';
 import 'package:lumica_app/core/widgets/app_states.dart';
-import 'package:lumica_app/core/widgets/profile_avatar.dart';
+import 'package:lumica_app/core/constants/app_images.dart';
 import 'package:lumica_app/core/widgets/replayable_animated_list.dart';
 import 'package:lumica_app/features/vidcall/controllers/vidcall_controller.dart';
 
@@ -99,7 +99,16 @@ class VidcallPage extends GetView<VidcallController> {
   Widget _buildHeader() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [const ProfileAvatar(size: 48)],
+      children: [
+        ClipOval(
+          child: Image.asset(
+            AppImages.doctor,
+            width: 48.w,
+            height: 48.w,
+            fit: BoxFit.cover,
+          ),
+        ),
+      ],
     );
   }
 
@@ -282,7 +291,14 @@ class VidcallPage extends GetView<VidcallController> {
         children: [
           Row(
             children: [
-              const ProfileAvatar(size: 48),
+              ClipOval(
+                child: Image.asset(
+                  AppImages.doctor,
+                  width: 48.w,
+                  height: 48.w,
+                  fit: BoxFit.cover,
+                ),
+              ),
               SizedBox(width: 12.w),
               Expanded(
                 child: Column(

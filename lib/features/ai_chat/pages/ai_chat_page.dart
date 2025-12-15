@@ -59,8 +59,8 @@ class AiChatPage extends GetView<AiChatController> {
                         controller.isAiTyping.value) {
                       return const TypingIndicator()
                           .animate()
-                          .fadeIn(duration: 200.ms)
-                          .slideY(begin: 0.2, end: 0);
+                          .fadeIn(duration: 150.ms)
+                          .slideY(begin: 0.1, end: 0);
                     }
 
                     final message = controller.messages[index];
@@ -73,7 +73,7 @@ class AiChatPage extends GetView<AiChatController> {
                           dateText: controller.formatDateDivider(
                             message.timestamp,
                           ),
-                        ).animate().fadeIn(duration: 300.ms),
+                        ).animate().fadeIn(duration: 150.ms),
                       );
                     }
 
@@ -147,11 +147,11 @@ class AiChatPage extends GetView<AiChatController> {
                               controller.startWithPrompt(suggestion),
                         )
                         .animate()
-                        .fadeIn(delay: (index * 60).ms, duration: 250.ms)
+                        .fadeIn(delay: (index * 30).ms, duration: 200.ms)
                         .slideX(
-                          begin: 0.15,
+                          begin: 0.05,
                           end: 0,
-                          curve: Curves.easeOutCubic,
+                          curve: Curves.easeOut,
                         );
                   },
                 ),

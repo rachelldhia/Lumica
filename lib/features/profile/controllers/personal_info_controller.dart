@@ -11,6 +11,7 @@ import 'package:lumica_app/core/utils/loading_util.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:lumica_app/core/widgets/app_snackbar.dart';
 import 'package:lumica_app/domain/repositories/profile_repository.dart';
+import 'package:lumica_app/core/utils/validators.dart';
 import 'package:lumica_app/features/profile/controllers/profile_controller.dart';
 import 'package:lumica_app/features/profile/widgets/location_selection_dialog.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -20,7 +21,7 @@ class PersonalInfoController extends GetxController {
   late final ProfileRepository _profileRepository;
 
   // Form controllers
-  final usernameController = TextEditingController();
+  final nameController = TextEditingController();
   final passwordController = TextEditingController();
 
   // Selected values
@@ -42,7 +43,7 @@ class PersonalInfoController extends GetxController {
   final RxBool isLocating = false.obs;
 
   // Form validation
-  final RxString usernameError = ''.obs;
+  final RxString nameError = ''.obs;
   final RxString passwordError = ''.obs;
 
   // Available locations (Initial list, can be expanded)
@@ -78,13 +79,13 @@ class PersonalInfoController extends GetxController {
     _loadUserData();
 
     // Add listeners for validation
-    usernameController.addListener(_validateUsername);
+    nameController.addListener(_validateName);
     passwordController.addListener(_validatePassword);
   }
 
   @override
   void onClose() {
-    usernameController.dispose();
+    nameController.dispose();
     passwordController.dispose();
     super.onClose();
   }
@@ -104,7 +105,9 @@ class PersonalInfoController extends GetxController {
             debugPrint('❌ Failed to load Personal Info: ${failure.message}');
           },
           (userModel) {
-            usernameController.text = userModel.username ?? '';
+            // Prioritize displayName, fallback to username
+            nameController.text =
+                userModel.displayName ?? userModel.username ?? '';
 
             // Load location
             if (userModel.location != null && userModel.location!.isNotEmpty) {
@@ -142,14 +145,14 @@ class PersonalInfoController extends GetxController {
   }
 
   // Validation methods
-  void _validateUsername() {
-    final username = usernameController.text.trim();
-    if (username.isEmpty) {
-      usernameError.value = 'Username cannot be empty';
-    } else if (username.length < 3) {
-      usernameError.value = 'Username must be at least 3 characters';
+  void _validateName() {
+    final name = nameController.text;
+    final validation = InputValidator.validateName(name);
+
+    if (!validation.isValid) {
+      nameError.value = validation.message ?? 'Invalid name';
     } else {
-      usernameError.value = '';
+      nameError.value = '';
     }
   }
 
@@ -346,10 +349,10 @@ class PersonalInfoController extends GetxController {
     if (isLoading.value) return;
 
     // Validate all fields
-    _validateUsername();
+    _validateName();
     _validatePassword();
 
-    if (usernameError.value.isNotEmpty || passwordError.value.isNotEmpty) {
+    if (nameError.value.isNotEmpty || passwordError.value.isNotEmpty) {
       AppSnackbar.error('auth.unexpectedError'.tr, title: 'common.error'.tr);
       return;
     }
@@ -364,11 +367,11 @@ class PersonalInfoController extends GetxController {
       final user = Supabase.instance.client.auth.currentUser;
       if (user == null) throw Exception('No user found');
 
-      // 1. Update Username if changed
-      final username = usernameController.text.trim();
-      if (username.isNotEmpty) {
+      // 1. Update Name (Display Name) if changed
+      final name = nameController.text.trim();
+      if (name.isNotEmpty) {
         final result = await _profileRepository
-            .updateUsername(user.id, username)
+            .updateDisplayName(user.id, name)
             .timeout(timeout);
         if (result.isLeft) {
           throw Exception(result.left.message);

@@ -42,17 +42,16 @@ class ProfilePage extends GetView<ProfileController> {
                       children: [
                         SizedBox(height: 80.h),
 
-                        // Profile Header with bouncy pop effect
+                        // Profile Header
                         _buildProfileHeader()
                             .animate()
-                            .fadeIn(duration: 350.ms, curve: Curves.easeOut)
+                            .fadeIn(duration: 200.ms, curve: Curves.easeOut)
                             .scale(
-                              begin: const Offset(0.85, 0.85),
+                              begin: const Offset(0.9, 0.9),
                               end: const Offset(1, 1),
-                              curve: Curves.elasticOut,
-                              duration: 700.ms,
-                            )
-                            .blur(begin: const Offset(3, 3), end: Offset.zero),
+                              curve: Curves.easeOut,
+                              duration: 200.ms,
+                            ),
 
                         SizedBox(height: 32.h),
 
@@ -111,44 +110,28 @@ class ProfilePage extends GetView<ProfileController> {
                               ),
                             )
                             .animate()
-                            .fadeIn(duration: 400.ms, delay: 180.ms)
-                            .slideX(
-                              begin: 0.12,
-                              end: 0,
-                              curve: Curves.easeOutCubic,
-                            )
-                            .blur(begin: const Offset(2, 0), end: Offset.zero),
+                            .fadeIn(duration: 200.ms, delay: 50.ms)
+                            .slideX(begin: 0.05, end: 0, curve: Curves.easeOut),
 
                         SizedBox(height: 24.h),
 
                         // Log Out Section with attention animation
                         SettingsSection(
+                          title: 'profile.logOut'.tr,
+                          showMoreIcon: true,
+                          children: [
+                            SettingsTile(
+                              icon: Icons.logout,
                               title: 'profile.logOut'.tr,
-                              showMoreIcon: true,
-                              children: [
-                                SettingsTile(
-                                  icon: Icons.logout,
-                                  title: 'profile.logOut'.tr,
-                                  trailing: Image.asset(
-                                    AppIcon.panahKanan,
-                                    width: 20.w,
-                                    height: 20.h,
-                                  ),
-                                  onTap: controller.logout,
-                                ),
-                              ],
-                            )
-                            .animate()
-                            .fadeIn(duration: 400.ms, delay: 280.ms)
-                            .slideY(
-                              begin: 0.15,
-                              end: 0,
-                              curve: Curves.easeOutCubic,
-                            )
-                            .scale(
-                              begin: const Offset(0.96, 0.96),
-                              end: const Offset(1, 1),
+                              trailing: Image.asset(
+                                AppIcon.panahKanan,
+                                width: 20.w,
+                                height: 20.h,
+                              ),
+                              onTap: controller.logout,
                             ),
+                          ],
+                        ).animate().fadeIn(duration: 200.ms, delay: 100.ms),
 
                         SizedBox(height: 32.h),
                       ],

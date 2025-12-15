@@ -108,6 +108,33 @@ class ProfileRemoteDataSource {
           .single();
       return UserModel.fromJson(response);
     } on PostgrestException catch (e) {
+      // Handle missing profile row (PGRST116: The result contains 0 rows)
+      if (e.code == 'PGRST116') {
+        debugPrint(
+          '⚠️ Profile missing in updateDisplayName. Creating for $userId...',
+        );
+        try {
+          await _supabase.from('profiles').insert({
+            'id': userId,
+            'updated_at': DateTime.now().toIso8601String(),
+          });
+
+          // Retry update
+          final retryResponse = await _supabase
+              .from('profiles')
+              .update({
+                'display_name': displayName,
+                'updated_at': DateTime.now().toIso8601String(),
+              })
+              .eq('id', userId)
+              .select()
+              .single();
+
+          return UserModel.fromJson(retryResponse);
+        } catch (createError) {
+          throw ServerException('Failed to create profile: $createError');
+        }
+      }
       throw ServerException('Failed to update display name: ${e.message}');
     } catch (e) {
       throw ServerException('Failed to update display name: ${e.toString()}');

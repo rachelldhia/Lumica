@@ -46,15 +46,15 @@ class PersonalInfoPage extends GetView<PersonalInfoController> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children:
                 [
-                      // Username field
-                      _buildSectionTitle('personalInfo.username'.tr),
+                      // Name field
+                      _buildSectionTitle('personalInfo.yourName'.tr),
                       SizedBox(height: 8.h),
                       EditTextField(
                         iconAsset: AppIcon.personalInformation,
                         hintText: 'personalInfo.yourName'.tr,
-                        controller: controller.usernameController,
+                        controller: controller.nameController,
                       ),
-                      _buildUsernameError(),
+                      _buildNameError(),
 
                       SizedBox(height: 20.h),
 
@@ -230,13 +230,13 @@ class PersonalInfoPage extends GetView<PersonalInfoController> {
     );
   }
 
-  Widget _buildUsernameError() {
+  Widget _buildNameError() {
     return Obx(
-      () => controller.usernameError.value.isNotEmpty
+      () => controller.nameError.value.isNotEmpty
           ? Padding(
               padding: EdgeInsets.only(top: 6.h, left: 4.w),
               child: Text(
-                controller.usernameError.value,
+                controller.nameError.value,
                 style: AppTextTheme.textTheme.bodySmall?.copyWith(
                   color: Colors.red,
                 ),

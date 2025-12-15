@@ -38,24 +38,19 @@ class HomePage extends GetView<HomeController> {
                     // Avatar with pop effect
                     _buildHeader()
                         .animate()
-                        .fadeIn(duration: 300.ms, curve: Curves.easeOut)
+                        .fadeIn(duration: 200.ms, curve: Curves.easeOut)
                         .scale(
-                          begin: const Offset(0.8, 0.8),
+                          begin: const Offset(0.9, 0.9),
                           end: const Offset(1, 1),
-                          curve: Curves.elasticOut,
-                          duration: 600.ms,
+                          curve: Curves.easeOut,
+                          duration: 200.ms,
                         ),
                     SizedBox(height: 20.h),
-                    // Greeting with slide and blur
+                    // Greeting with slide
                     _buildGreeting()
                         .animate()
-                        .fadeIn(duration: 400.ms, delay: 80.ms)
-                        .slideX(
-                          begin: -0.15,
-                          end: 0,
-                          curve: Curves.easeOutCubic,
-                        )
-                        .blur(begin: const Offset(4, 0), end: Offset.zero),
+                        .fadeIn(duration: 200.ms, delay: 50.ms)
+                        .slideX(begin: -0.1, end: 0, curve: Curves.easeOut),
                     SizedBox(height: 20.h),
                     // Question text with subtle animation
                     Text(
@@ -67,50 +62,32 @@ class HomePage extends GetView<HomeController> {
                           ),
                         )
                         .animate()
-                        .fadeIn(duration: 350.ms, delay: 160.ms)
-                        .slideY(begin: 0.2, end: 0, curve: Curves.easeOutCubic),
+                        .fadeIn(duration: 200.ms, delay: 100.ms)
+                        .slideY(begin: 0.1, end: 0, curve: Curves.easeOut),
                     SizedBox(height: 16.h),
-                    // Mood selector with shimmer effect
+                    // Mood selector
                     _buildMoodSelector()
                         .animate()
-                        .fadeIn(duration: 400.ms, delay: 220.ms)
-                        .slideY(begin: 0.15, end: 0, curve: Curves.easeOutCubic)
-                        .shimmer(
-                          delay: 500.ms,
-                          duration: 1200.ms,
-                          color: AppColors.vividOrange.withValues(alpha: 0.15),
-                        ),
+                        .fadeIn(duration: 200.ms, delay: 150.ms)
+                        .slideY(begin: 0.1, end: 0, curve: Curves.easeOut),
                     SizedBox(height: 20.h),
-                    // Session card with bounce scale
-                    const SessionCard()
-                        .animate()
-                        .fadeIn(duration: 450.ms, delay: 300.ms)
-                        .scale(
-                          begin: const Offset(0.92, 0.92),
-                          end: const Offset(1, 1),
-                          curve: Curves.easeOutBack,
-                        )
-                        .blur(begin: const Offset(2, 2), end: Offset.zero),
+                    // Session card
+                    const SessionCard().animate().fadeIn(
+                      duration: 200.ms,
+                      delay: 200.ms,
+                    ),
                     SizedBox(height: 18.h),
-                    // Action buttons with staggered pop
-                    _buildActionButtons()
-                        .animate()
-                        .fadeIn(duration: 400.ms, delay: 380.ms)
-                        .slideY(begin: 0.12, end: 0, curve: Curves.easeOutCubic)
-                        .scale(
-                          begin: const Offset(0.95, 0.95),
-                          end: const Offset(1, 1),
-                        ),
+                    // Action buttons
+                    _buildActionButtons().animate().fadeIn(
+                      duration: 200.ms,
+                      delay: 250.ms,
+                    ),
                     SizedBox(height: 20.h),
-                    // Quote section with elegant slide
+                    // Quote section
                     _buildQuoteSection()
                         .animate()
-                        .fadeIn(duration: 400.ms, delay: 460.ms)
-                        .slideX(
-                          begin: 0.08,
-                          end: 0,
-                          curve: Curves.easeOutCubic,
-                        ),
+                        .fadeIn(duration: 200.ms, delay: 300.ms)
+                        .slideX(begin: 0.05, end: 0, curve: Curves.easeOut),
                     SizedBox(height: 20.h),
                     // Mood Chart with elegant entrance
                     Obx(
@@ -120,12 +97,8 @@ class HomePage extends GetView<HomeController> {
                           ),
                         )
                         .animate()
-                        .fadeIn(duration: 400.ms, delay: 540.ms)
-                        .slideY(
-                          begin: 0.15,
-                          end: 0,
-                          curve: Curves.easeOutCubic,
-                        ),
+                        .fadeIn(duration: 200.ms, delay: 350.ms)
+                        .slideY(begin: 0.1, end: 0, curve: Curves.easeOut),
                   ],
                 ),
               ),
@@ -248,23 +221,31 @@ class HomePage extends GetView<HomeController> {
         Row(
           children: [
             Expanded(
-              child: ActionButton(
-                icon: Icons.book_outlined,
-                label: 'journal.journal'.tr,
-                onTap: () {
-                  Get.toNamed('/dashboard${AppRoutes.journal}');
-                },
-              ).animate().fadeIn(delay: 500.ms).slideX(begin: -0.1, end: 0),
+              child:
+                  ActionButton(
+                        icon: Icons.book_outlined,
+                        label: 'journal.journal'.tr,
+                        onTap: () {
+                          Get.toNamed('/dashboard${AppRoutes.journal}');
+                        },
+                      )
+                      .animate()
+                      .fadeIn(delay: 50.ms, duration: 200.ms)
+                      .slideX(begin: -0.05, end: 0),
             ),
             SizedBox(width: 12.w),
             Expanded(
-              child: ActionButton(
-                icon: Icons.insert_chart_outlined,
-                label: 'home.moodTrack'.tr,
-                onTap: () {
-                  Get.toNamed('/dashboard${AppRoutes.moodTrack}');
-                },
-              ).animate().fadeIn(delay: 550.ms).slideX(begin: 0.1, end: 0),
+              child:
+                  ActionButton(
+                        icon: Icons.insert_chart_outlined,
+                        label: 'home.moodTrack'.tr,
+                        onTap: () {
+                          Get.toNamed('/dashboard${AppRoutes.moodTrack}');
+                        },
+                      )
+                      .animate()
+                      .fadeIn(delay: 100.ms, duration: 200.ms)
+                      .slideX(begin: 0.05, end: 0),
             ),
           ],
         ),
