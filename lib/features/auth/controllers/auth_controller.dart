@@ -383,4 +383,14 @@ class AuthController extends GetxController {
     passwordError.value = '';
     agreeToTerms.value = false;
   }
+
+  @override
+  void onClose() {
+    signInEmailController.dispose();
+    signInPasswordController.dispose();
+    nameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    super.onClose();
+  }
 }

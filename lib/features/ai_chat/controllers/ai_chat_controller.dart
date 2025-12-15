@@ -27,7 +27,11 @@ class AiChatController extends GetxController {
     ChatRepositoryInterface? repository,
     SpeechService? speechService,
     ChatHistoryManager? historyManager,
-  }) : _geminiService = geminiService ?? GeminiService(),
+  }) : _geminiService =
+           geminiService ??
+           GeminiService(
+             userName: Get.find<ProfileController>().userName.value,
+           ),
        _repository = repository ?? ChatRepositoryImpl(),
        _speechService = speechService ?? SpeechService(),
        _historyManager = historyManager ?? ChatHistoryManager();
@@ -60,6 +64,10 @@ class AiChatController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+
+    // Reinitialize Gemini with user name once profile loads
+    _geminiService.reinitializeWithUserName(_profileController.userName.value);
+
     _loadChatHistory();
     _initializeSpeech();
   }

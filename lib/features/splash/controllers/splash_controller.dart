@@ -12,7 +12,6 @@ import 'package:lumica_app/data/repositories/profile_repository_impl.dart';
 import 'package:lumica_app/domain/repositories/auth_repository.dart';
 import 'package:lumica_app/domain/repositories/profile_repository.dart';
 import 'package:lumica_app/features/auth/controllers/auth_controller.dart';
-// import 'package:lumica_app/features/dashboard/controllers/network_controller.dart'; // Deleted
 import 'package:lumica_app/routes/app_routes.dart';
 import 'package:lumica_app/storage/storage_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -26,9 +25,6 @@ class SplashController extends GetxController {
     super.onInit();
     // Initialize services
     _initServices();
-
-    // Start network monitoring
-    Get.put<NetworkController>(NetworkController(), permanent: true);
   }
 
   /// Initialize all core services and dependencies

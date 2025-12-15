@@ -244,10 +244,10 @@ class WavyLinePainter extends CustomPainter {
 /// Grid of quick prompt buttons
 class _QuickPromptsGrid extends StatelessWidget {
   final List<String> prompts = const [
-    "How are you feeling today?",
+    "I'm so tired?",
     "I need someone to talk to",
     "Feeling stressed lately",
-    "Tell me about your day",
+    "Today so hard for me",
   ];
 
   @override

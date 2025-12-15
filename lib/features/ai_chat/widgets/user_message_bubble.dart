@@ -39,32 +39,52 @@ class UserMessageBubble extends StatelessWidget {
                   },
                   child: Container(
                     padding: EdgeInsets.symmetric(
-                      horizontal: 16.w,
-                      vertical: 14.h,
+                      horizontal: 14.w,
+                      vertical: 12.h,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.skyBlue,
-                      borderRadius: BorderRadius.circular(16.r),
+                      gradient: LinearGradient(
+                        colors: [
+                          AppColors.skyBlue,
+                          AppColors.skyBlue.withValues(alpha: 0.85),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(18.r),
+                        topRight: Radius.circular(18.r),
+                        bottomLeft: Radius.circular(18.r),
+                        bottomRight: Radius.circular(4.r),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.skyBlue.withValues(alpha: 0.25),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
                     child: Text(
                       message,
                       style: AppTextTheme.textTheme.bodyMedium?.copyWith(
                         color: AppColors.darkBrown,
-                        fontSize: 15.sp,
-                        height: 1.6,
-                        letterSpacing: 0.2,
+                        fontSize: 14.5.sp,
+                        height: 1.5,
+                        letterSpacing: 0.1,
                       ),
                     ),
                   ),
                 ),
                 if (timestamp != null)
                   Padding(
-                    padding: EdgeInsets.only(right: 8.w, top: 4.h),
+                    padding: EdgeInsets.only(right: 8.w, top: 6.h),
                     child: Text(
                       DateFormat('h:mm a').format(timestamp!),
                       style: TextStyle(
-                        fontSize: 11.sp,
-                        color: AppColors.darkSlateGray.withValues(alpha: 0.6),
+                        fontSize: 10.sp,
+                        color: AppColors.darkSlateGray.withValues(alpha: 0.5),
+                        fontWeight: FontWeight.w400,
                       ),
                     ),
                   ),

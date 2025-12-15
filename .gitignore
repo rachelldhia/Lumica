@@ -49,3 +49,11 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 .env
+
+# Signing credentials (DO NOT COMMIT)
+*.jks
+*.keystore
+android/key.properties
+ios/*.mobileprovision
+ios/*.p12
+

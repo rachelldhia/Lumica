@@ -60,9 +60,15 @@ class DashboardBinding extends Bindings {
     );
 
     // 5. Journal Feature Dependencies
-    Get.lazyPut(() => NoteRemoteDataSource(Supabase.instance.client));
-    Get.lazyPut<NoteRepository>(() => NoteRepositoryImpl(Get.find()));
-    Get.lazyPut<JournalController>(() => JournalController());
+    Get.lazyPut(
+      () => NoteRemoteDataSource(Supabase.instance.client),
+      fenix: true,
+    );
+    Get.lazyPut<NoteRepository>(
+      () => NoteRepositoryImpl(Get.find()),
+      fenix: true,
+    );
+    Get.lazyPut<JournalController>(() => JournalController(), fenix: true);
 
     // 6. Profile Feature Dependencies
     Get.lazyPut<ProfileController>(() => ProfileController());

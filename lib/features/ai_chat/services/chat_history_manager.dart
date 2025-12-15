@@ -7,19 +7,26 @@ import 'package:intl/intl.dart';
 class ChatHistoryManager {
   final ScrollController scrollController = ScrollController();
 
-  /// Scroll to bottom of chat
-  void scrollToBottom() {
-    if (scrollController.hasClients) {
-      Future.delayed(const Duration(milliseconds: 100), () {
-        if (scrollController.hasClients) {
-          scrollController.animateTo(
-            scrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOut,
-          );
-        }
-      });
-    }
+  /// Scroll to bottom of chat - optimized to prevent bounce
+  void scrollToBottom({bool animate = true}) {
+    if (!scrollController.hasClients) return;
+
+    // Use post-frame callback to ensure layout is complete
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!scrollController.hasClients) return;
+
+      final maxExtent = scrollController.position.maxScrollExtent;
+
+      if (animate) {
+        scrollController.animateTo(
+          maxExtent,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+        );
+      } else {
+        scrollController.jumpTo(maxExtent);
+      }
+    });
   }
 
   /// Scroll to specific position

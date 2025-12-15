@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:lumica_app/core/config/text_theme.dart';
 import 'package:lumica_app/core/config/theme.dart';
+import 'package:lumica_app/core/utils/debounce_util.dart';
 import 'package:lumica_app/core/utils/loading_util.dart';
 import 'package:lumica_app/core/utils/validators.dart';
 import 'package:lumica_app/core/widgets/app_snackbar.dart';
@@ -16,6 +17,11 @@ import 'package:uuid/uuid.dart';
 class JournalController extends GetxController {
   final NoteRepository _noteRepository;
   final GeminiService _geminiService;
+
+  // Debouncer for search input
+  final Debouncer _searchDebouncer = Debouncer(
+    delay: const Duration(milliseconds: 300),
+  );
 
   JournalController({
     NoteRepository? noteRepository,
@@ -42,6 +48,12 @@ class JournalController extends GetxController {
   void onInit() {
     super.onInit();
     loadNotes();
+  }
+
+  @override
+  void onClose() {
+    _searchDebouncer.dispose();
+    super.onClose();
   }
 
   Future<void> loadNotes() async {
@@ -127,21 +139,27 @@ class JournalController extends GetxController {
     return datesList;
   }
 
-  // Create a new note
+  // Create a new note with optimistic update
   Future<bool> createNote(Note note, {bool showSnackbar = true}) async {
-    LoadingUtil.show(message: 'Creating note...');
+    // Optimistic update: add to UI immediately
+    notes.insert(0, note);
+    setSelectedDate(note.createdAt);
+
     try {
       final result = await _noteRepository.createNote(note);
       return result.fold(
         (failure) {
+          // Rollback on failure
+          notes.removeWhere((n) => n.id == note.id);
           AppSnackbar.error(failure.message, title: 'common.error'.tr);
           return false;
         },
-        (newNote) {
-          notes.add(newNote);
-          // BUG FIX 1: Automatically select the date of the new note
-          setSelectedDate(newNote.createdAt);
-
+        (serverNote) {
+          // Replace with server version (may have updated timestamps)
+          final index = notes.indexWhere((n) => n.id == note.id);
+          if (index != -1) {
+            notes[index] = serverNote;
+          }
           if (showSnackbar) {
             AppSnackbar.success('journal.noteCreated'.tr);
           }
@@ -149,10 +167,10 @@ class JournalController extends GetxController {
         },
       );
     } catch (e) {
+      // Rollback on exception
+      notes.removeWhere((n) => n.id == note.id);
       AppSnackbar.error('journal.createFailed'.tr, title: 'common.error'.tr);
       return false;
-    } finally {
-      LoadingUtil.hide();
     }
   }
 
@@ -377,9 +395,11 @@ class JournalController extends GetxController {
     }
   }
 
-  // Set search query
+  // Set search query with debounce for performance
   void setSearchQuery(String query) {
-    searchQuery.value = query;
+    _searchDebouncer.run(() {
+      searchQuery.value = query;
+    });
   }
 
   // Set selected date

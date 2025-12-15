@@ -1,7 +1,18 @@
 import 'package:flutter/foundation.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 
 /// Utility class for retrying operations with exponential backoff
 class RetryUtil {
+  /// Check if network is available
+  static Future<bool> get isNetworkAvailable async {
+    try {
+      return await InternetConnection().hasInternetAccess;
+    } catch (e) {
+      debugPrint('⚠️ Network check failed: $e');
+      return false;
+    }
+  }
+
   /// Retry an operation with exponential backoff
   ///
   /// [operation] - The async operation to retry
@@ -55,23 +66,61 @@ class RetryUtil {
     throw Exception('Retry failed after $maxRetries attempts');
   }
 
-  /// Retry specifically for network operations
+  /// Retry specifically for network operations with connectivity check
   static Future<T> retryNetwork<T>(
     Future<T> Function() operation, {
     int maxRetries = 3,
-  }) {
+    bool checkConnectivity = true,
+  }) async {
+    // Check network connectivity first if enabled
+    if (checkConnectivity) {
+      final hasNetwork = await isNetworkAvailable;
+      if (!hasNetwork) {
+        throw NetworkException('No internet connection');
+      }
+    }
+
     return retry<T>(
       operation,
       maxRetries: maxRetries,
-      retryIf: (error) {
-        // Retry on common network errors
-        final errorStr = error.toString().toLowerCase();
-        return errorStr.contains('socket') ||
-            errorStr.contains('network') ||
-            errorStr.contains('connection') ||
-            errorStr.contains('timeout');
-      },
+      retryIf: (error) => _isRetryableError(error),
     );
+  }
+
+  /// Determine if an error is retryable
+  static bool _isRetryableError(dynamic error) {
+    final errorStr = error.toString().toLowerCase();
+
+    // Network errors - always retry
+    if (errorStr.contains('socket') ||
+        errorStr.contains('network') ||
+        errorStr.contains('connection') ||
+        errorStr.contains('timeout')) {
+      return true;
+    }
+
+    // Server errors (5xx) - retry
+    if (errorStr.contains('500') ||
+        errorStr.contains('502') ||
+        errorStr.contains('503') ||
+        errorStr.contains('504')) {
+      return true;
+    }
+
+    // Rate limit - retry with longer delay
+    if (errorStr.contains('429') || errorStr.contains('rate limit')) {
+      return true;
+    }
+
+    // Client errors (4xx except rate limit) - don't retry
+    if (errorStr.contains('400') ||
+        errorStr.contains('401') ||
+        errorStr.contains('403') ||
+        errorStr.contains('404')) {
+      return false;
+    }
+
+    return false;
   }
 
   /// Retry with custom backoff strategy
@@ -104,4 +153,13 @@ class RetryUtil {
 
     throw Exception('Retry failed after ${delays.length} attempts');
   }
+}
+
+/// Exception for network-related errors
+class NetworkException implements Exception {
+  final String message;
+  NetworkException(this.message);
+
+  @override
+  String toString() => 'NetworkException: $message';
 }

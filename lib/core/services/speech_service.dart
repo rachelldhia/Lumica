@@ -72,24 +72,48 @@ class SpeechService extends GetxService {
     isListening.value = true;
 
     try {
+      // Get available locales and prioritize Indonesian
+      final locales = await _speechToText.locales();
+      String? localeId;
+
+      // Try to find Indonesian locale
+      final indonesianLocale = locales.firstWhereOrNull(
+        (locale) =>
+            locale.localeId.startsWith('id') ||
+            locale.localeId.startsWith('in'),
+      );
+
+      if (indonesianLocale != null) {
+        localeId = indonesianLocale.localeId;
+        debugPrint('🌐 Using Indonesian locale: $localeId');
+      } else {
+        debugPrint('🌐 Using system default locale');
+      }
+
       await _speechToText.listen(
+        localeId: localeId, // Use Indonesian if available
         onResult: (result) {
           recognizedText.value = result.recognizedWords;
           debugPrint('🎤 Recognized: ${result.recognizedWords}');
+          debugPrint('🎤 Confidence: ${result.confidence}');
 
-          if (result.finalResult && result.recognizedWords.isNotEmpty) {
+          // Only accept results with reasonable confidence
+          if (result.finalResult &&
+              result.recognizedWords.isNotEmpty &&
+              result.confidence > 0.5) {
             onResult(result.recognizedWords);
             stopListening();
           }
         },
-        listenFor: const Duration(seconds: 60), // Increased timeout
-        pauseFor: const Duration(seconds: 5), // Longer pause detection
+        listenFor: const Duration(seconds: 30), // Reasonable timeout
+        pauseFor: const Duration(seconds: 3), // Pause detection
         listenOptions: SpeechListenOptions(
-          partialResults: true,
-          onDevice: false, // Use cloud recognition for better accuracy
-          listenMode: ListenMode.confirmation,
-          cancelOnError: false, // Don't auto-cancel on error
+          partialResults: true, // Show real-time results
+          onDevice: true, // Use on-device for better privacy & speed
+          listenMode: ListenMode.dictation, // Better for natural speech
+          cancelOnError: false,
           autoPunctuation: true,
+          enableHapticFeedback: true, // Haptic feedback on recognition
         ),
       );
 
@@ -113,15 +137,17 @@ class SpeechService extends GetxService {
   /// Convert error codes to user-friendly messages
   String _getUserFriendlyError(String error) {
     if (error.contains('error_no_match') || error.contains('7')) {
-      return 'Tidak mendeteksi suara. Coba bicara lebih jelas.';
+      return 'Tidak mendeteksi suara. Coba bicara lebih jelas dan keras.';
     } else if (error.contains('error_network')) {
       return 'Kesalahan jaringan. Periksa koneksi internet.';
     } else if (error.contains('error_audio')) {
-      return 'Masalah audio. Periksa mikrofon Anda.';
+      return 'Masalah audio. Pastikan mikrofon tidak digunakan app lain.';
     } else if (error.contains('error_busy')) {
-      return 'Layanan sibuk. Coba lagi.';
+      return 'Layanan sibuk. Tunggu sebentar dan coba lagi.';
+    } else if (error.contains('error_speech_timeout')) {
+      return 'Waktu habis. Coba bicara lebih cepat.';
     }
-    return 'Terjadi kesalahan. Coba lagi.';
+    return 'Terjadi kesalahan recognition. Coba lagi.';
   }
 
   /// Check if speech recognition is available

@@ -18,26 +18,18 @@ class GenderSelector extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Gender',
-              style: AppTextTheme.textTheme.titleMedium?.copyWith(
-                color: AppColors.darkBrown,
-                fontWeight: FontWeight.w600,
-              ),
+        // Helper text
+        Align(
+          alignment: Alignment.centerRight,
+          child: Text(
+            'Choose only 1',
+            style: AppTextTheme.textTheme.bodySmall?.copyWith(
+              color: AppColors.greyText,
             ),
-            Text(
-              'Choose only 1',
-              style: AppTextTheme.textTheme.bodySmall?.copyWith(
-                color: AppColors.greyText,
-              ),
-            ),
-          ],
+          ),
         ),
 
-        SizedBox(height: 12.h),
+        SizedBox(height: 8.h),
 
         // Gender options
         Row(

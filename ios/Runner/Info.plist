@@ -55,5 +55,21 @@
 		<string>Lumica uses your location to provide personalized mood insights</string>
 		<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 		<string>Lumica uses your location to provide personalized mood insights</string>
+		<!-- Microphone permission for voice chat -->
+		<key>NSMicrophoneUsageDescription</key>
+		<string>Lumica needs microphone access for voice chat with your AI companion</string>
+		<!-- Speech recognition permission -->
+		<key>NSSpeechRecognitionUsageDescription</key>
+		<string>Lumica uses speech recognition to convert your voice to text for chatting</string>
+		<!-- Supabase OAuth URL Scheme -->
+		<key>CFBundleURLTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>io.supabase.lumica</string>
+				</array>
+			</dict>
+		</array>
 	</dict>
 </plist>
